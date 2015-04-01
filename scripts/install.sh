@@ -3,6 +3,13 @@
 EXEC="%s"
 # EXEC="chisel"
 
+#bash check
+if [ ! "$BASH_VERSION" ] ; then
+    echo "Please do not use sh to run this script ($0), just execute it directly" 1>&2
+    exit 1
+fi
+
+#dependency check
 if ! which curl > /dev/null; then
 	echo "curl is not installed"
 	exit 1
