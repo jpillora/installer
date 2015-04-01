@@ -44,16 +44,16 @@ echo "Downloading: $DIR"
 URL="$GH/releases/download/$VERSION/$DIR"
 case "$OS" in
 darwin)
-	curl -# -L "$URL.zip" > tmp.zip 
-	unzip -qq tmp.zip
-	rm tmp.zip
+	curl -# -L "$URL.zip" > tmp.zip || fail "download failed"
+	unzip -o -qq tmp.zip || fail "unzip failed"
+	rm tmp.zip || fail "cleanup failed"
 	;;
 linux)
-	curl -# -L "$URL.tar.gz" | tar zxvf -
+	curl -# -L "$URL.tar.gz" | tar zxf - || fail "download failed"
 	;;
 esac
 
-cp $DIR/$EXEC $EXEC
-chmod +x $EXEC
-rm -r $DIR
+cp $DIR/$EXEC $EXEC || fail "copy failed"
+rm -r $DIR || fail "cleanup failed"
+chmod +x $EXEC || fail "make failed"
 echo "Done"
