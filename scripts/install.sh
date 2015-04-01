@@ -16,13 +16,14 @@ Linux) OS="linux";;
 esac
 #find ARCH
 if uname -m | grep 64 > /dev/null; then
-	ARCH=amd64
+	ARCH="amd64"
 else
-	ARCH=386
+	ARCH="386"
 fi
 
 GH="https://github.com/jpillora/$EXEC"
-VERSION=`curl -sI $GH/releases/latest | grep Location | sed 's/.*releases\/tag\///'`
+#releases/latest will 302, inspect Location header, extract version
+VERSION=`curl -sI $GH/releases/latest | grep Location | sed 's/^.*\([0-9]\+\.[0-9]\+\.[0-9]\+\).*$/\1/'`
 
 if [ "$VERSION" = "" ]; then
 	echo "Latest release not found: $GH"
