@@ -20,7 +20,7 @@ func main() {
 	installsh = load("install")
 
 	e := echo.New()
-	e.Get("/install/:repo", install)
+	e.Get("/:repo", install)
 	log.Printf("Listening on %s...", port)
 	e.Run(":" + port)
 }
