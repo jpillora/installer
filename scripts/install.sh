@@ -22,7 +22,13 @@ else
 fi
 
 GH="https://github.com/jpillora/$EXEC"
-VERSION=`curl -sI $GH/releases/latest | grep Location | grep -m 1 -o '\d\+\.\d\+\.\d\+'`
+VERSION=`curl -sI $GH/releases/latest | grep Location | sed 's/.*releases\/tag\///'`
+
+if [ "$VERSION" = "" ]; then
+	echo "Latest release not found: $GH"
+	exit 1
+fi
+
 DIR="${EXEC}_${VERSION}_${OS}_${ARCH}"
 echo "Downloading: $DIR"
 URL="$GH/releases/download/$VERSION/$DIR"
