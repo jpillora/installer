@@ -2,8 +2,9 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
+
+	"github.com/labstack/echo"
 )
 
 func main() {
@@ -12,6 +13,12 @@ func main() {
 		port = "3000"
 	}
 
+	e := echo.New()
+	e.Get("/install", install)
 	log.Printf("Listening on %s...", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	e.Run(":" + port)
+}
+
+func install(c *echo.Context) {
+	c.String(200, "installingggg")
 }
