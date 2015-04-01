@@ -30,7 +30,9 @@ fi
 
 GH="https://github.com/jpillora/$EXEC"
 #releases/latest will 302, inspect Location header, extract version
-VERSION=`curl -sI $GH/releases/latest | grep Location | sed 's/^.*\([0-9]\+\.[0-9]\+\.[0-9]\+\).*$/\1/'`
+VERSION=`curl -sI $GH/releases/latest |
+		grep Location |
+		sed "s~^.*tag\/~~" | tr -d '\n' | tr -d '\r'`
 
 if [ "$VERSION" = "" ]; then
 	echo "Latest release not found: $GH"
