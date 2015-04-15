@@ -1,18 +1,26 @@
 #!/bin/bash
 
+#settings
 EXEC="%s"
-# EXEC="chisel"
+MOVE="%v"
+BIN_DIR=/usr/local/bin
 
 #bash check
 if [ ! "$BASH_VERSION" ] ; then
-    echo "Please do not use sh to run this script ($0), just execute it directly" 1>&2
+    echo "Please use bash instead" 1>&2
     exit 1
 fi
 
+function fail {
+	msg=$1
+	echo "============"
+    echo "Error: $msg" 1>&2
+    exit 1
+}
+
 #dependency check
 if ! which curl > /dev/null; then
-	echo "curl is not installed"
-	exit 1
+	fail "curl is not installed"
 fi
 
 #find OS
@@ -34,11 +42,14 @@ VERSION=`curl -sI $GH/releases/latest |
 		grep Location |
 		sed "s~^.*tag\/~~" | tr -d '\n' | tr -d '\r'`
 
+
+#confirm version
 if [ "$VERSION" = "" ]; then
 	echo "Latest release not found: $GH"
 	exit 1
 fi
 
+#download!
 DIR="${EXEC}_${VERSION}_${OS}_${ARCH}"
 echo "Downloading: $DIR"
 URL="$GH/releases/download/$VERSION/$DIR"
@@ -53,7 +64,16 @@ linux)
 	;;
 esac
 
-cp $DIR/$EXEC $EXEC || fail "copy failed"
+#move into PATH or cwd
+if [[ $MOVE = "true" && -d $BIN_DIR ]]; then
+	mv $DIR/$EXEC $BIN_DIR/$EXEC || fail "mv failed"
+	chmod +x $BIN_DIR/$EXEC || fail "chmod +x failed"
+	echo "Installed at $BIN_DIR/$EXEC"
+else
+	mv $DIR/$EXEC $EXEC || fail "mv failed"
+	chmod +x $EXEC || fail "chmod +x failed"
+	echo "Downloaded to $(pwd)/$EXEC"
+fi
+
+#done
 rm -r $DIR || fail "cleanup failed"
-chmod +x $EXEC || fail "make failed"
-echo "Done"

@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/labstack/echo"
 )
@@ -27,7 +28,15 @@ func main() {
 
 func install(c *echo.Context) {
 	repo := c.P(0)
-	c.String(200, fmt.Sprintf(installsh, repo))
+
+	mv := false
+	if strings.HasSuffix(repo, "!") {
+		mv = true
+		repo = strings.TrimSuffix(repo, "!")
+	}
+
+	c.Response.Header().Set("Content-Type", "text/x-shellscript")
+	c.String(200, fmt.Sprintf(installsh, repo, mv))
 }
 
 func load(script string) string {
