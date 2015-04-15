@@ -7,15 +7,15 @@ BIN_DIR=/usr/local/bin
 
 #bash check
 if [ ! "$BASH_VERSION" ] ; then
-    echo "Please use bash instead" 1>&2
-    exit 1
+	echo "Please use bash instead" 1>&2
+	exit 1
 fi
 
 function fail {
 	msg=$1
 	echo "============"
-    echo "Error: $msg" 1>&2
-    exit 1
+	echo "Error: $msg" 1>&2
+	exit 1
 }
 
 #dependency check
