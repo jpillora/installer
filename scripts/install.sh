@@ -27,14 +27,19 @@ fi
 case `uname -s` in
 Darwin) OS="darwin";;
 Linux) OS="linux";;
-*) echo "unknown os" && exit 1;;
+*) fail "unknown os: $(uname -s)";;
 esac
 #find ARCH
 if uname -m | grep 64 > /dev/null; then
 	ARCH="amd64"
-else
+elif uname -m | grep arm > /dev/null; then
+	ARCH="arm"
+elif uname -m | grep 386 > /dev/null; then
 	ARCH="386"
+else
+	fail "unknown arch: $(uname -m)"
 fi
+
 
 GH="https://github.com/jpillora/$EXEC"
 #releases/latest will 302, inspect Location header, extract version
