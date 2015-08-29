@@ -65,7 +65,7 @@ ISGZ=$?; if [[ $ISGZ == 0 ]]; then
 	echo "Downloading $GZ..."
 	#gz download!
 	mkdir -p $DIR
-	curl -# -L --compressed $URL > $DIR/$EXEC || fail "download failed"
+	curl -# -L $URL | gzip -d - > $DIR/$EXEC || fail "download failed"
 else
 	#legacy download!
 	DIR="${EXEC}_${VERSION}_${OS}_${ARCH}"
