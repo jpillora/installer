@@ -11,6 +11,8 @@ if [ ! "$BASH_VERSION" ] ; then
 	exit 1
 fi
 
+echo "Downloading $EXEC..."
+
 function fail {
 	msg=$1
 	echo "============"
@@ -53,19 +55,21 @@ if [ "$VERSION" = "" ]; then
 	exit 1
 fi
 
+echo "Latest version is $VERSION"
+
 DIR="/tmp/jpinstall"
 GZ="${EXEC}_${OS}_${ARCH}.gz"
 URL="$GH/releases/download/$VERSION/$GZ"
 curl -sfI $URL > /dev/null
 ISGZ=$?; if [[ $ISGZ == 0 ]]; then
-	echo "Downloading: $GZ"
+	echo "Downloading $GZ..."
 	#gz download!
 	mkdir -p $DIR
 	curl -# -L --compressed $URL > $DIR/$EXEC || fail "download failed"
 else
 	#legacy download!
 	DIR="${EXEC}_${VERSION}_${OS}_${ARCH}"
-	echo "Downloading: $DIR"
+	echo "Downloading $DIR..."
 	URL="$GH/releases/download/$VERSION/$DIR"
 	case "$OS" in
 	darwin)
