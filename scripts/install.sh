@@ -47,27 +47,37 @@ VERSION=`curl -sI $GH/releases/latest |
 		grep Location |
 		sed "s~^.*tag\/~~" | tr -d '\n' | tr -d '\r'`
 
-
 #confirm version
 if [ "$VERSION" = "" ]; then
 	echo "Latest release not found: $GH"
 	exit 1
 fi
 
-#download!
-DIR="${EXEC}_${VERSION}_${OS}_${ARCH}"
-echo "Downloading: $DIR"
-URL="$GH/releases/download/$VERSION/$DIR"
-case "$OS" in
-darwin)
-	curl -# -L "$URL.zip" > tmp.zip || fail "download failed"
-	unzip -o -qq tmp.zip || fail "unzip failed"
-	rm tmp.zip || fail "cleanup failed"
-	;;
-linux)
-	curl -# -L "$URL.tar.gz" | tar zxf - || fail "download failed"
-	;;
-esac
+DIR="/tmp/jpinstall"
+GZ="${EXEC}_${OS}_${ARCH}.gz"
+URL="$GH/releases/download/$VERSION/$GZ"
+curl -sfI $URL > /dev/null
+ISGZ=$?; if [[ $ISGZ == 0 ]]; then
+	echo "Downloading: $GZ"
+	#gz download!
+	mkdir -p $DIR
+	curl -# -L --compressed $URL > $DIR/$EXEC || fail "download failed"
+else
+	#legacy download!
+	DIR="${EXEC}_${VERSION}_${OS}_${ARCH}"
+	echo "Downloading: $DIR"
+	URL="$GH/releases/download/$VERSION/$DIR"
+	case "$OS" in
+	darwin)
+		curl -# -L "$URL.zip" > tmp.zip || fail "download failed"
+		unzip -o -qq tmp.zip || fail "unzip failed"
+		rm tmp.zip || fail "cleanup failed"
+		;;
+	linux)
+		curl -# -L "$URL.tar.gz" | tar zxf - || fail "download failed"
+		;;
+	esac
+fi
 
 #move into PATH or cwd
 if [[ $MOVE = "true" && -d $BIN_DIR ]]; then
