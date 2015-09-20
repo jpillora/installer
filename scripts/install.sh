@@ -1,9 +1,11 @@
 #!/bin/bash
 
 #settings
-EXEC="%s"
-MOVE="%v"
+EXEC="{{ .Program }}"
+DLONLY="{{ .DownloadOnly }}"
+RELEASE="{{ .Release }}"
 BIN_DIR=/usr/local/bin
+TMP_DIR="/tmp/jpinstall"
 
 #bash check
 if [ ! "$BASH_VERSION" ] ; then
@@ -11,7 +13,7 @@ if [ ! "$BASH_VERSION" ] ; then
 	exit 1
 fi
 
-echo "Downloading $EXEC..."
+echo "Downloading $EXEC (release $RELEASE)..."
 
 function fail {
 	msg=$1
@@ -42,25 +44,15 @@ else
 	fail "unknown arch: $(uname -m)"
 fi
 
+# LOOP ASSETS
+#    URL =
 
-GH="https://github.com/jpillora/$EXEC"
-#releases/latest will 302, inspect Location header, extract version
-VERSION=`curl -sI $GH/releases/latest |
-		grep Location |
-		sed "s~^.*tag\/~~" | tr -d '\n' | tr -d '\r'`
 
-#confirm version
-if [ "$VERSION" = "" ]; then
-	echo "Latest release not found: $GH"
-	exit 1
-fi
-
-echo "Latest version is $VERSION"
-
-DIR="/tmp/jpinstall"
 GZ="${EXEC}_${OS}_${ARCH}.gz"
 URL="$GH/releases/download/$VERSION/$GZ"
 curl -sfI $URL > /dev/null
+
+# IF .tar.gz OR .zip -> LEGACY
 ISGZ=$?; if [[ $ISGZ == 0 ]]; then
 	echo "Downloading $GZ..."
 	#gz download!
@@ -84,7 +76,7 @@ else
 fi
 
 #move into PATH or cwd
-if [[ $MOVE = "true" && -d $BIN_DIR ]]; then
+if [[ $DLONLY = "false" && -d $BIN_DIR ]]; then
 	mv $DIR/$EXEC $BIN_DIR/$EXEC || fail "mv failed"
 	chmod +x $BIN_DIR/$EXEC || fail "chmod +x failed"
 	echo "Installed at $BIN_DIR/$EXEC"
