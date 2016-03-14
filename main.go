@@ -28,38 +28,38 @@ func main() {
 }
 
 var (
-	userRe      = `(\/([\w\-]+))?`
-	repoRe      = `([\w\-\_]+)`
-	releaseRe   = `(@([\w\-\.\_]+?))?`
-	extRe       = `(\.(\w+))?(!)?`
-	pathRe      = regexp.MustCompile(`^` + userRe + `\/` + repoRe + releaseRe + extRe + `$`)
-	fileExtRe   = `(\.[a-z][a-z0-9]+)+$`
-	fileExt     = regexp.MustCompile(fileExtRe)
-	isTermReStr = `(?i)^(curl|wget)\/`
-	isTermRe    = regexp.MustCompile(isTermReStr)
+	userRe       = `(\/([\w\-]+))?`
+	repoRe       = `([\w\-\_]+)`
+	releaseRe    = `(@([\w\-\.\_]+?))?`
+	moveRe       = `(!)?`
+	pathRe       = regexp.MustCompile(`^` + userRe + `\/` + repoRe + releaseRe + moveRe + `$`)
+	fileExtRe    = regexp.MustCompile(`(\.[a-z][a-z0-9]+)+$`)
+	isTermRe     = regexp.MustCompile(`(?i)^(curl|wget)\/`)
+	isHomebrewRe = regexp.MustCompile(`(?i)^homebrew`)
+	posixOSRe    = regexp.MustCompile(`(darwin|linux|(net|free|open)bsd)`)
+	archRe       = regexp.MustCompile(`(arm|386|amd64)`)
 )
 
 func install(w http.ResponseWriter, r *http.Request) {
 	//terminal client?
-	isTerm := isTermRe.MatchString(r.Header.Get("User-Agent"))
+	ua := r.Header.Get("User-Agent")
+	itype := r.URL.Query().Get("type")
+	isTerm := isTermRe.MatchString(ua) || itype == "script"
+	isHomebrew := isHomebrewRe.MatchString(ua) || itype == "homebrew"
 	//extension specific error
-	var ext string
 	showError := func(msg string, code int) {
-		if ext == "txt" {
-			//noop
-		} else if ext == "rb" {
-			//TODO write ruby
-		} else if ext == "sh" || isTerm {
+		if isTerm {
 			msg = fmt.Sprintf("echo '%s'\n", msg)
 		}
 		http.Error(w, msg, http.StatusInternalServerError)
 	}
-
+	//
 	m := pathRe.FindStringSubmatch(r.URL.Path)
 	if len(m) == 0 {
 		showError("Invalid path", http.StatusBadRequest)
 		return
 	}
+	log.Println(m)
 	data := &struct {
 		User, Program, Release string
 		MoveToPath, Insecure   bool
@@ -68,31 +68,41 @@ func install(w http.ResponseWriter, r *http.Request) {
 		User:       m[2],
 		Program:    m[3],
 		Release:    m[5],
-		MoveToPath: m[8] == "!",
+		MoveToPath: m[6] == "!",
 	}
 	if data.User == "" {
 		data.User = "jpillora"
 	}
-	ext = m[7]
-	if isTerm && ext == "" {
-		ext = "sh"
+
+	//fetch assets
+	assets, release, err := getAssets(data.User, data.Program, data.Release)
+	if err != nil {
+		showError(err.Error(), http.StatusBadGateway)
+		return
 	}
-	switch ext {
-	case "txt":
+	data.Release = release //update release
+	data.Assets = assets
+
+	ext := ""
+	if isTerm {
+		w.Header().Set("Content-Type", "text/x-shellscript")
+		ext = "sh"
+	} else if isHomebrew {
+		w.Header().Set("Content-Type", "text/ruby")
+		ext = "rb"
+	} else {
 		w.Header().Set("Content-Type", "text/plain")
 		//debug
+		fmt.Fprintf(w, "text view\n\n")
 		fmt.Fprintf(w, "user: %s\n", data.User)
 		fmt.Fprintf(w, "program: %s\n", data.Program)
 		fmt.Fprintf(w, "release: %s\n", data.Release)
-		fmt.Fprintf(w, "ext: %s\n", ext)
-		fmt.Fprintf(w, "move-to-path: %v\n", data.MoveToPath)
-		return
-	case "sh":
-		w.Header().Set("Content-Type", "text/x-shellscript")
-	case "rb":
-		w.Header().Set("Content-Type", "text/ruby")
-	default:
-		showError("Unsupported extension", http.StatusBadRequest)
+		fmt.Fprintf(w, "move-into-path: %v\n", data.MoveToPath)
+		fmt.Fprintf(w, "assets:\n")
+		for i, a := range data.Assets {
+			fmt.Fprintf(w, "[#%02d] %s\n", i+1, a.URL)
+		}
+		fmt.Fprintf(w, "\n\nto see script, open:\n  %s%s?type=script\n", r.Host, r.URL.String())
 		return
 	}
 	b, err := ioutil.ReadFile("scripts/install." + ext)
@@ -105,14 +115,6 @@ func install(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Installer script invalid", http.StatusInternalServerError)
 		return
 	}
-	//fetch assets
-	assets, release, err := getAssets(data.User, data.Program, data.Release)
-	if err != nil {
-		showError(err.Error(), http.StatusBadGateway)
-		return
-	}
-	data.Release = release //update release
-	data.Assets = assets
 	//execute script
 	buff := bytes.Buffer{}
 	if err := t.Execute(&buff, data); err != nil {
@@ -130,23 +132,28 @@ type asset struct {
 
 func getAssets(user, repo, release string) ([]asset, string, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", user, repo)
-	ghr := ghRelease{}
+	ghas := []ghAsset{}
 	if release == "" {
 		url += "/latest"
+		ghr := ghRelease{}
 		if err := get(url, &ghr); err != nil {
 			return nil, "", err
 		}
 		release = ghr.TagName
+		ghas = ghr.Assets
 	} else {
 		ghrs := []ghRelease{}
 		if err := get(url, &ghrs); err != nil {
 			return nil, "", err
 		}
 		found := false
-		for _, r := range ghrs {
-			if r.TagName == release {
+		for _, ghr := range ghrs {
+			if ghr.TagName == release {
 				found = true
-				ghr = r
+				if err := get(ghr.AssetsURL, &ghas); err != nil {
+					return nil, "", err
+				}
+				ghas = ghr.Assets
 				break
 			}
 		}
@@ -154,40 +161,35 @@ func getAssets(user, repo, release string) ([]asset, string, error) {
 			return nil, "", fmt.Errorf("Release tag '%s' not found", release)
 		}
 	}
-
-	if len(ghr.Assets) == 0 {
+	if len(ghas) == 0 {
 		return nil, "", errors.New("No assets found")
 	}
-
 	assets := []asset{}
-	for _, ga := range ghr.Assets {
-		m := assetRe.FindStringSubmatch(ga.Name)
-		if len(m) == 0 {
-			continue
-		}
-		if m[2] != "linux" && m[2] != "darwin" {
-			continue
-		}
+	for _, ga := range ghas {
 		url := ga.BrowserDownloadURL
+		os := posixOSRe.FindString(ga.Name)
+		arch := archRe.FindString(ga.Name)
+		if os == "" || arch == "" {
+			continue
+		}
 		assets = append(assets, asset{
-			Name:    m[1],
-			OS:      m[2],
-			IsMac:   m[2] == "darwin",
-			Arch:    m[3],
-			Is32bit: m[3] == "386",
+			Name:    ga.Name,
+			OS:      os,
+			IsMac:   os == "darwin",
+			Arch:    arch,
+			Is32bit: arch == "386",
 			URL:     url,
-			Type:    fileExt.FindString(url),
+			Type:    fileExtRe.FindString(url),
 		})
 	}
 	if len(assets) == 0 {
-		return nil, "", errors.New("No assets produces")
+		return nil, "", errors.New("No downloads found for this release")
 	}
 	return assets, release, nil
 }
 
-var assetRe = regexp.MustCompile(`^(.+)_(darwin|linux)_(arm|386|amd64)(\.[\w\.]+)$`)
-
 func get(url string, v interface{}) error {
+	log.Printf("fetch: %s", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return fmt.Errorf("Request failed: %s: %s", url, err)
@@ -204,43 +206,45 @@ func get(url string, v interface{}) error {
 	if err := json.NewDecoder(resp.Body).Decode(v); err != nil {
 		return fmt.Errorf("Download failed: %s: %s", url, err)
 	}
+
 	return nil
 }
 
+type ghAsset struct {
+	BrowserDownloadURL string `json:"browser_download_url"`
+	ContentType        string `json:"content_type"`
+	CreatedAt          string `json:"created_at"`
+	DownloadCount      int    `json:"download_count"`
+	ID                 int    `json:"id"`
+	Label              string `json:"label"`
+	Name               string `json:"name"`
+	Size               int    `json:"size"`
+	State              string `json:"state"`
+	UpdatedAt          string `json:"updated_at"`
+	Uploader           struct {
+		AvatarURL         string `json:"avatar_url"`
+		EventsURL         string `json:"events_url"`
+		FollowersURL      string `json:"followers_url"`
+		FollowingURL      string `json:"following_url"`
+		GistsURL          string `json:"gists_url"`
+		GravatarID        string `json:"gravatar_id"`
+		HTMLURL           string `json:"html_url"`
+		ID                int    `json:"id"`
+		Login             string `json:"login"`
+		OrganizationsURL  string `json:"organizations_url"`
+		ReceivedEventsURL string `json:"received_events_url"`
+		ReposURL          string `json:"repos_url"`
+		SiteAdmin         bool   `json:"site_admin"`
+		StarredURL        string `json:"starred_url"`
+		SubscriptionsURL  string `json:"subscriptions_url"`
+		Type              string `json:"type"`
+		URL               string `json:"url"`
+	} `json:"uploader"`
+	URL string `json:"url"`
+}
 type ghRelease struct {
-	Assets []struct {
-		BrowserDownloadURL string `json:"browser_download_url"`
-		ContentType        string `json:"content_type"`
-		CreatedAt          string `json:"created_at"`
-		DownloadCount      int    `json:"download_count"`
-		ID                 int    `json:"id"`
-		Label              string `json:"label"`
-		Name               string `json:"name"`
-		Size               int    `json:"size"`
-		State              string `json:"state"`
-		UpdatedAt          string `json:"updated_at"`
-		Uploader           struct {
-			AvatarURL         string `json:"avatar_url"`
-			EventsURL         string `json:"events_url"`
-			FollowersURL      string `json:"followers_url"`
-			FollowingURL      string `json:"following_url"`
-			GistsURL          string `json:"gists_url"`
-			GravatarID        string `json:"gravatar_id"`
-			HTMLURL           string `json:"html_url"`
-			ID                int    `json:"id"`
-			Login             string `json:"login"`
-			OrganizationsURL  string `json:"organizations_url"`
-			ReceivedEventsURL string `json:"received_events_url"`
-			ReposURL          string `json:"repos_url"`
-			SiteAdmin         bool   `json:"site_admin"`
-			StarredURL        string `json:"starred_url"`
-			SubscriptionsURL  string `json:"subscriptions_url"`
-			Type              string `json:"type"`
-			URL               string `json:"url"`
-		} `json:"uploader"`
-		URL string `json:"url"`
-	} `json:"assets"`
-	AssetsURL string `json:"assets_url"`
+	Assets    []ghAsset `json:"assets"`
+	AssetsURL string    `json:"assets_url"`
 	Author    struct {
 		AvatarURL         string `json:"avatar_url"`
 		EventsURL         string `json:"events_url"`

@@ -20,14 +20,14 @@ function install {
 	OUT_DIR="{{ if .MoveToPath }}/usr/local/bin{{ else }}$(pwd){{ end }}"
 	GH="https://github.com"
 	#bash check
-	if [ ! "$BASH_VERSION" ] ; then
-		echo "Please use bash instead" 1>&2
-		exit 1
-	fi
-	if [ ! -d $OUT_DIR ]; then
-		fail "output directory missing: $OUT_DIR"
-	fi
-	#dependency check
+	[ ! "$BASH_VERSION" ] && fail "Please use bash instead"
+	[ ! -d $OUT_DIR ] && fail "output directory missing: $OUT_DIR"
+	#dependency check, assume were standard POISX
+	which find > /dev/null || fail "find not installed"
+	which xargs > /dev/null || fail "xargs not installed"
+	which sort > /dev/null || fail "sort not installed"
+	which tail > /dev/null || fail "tail not installed"
+	which cut > /dev/null || fail "cut not installed"
 	GET=""
 	if which curl > /dev/null; then
 		GET="curl"
@@ -40,8 +40,7 @@ function install {
 	else
 		fail "neither wget/curl are installed"
 	fi
-	echo "Downloading $PROG (release $RELEASE)..."
-	#find OS
+	#find OS #TODO BSDs and other posixs
 	case `uname -s` in
 	Darwin) OS="darwin";;
 	Linux) OS="linux";;
@@ -67,6 +66,8 @@ function install {
 		;;{{end}}
 	*) fail "No asset for platform ${OS}-${ARCH}";;
 	esac
+	#got URL! download it...
+	echo "Downloading $PROG $RELEASE ($URL)..."
 	#enter tempdir
 	mkdir -p $TMP_DIR
 	cd $TMP_DIR
@@ -76,17 +77,14 @@ function install {
 		NAME="${PROG}_${OS}_${ARCH}.gz"
 		GZURL="$GH/releases/download/$RELEASE/$NAME"
 		#gz download!
-		echo "Downloading $URL"
 		bash -c "$GET $URL" | gzip -d - > $PROG || fail "download failed"
 	elif [[ $FTYPE = ".tar.gz" ]]; then
 		#check if archiver progs installed
 		which tar > /dev/null || fail "tar is not installed"
 		which gzip > /dev/null || fail "gzip is not installed"
-		echo "Downloading $URL"
 		bash -c "$GET $URL" | tar zxf - || fail "download failed"
 	elif [[ $FTYPE = ".zip" ]]; then
 		which unzip > /dev/null || fail "unzip is not installed"
-		echo "Downloading $URL"
 		bash -c "$GET $URL" > tmp.zip || fail "download failed"
 		unzip -o -qq tmp.zip || fail "unzip failed"
 		rm tmp.zip || fail "cleanup failed"

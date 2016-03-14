@@ -6,7 +6,7 @@ class In{{ .Release }} < Formula
 
   {{ range .Assets }}{{ if ne .Arch "arm" }}if {{if .IsMac }}!{{end}}OS.linux? && {{if .Is32bit }}!{{end}}Hardware.is_64_bit?
     url "{{ .URL }}"
-    sha1 "223411f5fd0f49bfef6d2e0fd34b47ad7c48fd1b"
+    # sha1 "223411f5fd0f49bfef6d2e0fd34b47ad7c48fd1b"
   els{{end}}{{end}}e
     onoe "Not supported"
   end
