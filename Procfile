@@ -1,1 +1,1 @@
-web: jpinstaller
+web: jp-installer
