@@ -23,11 +23,14 @@ var c = &struct {
 	User: "jpillora",
 }
 
+var VERSION = "0.0.0-src"
+
 func main() {
-	opts.Parse(&c)
-	port := strconv.Itoa(c.Port)
-	log.Printf("Listening on %s...", port)
-	http.ListenAndServe(":"+port, http.HandlerFunc(install))
+	opts.New(&c).Repo("github.com/jpillora/installer").Version(VERSION).Parse()
+	log.Printf("Default user is '%s' and listening on %d...", c.User, c.Port)
+	if err := http.ListenAndServe(":"+strconv.Itoa(c.Port), http.HandlerFunc(install)); err != nil {
+		log.Fatal(err)
+	}
 }
 
 var (

@@ -13,8 +13,6 @@ curl https://i.jpillora.com/<user>/<repo>@<release>! | bash
 
 *Or you can use* `wget -qO- <url> | bash`
 
-:warning: I promise [my instance of `installer`](https://i.jpillora.com/) is simply a copy of this repo. Nevertheless, you're right to be wary of piping shell scripts from unknown servers, you can host your own server [here](#host-your-own). Or just leave off `| bash` and checkout the script yourself.
-
 **Path API**
 
 * `user` Github user (defaults to @jpillora, customizable if you [host your own](#host-your-own))
@@ -28,6 +26,10 @@ curl https://i.jpillora.com/<user>/<repo>@<release>! | bash
     * `type` is normally detected via `User-Agent` header
     * `type=homebrew` is **not** working at the moment – see [Homebrew](#homebrew)
 * `?insecure=1` Force `curl`/`wget` to skip certificate checks
+
+## Security
+
+:warning: Although I promise [my instance of `installer`](https://i.jpillora.com/) is simply a copy of this repo - you're right to be wary of piping shell scripts from unknown servers, so you can host your own server [here](#host-your-own) or just leave off `| bash` and checkout the script yourself.
 
 ## Examples
 
