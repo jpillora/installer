@@ -1,13 +1,85 @@
 
 # Installer
 
-Install binaries directly from Github
+Quickly install Go (golang) binaries from Github releases.
 
-:warning: In progress
+Installer is an HTTP API which returns shell scripts to install Go programs. The returned script will detect platform OS and architecture, choose from a selection of URLs, download the appropriate file, unzip/untar/ungzip the file, find the binary and optionally move it into your `PATH`.
+
+## Usage
+
+```sh
+curl https://i.jpillora.com/<user>/<repo>@<release>! | bash
+```
+
+*Or you can use* `wget -qO- <url> | bash`
+
+:warning: I promise [my instance of `installer`](https://i.jpillora.com/) is simply a copy of this repo. Nevertheless, you're right to be wary of piping shell scripts from unknown servers, you can host your own server [here](#host-your-own). Or just leave off `| bash` and checkout the script yourself.
+
+**Path API**
+
+* `user` Github user (defaults to @jpillora)
+* `repo` Github repository belonging to `user`
+* `release` Github release name (defaults to the **latest** release)
+* `!` When provided, downloads binary directly into `/usr/local/bin/` (defaults to working directory)
+
+**Query API**
+
+* `?type=` Force the return type to be one of: `script` or `homebrew`
+    * `type` is normally detected via `User-Agent` header
+    * `type=homebrew` is **not** working at the moment – see [Homebrew](#homebrew)
+* `?insecure=1` Force `curl`/`wget` to skip certificate checks
+
+## Examples
+
+* https://i.jpillora.com/serve
+* https://i.jpillora.com/cloud-torrent
+* https://i.jpillora.com/yudai/gotty@v0.0.12
+* https://i.jpillora.com/mholt/caddy
+
+    ```sh
+    jp /tmp $ curl -s localhost:4000/mholt/caddy | bash
+    Downloading mholt/caddy v0.8.2 (https://github.com/mholt/caddy/releases/download/v0.8.2/caddy_darwin_amd64.zip)
+    ######################################################################## 100.0%
+    Downloaded to /private/tmp/caddy
+    jp /tmp $ ./caddy --version
+    Caddy 0.8.2
+    ```
+
+## Host your own
+
+* Install installer with installer
+
+    ```sh
+    curl -s https://i.jpillora.com/installer | bash
+    ```
+
+* Build from source
+
+    ```sh
+    go get github.com/jpillora.com/installer
+    ```
+
+* Host on Heroku
+
+    Click this button to deploy for free on [Heroku](https://heroku.com)
+
+	[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+
+    *You can optionally add your own domain as a app custom domain.*
+
+### Homebrew
+
+Currently, installing via Homebrew does not work. Homebrew was intended to be supported with:
+
+```
+brew install https://i.jpillora.com/serve
+```
+
+However, homebrew formulas require an SHA1 hash of each binary and currently, the only way to get is to actually download the file. It **might** be acceptable to download all assets if the resulting `.rb` file was cached for a long time.
 
 #### MIT License
 
-Copyright © 2015 Jaime Pillora &lt;dev@jpillora.com&gt;
+Copyright © 2016 Jaime Pillora &lt;dev@jpillora.com&gt;
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

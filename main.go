@@ -41,19 +41,38 @@ var (
 )
 
 func install(w http.ResponseWriter, r *http.Request) {
-	//terminal client?
-	ua := r.Header.Get("User-Agent")
-	itype := r.URL.Query().Get("type")
-	isTerm := isTermRe.MatchString(ua) || itype == "script"
-	isHomebrew := isHomebrewRe.MatchString(ua) || itype == "homebrew"
-	//extension specific error
+	if r.URL.Path == "/" {
+		http.Redirect(w, r, "https://github.com/jpillora/installer", http.StatusMovedPermanently)
+		return
+	}
+	//calculate reponse type
+	var isTerm, isHomebrew, isText bool
+	switch r.URL.Query().Get("type") {
+	case "script":
+		isTerm = true
+	case "homebrew":
+		isHomebrew = true
+	case "text":
+		isText = true
+	default:
+		ua := r.Header.Get("User-Agent")
+		switch {
+		case isTermRe.MatchString(ua):
+			isTerm = true
+		case isHomebrewRe.MatchString(ua):
+			isHomebrew = true
+		default:
+			isText = true
+		}
+	}
+	//type specific error response
 	showError := func(msg string, code int) {
 		if isTerm {
 			msg = fmt.Sprintf("echo '%s'\n", msg)
 		}
 		http.Error(w, msg, http.StatusInternalServerError)
 	}
-	//
+	//"route"
 	m := pathRe.FindStringSubmatch(r.URL.Path)
 	if len(m) == 0 {
 		showError("Invalid path", http.StatusBadRequest)
@@ -69,6 +88,7 @@ func install(w http.ResponseWriter, r *http.Request) {
 		Program:    m[3],
 		Release:    m[5],
 		MoveToPath: m[6] == "!",
+		Insecure:   r.URL.Query().Get("insecure") == "1",
 	}
 	if data.User == "" {
 		data.User = "jpillora"
@@ -90,19 +110,23 @@ func install(w http.ResponseWriter, r *http.Request) {
 	} else if isHomebrew {
 		w.Header().Set("Content-Type", "text/ruby")
 		ext = "rb"
-	} else {
+	} else if isText {
 		w.Header().Set("Content-Type", "text/plain")
-		//debug
-		fmt.Fprintf(w, "text view\n\n")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "repository: https://github.com/%s/%s\n", data.User, data.Program)
 		fmt.Fprintf(w, "user: %s\n", data.User)
 		fmt.Fprintf(w, "program: %s\n", data.Program)
 		fmt.Fprintf(w, "release: %s\n", data.Release)
-		fmt.Fprintf(w, "move-into-path: %v\n", data.MoveToPath)
-		fmt.Fprintf(w, "assets:\n")
+		fmt.Fprintf(w, "release assets:\n")
 		for i, a := range data.Assets {
-			fmt.Fprintf(w, "[#%02d] %s\n", i+1, a.URL)
+			fmt.Fprintf(w, "  [#%02d] %s\n", i+1, a.URL)
 		}
-		fmt.Fprintf(w, "\n\nto see script, open:\n  %s%s?type=script\n", r.Host, r.URL.String())
+		fmt.Fprintf(w, "move-into-path: %v\n", data.MoveToPath)
+		fmt.Fprintf(w, "\nto see shell script, visit:\n  %s%s?type=script\n", r.Host, r.URL.String())
+		fmt.Fprintf(w, "\nfor more information on this server, visit:\n  github.com/jpillora/installer\n")
+		return
+	} else {
+		showError("Unknown type", http.StatusInternalServerError)
 		return
 	}
 	b, err := ioutil.ReadFile("scripts/install." + ext)
