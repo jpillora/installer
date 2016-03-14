@@ -8,69 +8,96 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"regexp"
+	"strconv"
 	"text/template"
+
+	"github.com/jpillora/opts"
 )
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "3000"
+	c := &struct {
+		Port int `help:"port" env:"PORT"`
+	}{
+		Port: 3000,
 	}
+	opts.Parse(&c)
+	port := strconv.Itoa(c.Port)
 	log.Printf("Listening on %s...", port)
 	http.ListenAndServe(":"+port, http.HandlerFunc(install))
 }
 
 var (
-	user    = `(\/([\w\-]+))?`
-	repo    = `([\w\-\_]+)`
-	release = `(@([\w\-\.\_]+?))?`
-	ext     = `(\.(\w+))?(!)?`
-	pathRe  = regexp.MustCompile(`^` + user + `\/` + repo + release + ext + `$`)
+	userRe      = `(\/([\w\-]+))?`
+	repoRe      = `([\w\-\_]+)`
+	releaseRe   = `(@([\w\-\.\_]+?))?`
+	extRe       = `(\.(\w+))?(!)?`
+	pathRe      = regexp.MustCompile(`^` + userRe + `\/` + repoRe + releaseRe + extRe + `$`)
+	fileExtRe   = `(\.[a-z][a-z0-9]+)+$`
+	fileExt     = regexp.MustCompile(fileExtRe)
+	isTermReStr = `(?i)^(curl|wget)\/`
+	isTermRe    = regexp.MustCompile(isTermReStr)
 )
 
 func install(w http.ResponseWriter, r *http.Request) {
+	//terminal client?
+	isTerm := isTermRe.MatchString(r.Header.Get("User-Agent"))
+	//extension specific error
+	var ext string
+	showError := func(msg string, code int) {
+		if ext == "txt" {
+			//noop
+		} else if ext == "rb" {
+			//TODO write ruby
+		} else if ext == "sh" || isTerm {
+			msg = fmt.Sprintf("echo '%s'\n", msg)
+		}
+		http.Error(w, msg, http.StatusInternalServerError)
+	}
+
 	m := pathRe.FindStringSubmatch(r.URL.Path)
 	if len(m) == 0 {
-		http.Error(w, "Invalid path", http.StatusBadRequest)
+		showError("Invalid path", http.StatusBadRequest)
 		return
 	}
-
-	user := m[2]
-	if user == "" {
-		user = "jpillora"
+	data := &struct {
+		User, Program, Release string
+		MoveToPath, Insecure   bool
+		Assets                 []asset
+	}{
+		User:       m[2],
+		Program:    m[3],
+		Release:    m[5],
+		MoveToPath: m[8] == "!",
 	}
-	repo := m[3]
-	release := m[5]
-	ext := m[7]
-	if ext == "" {
+	if data.User == "" {
+		data.User = "jpillora"
+	}
+	ext = m[7]
+	if isTerm && ext == "" {
 		ext = "sh"
 	}
-	downloadOnly := m[8] != "!"
-
 	switch ext {
 	case "txt":
 		w.Header().Set("Content-Type", "text/plain")
 		//debug
-		fmt.Fprintf(w, "user: %s\n", user)
-		fmt.Fprintf(w, "repo: %s\n", repo)
-		fmt.Fprintf(w, "release: %s\n", release)
+		fmt.Fprintf(w, "user: %s\n", data.User)
+		fmt.Fprintf(w, "program: %s\n", data.Program)
+		fmt.Fprintf(w, "release: %s\n", data.Release)
 		fmt.Fprintf(w, "ext: %s\n", ext)
-		fmt.Fprintf(w, "download-only: %v\n", downloadOnly)
+		fmt.Fprintf(w, "move-to-path: %v\n", data.MoveToPath)
 		return
 	case "sh":
 		w.Header().Set("Content-Type", "text/x-shellscript")
 	case "rb":
 		w.Header().Set("Content-Type", "text/ruby")
 	default:
-		http.Error(w, "Unsupported extension", http.StatusBadRequest)
+		showError("Unsupported extension", http.StatusBadRequest)
 		return
 	}
-
 	b, err := ioutil.ReadFile("scripts/install." + ext)
 	if err != nil {
-		http.Error(w, "Installer script not found", http.StatusInternalServerError)
+		showError("Installer script not found", http.StatusInternalServerError)
 		return
 	}
 	t, err := template.New("installer").Parse(string(b))
@@ -78,37 +105,27 @@ func install(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Installer script invalid", http.StatusInternalServerError)
 		return
 	}
-
-	assets, release, err := getAssets(user, repo, release)
+	//fetch assets
+	assets, release, err := getAssets(data.User, data.Program, data.Release)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		showError(err.Error(), http.StatusBadGateway)
 		return
 	}
-
+	data.Release = release //update release
+	data.Assets = assets
+	//execute script
 	buff := bytes.Buffer{}
-	if err := t.Execute(&buff, &struct {
-		User         string
-		Program      string
-		Release      string
-		DownloadOnly bool
-		Assets       []asset
-	}{
-		User:         user,
-		Program:      repo,
-		Release:      release,
-		DownloadOnly: downloadOnly,
-		Assets:       assets,
-	}); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if err := t.Execute(&buff, data); err != nil {
+		showError("Template error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	//ready
 	w.Write(buff.Bytes())
 }
 
 type asset struct {
-	Name, OS, Arch, URL string
-	Is32bit, IsMac      bool
+	Name, OS, Arch, URL, Type string
+	Is32bit, IsMac            bool
 }
 
 func getAssets(user, repo, release string) ([]asset, string, error) {
@@ -117,13 +134,13 @@ func getAssets(user, repo, release string) ([]asset, string, error) {
 	if release == "" {
 		url += "/latest"
 		if err := get(url, &ghr); err != nil {
-			return nil, release, err
+			return nil, "", err
 		}
 		release = ghr.TagName
 	} else {
 		ghrs := []ghRelease{}
 		if err := get(url, &ghrs); err != nil {
-			return nil, release, err
+			return nil, "", err
 		}
 		found := false
 		for _, r := range ghrs {
@@ -134,12 +151,12 @@ func getAssets(user, repo, release string) ([]asset, string, error) {
 			}
 		}
 		if !found {
-			return nil, release, fmt.Errorf("Release tag '%s' not found", release)
+			return nil, "", fmt.Errorf("Release tag '%s' not found", release)
 		}
 	}
 
 	if len(ghr.Assets) == 0 {
-		return nil, release, errors.New("No assets found")
+		return nil, "", errors.New("No assets found")
 	}
 
 	assets := []asset{}
@@ -151,17 +168,19 @@ func getAssets(user, repo, release string) ([]asset, string, error) {
 		if m[2] != "linux" && m[2] != "darwin" {
 			continue
 		}
+		url := ga.BrowserDownloadURL
 		assets = append(assets, asset{
 			Name:    m[1],
 			OS:      m[2],
 			IsMac:   m[2] == "darwin",
 			Arch:    m[3],
 			Is32bit: m[3] == "386",
-			URL:     ga.BrowserDownloadURL,
+			URL:     url,
+			Type:    fileExt.FindString(url),
 		})
 	}
 	if len(assets) == 0 {
-		return nil, release, errors.New("No assets produces")
+		return nil, "", errors.New("No assets produces")
 	}
 	return assets, release, nil
 }
@@ -175,7 +194,9 @@ func get(url string, v interface{}) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode == 404 {
+		return fmt.Errorf("Download not found (%s)", url)
+	} else if resp.StatusCode != 200 {
 		b, _ := ioutil.ReadAll(resp.Body)
 		return errors.New(http.StatusText(resp.StatusCode) + " " + string(b))
 	}
