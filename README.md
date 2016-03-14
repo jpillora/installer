@@ -17,7 +17,7 @@ curl https://i.jpillora.com/<user>/<repo>@<release>! | bash
 
 **Path API**
 
-* `user` Github user (defaults to @jpillora)
+* `user` Github user (defaults to @jpillora, customizable if you [host your own](#host-your-own))
 * `repo` Github repository belonging to `user`
 * `release` Github release name (defaults to the **latest** release)
 * `!` When provided, downloads binary directly into `/usr/local/bin/` (defaults to working directory)

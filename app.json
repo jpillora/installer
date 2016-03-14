@@ -1,5 +1,9 @@
 {
 	"name": "installer",
 	"website": "https://github.com/jpillora/installer",
-	"repository": "https://github.com/jpillora/installer"
+	"repository": "https://github.com/jpillora/installer",
+	"USER": {
+		"description": "Default user when not contained in URL",
+		"required": false
+	}
 }

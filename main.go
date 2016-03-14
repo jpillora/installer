@@ -15,12 +15,15 @@ import (
 	"github.com/jpillora/opts"
 )
 
+var c = &struct {
+	Port int    `help:"port" env:"PORT"`
+	User string `help:"default user when not provided in URL" env:"USER"`
+}{
+	Port: 3000,
+	User: "jpillora",
+}
+
 func main() {
-	c := &struct {
-		Port int `help:"port" env:"PORT"`
-	}{
-		Port: 3000,
-	}
 	opts.Parse(&c)
 	port := strconv.Itoa(c.Port)
 	log.Printf("Listening on %s...", port)
@@ -91,9 +94,8 @@ func install(w http.ResponseWriter, r *http.Request) {
 		Insecure:   r.URL.Query().Get("insecure") == "1",
 	}
 	if data.User == "" {
-		data.User = "jpillora"
+		data.User = c.User
 	}
-
 	//fetch assets
 	assets, release, err := getAssets(data.User, data.Program, data.Release)
 	if err != nil {
