@@ -3,7 +3,7 @@
 
 Quickly install Go (golang) binaries from Github releases.
 
-Installer is an HTTP API which returns shell scripts to install Go programs. The returned script will detect platform OS and architecture, choose from a selection of URLs, download the appropriate file, unzip/untar/ungzip the file, find the binary and optionally move it into your `PATH`.
+Installer is an HTTP API which returns shell scripts to install Go programs. The returned script will detect platform OS and architecture, choose from a selection of URLs, download the appropriate file, un(zip|tar|gzip) the file, find the binary and optionally move it into your `PATH`. Useful for installing your favourite Go programs on hosts without the Go compiler installed.
 
 ## Usage
 
@@ -15,7 +15,7 @@ curl https://i.jpillora.com/<user>/<repo>@<release>! | bash
 
 **Path API**
 
-* `user` Github user (defaults to @jpillora, customizable if you [host your own](#host-your-own))
+* `user` Github user (defaults to @jpillora, customisable if you [host your own](#host-your-own))
 * `repo` Github repository belonging to `user`
 * `release` Github release name (defaults to the **latest** release)
 * `!` When provided, downloads binary directly into `/usr/local/bin/` (defaults to working directory)
@@ -39,7 +39,7 @@ curl https://i.jpillora.com/<user>/<repo>@<release>! | bash
 * https://i.jpillora.com/mholt/caddy
 
     ```sh
-    jp /tmp $ curl -s localhost:4000/mholt/caddy | bash
+    jp /tmp $ curl -s i.jpillora.com/mholt/caddy | bash
     Downloading mholt/caddy v0.8.2 (https://github.com/mholt/caddy/releases/download/v0.8.2/caddy_darwin_amd64.zip)
     ######################################################################## 100.0%
     Downloaded to /private/tmp/caddy
@@ -55,13 +55,13 @@ curl https://i.jpillora.com/<user>/<repo>@<release>! | bash
     curl -s https://i.jpillora.com/installer | bash
     ```
 
-* Build from source
+* Install from source
 
     ```sh
     go get github.com/jpillora.com/installer
     ```
 
-* Host on Heroku
+* Install on Heroku
 
     Click this button to deploy for free on [Heroku](https://heroku.com)
 
@@ -74,6 +74,7 @@ curl https://i.jpillora.com/<user>/<repo>@<release>! | bash
 Currently, installing via Homebrew does not work. Homebrew was intended to be supported with:
 
 ```
+#does not work
 brew install https://i.jpillora.com/serve
 ```
 
