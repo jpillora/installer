@@ -1,1 +1,1 @@
-web: go-installer
+web: jp-installer
