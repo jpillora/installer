@@ -1,1 +1,1 @@
-web: installer
+web: go-installer

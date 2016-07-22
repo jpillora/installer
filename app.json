@@ -1,5 +1,5 @@
 {
-	"name": "installer",
+	"name": "go-installer",
 	"website": "https://github.com/jpillora/installer",
 	"repository": "https://github.com/jpillora/installer",
 	"env": {
