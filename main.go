@@ -84,7 +84,6 @@ func install(w http.ResponseWriter, r *http.Request) {
 		showError("Invalid path", http.StatusBadRequest)
 		return
 	}
-	log.Println(m)
 	data := &struct {
 		User, Program, Release string
 		MoveToPath, Insecure   bool
@@ -134,7 +133,8 @@ func install(w http.ResponseWriter, r *http.Request) {
 		showError("Unknown type", http.StatusInternalServerError)
 		return
 	}
-	b, err := ioutil.ReadFile("scripts/install." + ext)
+	script := "scripts/install." + ext
+	b, err := ioutil.ReadFile(script)
 	if err != nil {
 		showError("Installer script not found", http.StatusInternalServerError)
 		return
@@ -150,6 +150,7 @@ func install(w http.ResponseWriter, r *http.Request) {
 		showError("Template error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	log.Printf("serving script %s/%s@%s (%s)", data.User, data.Program, data.Release, ext)
 	//ready
 	w.Write(buff.Bytes())
 }
@@ -218,7 +219,6 @@ func getAssets(user, repo, release string) ([]asset, string, error) {
 }
 
 func get(url string, v interface{}) error {
-	log.Printf("fetch: %s", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return fmt.Errorf("Request failed: %s: %s", url, err)

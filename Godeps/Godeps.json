@@ -1,6 +1,7 @@
 {
-	"ImportPath": "github.com/jpillora/jp-installer",
-	"GoVersion": "go1.5.3",
+	"ImportPath": "github.com/jpillora/installer",
+	"GoVersion": "go1.7",
+	"GodepVersion": "v74",
 	"Deps": [
 		{
 			"ImportPath": "github.com/jpillora/opts",
