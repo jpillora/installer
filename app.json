@@ -6,6 +6,10 @@
 		"USER": {
 			"description": "Default user when not provided in URL",
 			"required": false
+		},
+		"GH_TOKEN": {
+			"description": "Optional Github API token",
+			"required": false
 		}
 	}
 }

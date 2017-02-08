@@ -16,8 +16,9 @@ import (
 )
 
 var c = &struct {
-	Port int    `help:"port" env:"PORT"`
-	User string `help:"default user when not provided in URL" env:"USER"`
+	Port  int    `help:"port" env:"PORT"`
+	User  string `help:"default user when not provided in URL" env:"USER"`
+	Token string `help:"github api token" env:"GH_TOKEN"`
 }{
 	Port: 3000,
 	User: "jpillora",
@@ -27,7 +28,7 @@ var VERSION = "0.0.0-src"
 
 func main() {
 	opts.New(&c).Repo("github.com/jpillora/installer").Version(VERSION).Parse()
-	log.Printf("Default user is '%s' and listening on %d...", c.User, c.Port)
+	log.Printf("Default user is '%s', GH token set: %v, listening on %d...", c.User, c.Token != "", c.Port)
 	if err := http.ListenAndServe(":"+strconv.Itoa(c.Port), http.HandlerFunc(install)); err != nil {
 		log.Fatal(err)
 	}
@@ -219,6 +220,11 @@ func getAssets(user, repo, release string) ([]asset, string, error) {
 }
 
 func get(url string, v interface{}) error {
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Accept", "application/vnd.github.v3+json")
+	if c.Token != "" {
+		req.Header.Set("Authorization", "token "+c.Token)
+	}
 	resp, err := http.Get(url)
 	if err != nil {
 		return fmt.Errorf("Request failed: %s: %s", url, err)
