@@ -50,8 +50,8 @@ var (
 	fileExtRe    = regexp.MustCompile(`(\.[a-z][a-z0-9]+)+$`)
 	isTermRe     = regexp.MustCompile(`(?i)^(curl|wget)\/`)
 	isHomebrewRe = regexp.MustCompile(`(?i)^homebrew`)
-	posixOSRe    = regexp.MustCompile(`(darwin|linux|(net|free|open)bsd)`)
-	archRe       = regexp.MustCompile(`(arm|386|amd64)`)
+	posixOSRe    = regexp.MustCompile(`(darwin|linux|(net|free|open)bsd|mac|osx)`)
+	archRe       = regexp.MustCompile(`(arm|386|amd64|32|64)`)
 	cache        = map[string]cacheItem{}
 	cacheMut     = sync.Mutex{}
 )
@@ -225,8 +225,16 @@ func getAssets(user, repo, release string) ([]asset, string, error) {
 		url := ga.BrowserDownloadURL
 		os := posixOSRe.FindString(ga.Name)
 		arch := archRe.FindString(ga.Name)
-		if os == "" || arch == "" {
-			continue
+		if os == "" {
+			continue //unknown os
+		}
+		if os == "mac" || os == "osx" {
+			os = "darwin"
+		}
+		if arch == "64" || arch == "" {
+			arch = "amd64" //default
+		} else if arch == "32" {
+			arch = "386"
 		}
 		assets = append(assets, asset{
 			Name:    ga.Name,
