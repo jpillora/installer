@@ -10,7 +10,10 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
+	"sync"
 	"text/template"
+	"time"
 
 	"github.com/jpillora/opts"
 )
@@ -34,6 +37,10 @@ func main() {
 	}
 }
 
+const (
+	cacheTTL = time.Hour
+)
+
 var (
 	userRe       = `(\/([\w\-]+))?`
 	repoRe       = `([\w\-\_]+)`
@@ -45,7 +52,15 @@ var (
 	isHomebrewRe = regexp.MustCompile(`(?i)^homebrew`)
 	posixOSRe    = regexp.MustCompile(`(darwin|linux|(net|free|open)bsd)`)
 	archRe       = regexp.MustCompile(`(arm|386|amd64)`)
+	cache        = map[string]cacheItem{}
+	cacheMut     = sync.Mutex{}
 )
+
+type cacheItem struct {
+	added   time.Time
+	assets  []asset
+	release string
+}
 
 func install(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
@@ -162,6 +177,16 @@ type asset struct {
 }
 
 func getAssets(user, repo, release string) ([]asset, string, error) {
+	//cached?
+	key := strings.Join([]string{user, repo, release}, "|")
+	cacheMut.Lock()
+	ci, ok := cache[key]
+	cacheMut.Unlock()
+	if ok && time.Now().Sub(ci.added) < cacheTTL {
+		return ci.assets, ci.release, nil
+	}
+	//not cached - ask github
+	log.Printf("fetching asset info for %s/%s@%s", user, repo, release)
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", user, repo)
 	ghas := []ghAsset{}
 	if release == "" {
@@ -216,6 +241,10 @@ func getAssets(user, repo, release string) ([]asset, string, error) {
 	if len(assets) == 0 {
 		return nil, "", errors.New("No downloads found for this release")
 	}
+	//success store results
+	cacheMut.Lock()
+	cache[key] = cacheItem{time.Now(), assets, release}
+	cacheMut.Unlock()
 	return assets, release, nil
 }
 
