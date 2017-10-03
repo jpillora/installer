@@ -112,7 +112,11 @@ func install(w http.ResponseWriter, r *http.Request) {
 		Insecure:   r.URL.Query().Get("insecure") == "1",
 	}
 	if data.User == "" {
-		data.User = c.User
+		if data.Program == "micro" {
+			data.User = "zyedidia"
+		} else {
+			data.User = c.User
+		}
 	}
 	//fetch assets
 	assets, release, err := getAssets(data.User, data.Program, data.Release)
@@ -130,22 +134,23 @@ func install(w http.ResponseWriter, r *http.Request) {
 	} else if isHomebrew {
 		w.Header().Set("Content-Type", "text/ruby")
 		ext = "rb"
-	} else if isText {
-		w.Header().Set("Content-Type", "text/plain")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "repository: https://github.com/%s/%s\n", data.User, data.Program)
-		fmt.Fprintf(w, "user: %s\n", data.User)
-		fmt.Fprintf(w, "program: %s\n", data.Program)
-		fmt.Fprintf(w, "release: %s\n", data.Release)
-		fmt.Fprintf(w, "release assets:\n")
-		for i, a := range data.Assets {
-			fmt.Fprintf(w, "  [#%02d] %s\n", i+1, a.URL)
-		}
-		fmt.Fprintf(w, "move-into-path: %v\n", data.MoveToPath)
-		fmt.Fprintf(w, "\nto see shell script, visit:\n  %s%s?type=script\n", r.Host, r.URL.String())
-		fmt.Fprintf(w, "\nfor more information on this server, visit:\n  github.com/jpillora/installer\n")
-		return
 	} else {
+		if isText {
+			w.Header().Set("Content-Type", "text/plain")
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w, "repository: https://github.com/%s/%s\n", data.User, data.Program)
+			fmt.Fprintf(w, "user: %s\n", data.User)
+			fmt.Fprintf(w, "program: %s\n", data.Program)
+			fmt.Fprintf(w, "release: %s\n", data.Release)
+			fmt.Fprintf(w, "release assets:\n")
+			for i, a := range data.Assets {
+				fmt.Fprintf(w, "  [#%02d] %s\n", i+1, a.URL)
+			}
+			fmt.Fprintf(w, "move-into-path: %v\n", data.MoveToPath)
+			fmt.Fprintf(w, "\nto see shell script, visit:\n  %s%s?type=script\n", r.Host, r.URL.String())
+			fmt.Fprintf(w, "\nfor more information on this server, visit:\n  github.com/jpillora/installer\n")
+			return
+		}
 		showError("Unknown type", http.StatusInternalServerError)
 		return
 	}

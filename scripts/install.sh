@@ -68,7 +68,7 @@ function install {
 	*) fail "No asset for platform ${OS}-${ARCH}";;
 	esac
 	#got URL! download it...
-	echo "{{ if .MoveToPath }}Installing{{ else }}Downloading{{ end }} $USER/$PROG $RELEASE ($URL)..."
+	echo "{{ if .MoveToPath }}Installing{{ else }}Downloading{{ end }} $USER/$PROG $RELEASE..."
 	#enter tempdir
 	mkdir -p $TMP_DIR
 	cd $TMP_DIR
