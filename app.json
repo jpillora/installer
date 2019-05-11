@@ -1,15 +1,16 @@
 {
-	"name": "go-installer",
-	"website": "https://github.com/jpillora/installer",
-	"repository": "https://github.com/jpillora/installer",
-	"env": {
-		"USER": {
-			"description": "Default user when not provided in URL",
-			"required": false
-		},
-		"GH_TOKEN": {
-			"description": "Optional Github API token",
-			"required": false
-		}
-	}
+  "name": "go-installer",
+  "stack": "heroku-18",
+  "website": "https://github.com/jpillora/installer",
+  "repository": "https://github.com/jpillora/installer",
+  "env": {
+    "USER": {
+      "description": "Default user when not provided in URL",
+      "required": false
+    },
+    "GH_TOKEN": {
+      "description": "Optional Github API token",
+      "required": false
+    }
+  }
 }

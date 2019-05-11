@@ -1,6 +1,6 @@
 {
   "ImportPath": "github.com/jpillora/installer",
-  "GoVersion": "go1.9",
+  "GoVersion": "go1.12.5",
   "GodepVersion": "v74",
   "Deps": [
     {
