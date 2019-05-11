@@ -1,6 +1,5 @@
 {
   "name": "go-installer",
-  "stack": "heroku-18",
   "website": "https://github.com/jpillora/installer",
   "repository": "https://github.com/jpillora/installer",
   "env": {
