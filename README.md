@@ -58,7 +58,7 @@ curl https://i.jpillora.com/<user>/<repo>@<release>! | bash
 * Install from source
 
     ```sh
-    go get github.com/jpillora.com/installer
+    go get github.com/jpillora/installer
     ```
 
 * Install on Heroku
