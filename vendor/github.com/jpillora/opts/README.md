@@ -1,204 +1,168 @@
-# opts
+<p align="center">
+<img width="443" alt="logo" src="https://user-images.githubusercontent.com/633843/57529538-84a22780-7378-11e9-9235-312633dc125e.png"><br>
+<b>A Go (golang) package for building frictionless command-line interfaces</b><br><br>
+<a href="https://godoc.org/github.com/jpillora/opts#Opts" rel="nofollow">
+	<img src="https://camo.githubusercontent.com/42566bdba17f1a0c86c1a1de859d6ab70bde1457/68747470733a2f2f676f646f632e6f72672f6769746875622e636f6d2f6a70696c6c6f72612f6f7074733f7374617475732e737667" alt="GoDoc" data-canonical-src="https://godoc.org/github.com/jpillora/opts?status.svg" style="max-width:100%;">
+</a>
+<a href="https://circleci.com/gh/jpillora/opts" rel="nofollow">
+	<img src="https://camo.githubusercontent.com/34202387888c6b05f640653a29bb1e204f5a9e19/68747470733a2f2f636972636c6563692e636f6d2f67682f6a70696c6c6f72612f6f7074732e7376673f7374796c653d736869656c6426636972636c652d746f6b656e3d36396566396336616330643863656263623335346262383563333737656365666637376266623162" alt="CircleCI" data-canonical-src="https://circleci.com/gh/jpillora/opts.svg?style=shield&amp;circle-token=69ef9c6ac0d8cebcb354bb85c377eceff77bfb1b" style="max-width:100%;">
+</a>
+</p>
 
-**A low friction command-line interface library for Go (Golang)**
+---
 
-[![GoDoc](https://godoc.org/github.com/jpillora/opts?status.svg)](https://godoc.org/github.com/jpillora/opts)  [![CircleCI](https://circleci.com/gh/jpillora/opts.svg?style=shield&circle-token=69ef9c6ac0d8cebcb354bb85c377eceff77bfb1b)](https://circleci.com/gh/jpillora/opts)
+Creating command-line interfaces should be simple:
 
-Command-line parsing should be easy. Use configuration structs:
-
-``` go
+```go
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/jpillora/opts"
 )
 
 func main() {
-	config := struct {
-		File  string `help:"file to load"`
-		Lines int    `help:"number of lines to show"`
-	}{}
-	opts.Parse(&config)
-	fmt.Println(config)
+	type config struct {
+		File  string `opts:"help=file to load"`
+		Lines int    `opts:"help=number of lines to show"`
+	}
+	c := config{}
+	opts.Parse(&c)
+	log.Printf("%+v", c)
 }
 ```
 
+```sh
+$ go build -o my-prog
+$ ./my-prog --help
+
+  Usage: my-prog [options]
+
+  Options:
+  --file, -f   file to load
+  --lines, -l  number of lines to show
+  --help, -h   display help
+
 ```
-$ go run main.go -f foo -l 12
-{foo 12}
+
+```sh
+$ ./my-prog -f foo.txt -l 42
+{File:foo.txt Lines:42}
 ```
+
+*Try it out https://play.golang.org/p/D0jWFwmxRgt*
 
 ### Features (with examples)
 
-* Easy to use ([simple](example/simple/))
-* Promotes separation of CLI code and library code ([separation](example/separation/))
-* Automatically generated `--help` text via struct tags `help:"Foo bar"` ([help](example/help/))
-* Commands by nesting structs ([cmds](example/cmds/))
-* Default values by modifying the struct prior to `Parse()` ([defaults](example/defaults/))
-* Default values from a JSON config file, unmarshalled via your config struct ([config](example/config/))
-* Default values from environment, defined by your field names ([env](example/env/))
-* Infers program name from package name (and optional repository link)
-* Extensible via `flag.Value` ([customtypes](example/customtypes/))
-* Customizable help text by modifying the default templates ([customhelp](example/customhelp/))
+- Easy to use ([eg-helloworld](https://github.com/jpillora/opts-examples/tree/master/eg-helloworld/))
+- Promotes separation of CLI code and library code ([eg-app](https://github.com/jpillora/opts-examples/tree/master/eg-app/))
+- Automatically generated `--help` text via struct tags ([eg-help](https://github.com/jpillora/opts-examples/tree/master/eg-help/))
+- Default values by modifying the struct prior to `Parse()` ([eg-defaults](https://github.com/jpillora/opts-examples/tree/master/eg-defaults/))
+- Default values from a JSON config file, unmarshalled via your config struct ([eg-config](https://github.com/jpillora/opts-examples/tree/master/eg-config/))
+- Default values from environment, defined by your field names ([eg-env](https://github.com/jpillora/opts-examples/tree/master/eg-env/))
+- Repeated flags using slices ([eg-repeated-flag](https://github.com/jpillora/opts-examples/tree/master/eg-repeated-flag/))
+- Group your flags in the help output ([eg-groups](https://github.com/jpillora/opts-examples/tree/master/eg-groups/))
+- Sub-commands by nesting structs ([eg-commands-inline](https://github.com/jpillora/opts-examples/tree/master/eg-commands-inline/))
+- Sub-commands by providing child `Opts` ([eg-commands-main](https://github.com/jpillora/opts-examples/tree/master/eg-commands-main/))
+- Infers program name from executable name
+- Infers command names from struct or package name
+- Define custom flags types via `opts.Setter` or `flag.Value` ([eg-custom-flag](https://github.com/jpillora/opts-examples/tree/master/eg-custom-flag/))
+- Customizable help text by modifying the default templates ([eg-help](https://github.com/jpillora/opts-examples/tree/master/eg-help/))
+- Built-in shell auto-completion ([eg-complete](https://github.com/jpillora/opts-examples/tree/master/eg-complete))
 
-### Overview
-
-Internally, `opts` creates `flag.FlagSet`s from your configuration structs using `pkg/reflect`. So, given the following program:
-
-```go
-type Config struct {
-	Alpha   string        `help:"a string"`
-	Bravo   int           `help:"an int"`
-	Charlie bool          `help:"a bool"`
-	Delta   time.Duration `help:"a duration"`
-}
-
-c := Config{
-	Bravo: 42,
-	Delta: 2 * time.Minute,
-}
-```
-
-```go
-opts.Parse(&c)
-```
-
-At this point, `opts.Parse` will *approximately* perform:
-
-```go
-foo := Config{}
-set := flag.NewFlagSet("Config")
-set.StringVar(&foo.Alpha, "", "a string")
-set.IntVar(&foo.Bravo, 42, "an int")
-set.BoolVar(&foo.Charlie, false, "a bool")
-set.DurationVar(&foo.Delta, 2 * time.Minute, "a duration")
-set.Parse(os.Args)
-```
-
-And, you get pretty `--help` output:
-
-```
-$ ./foo --help
-
-  Usage: foo [options]
-
-  Options:
-  --alpha, -a    a string
-  --bravo, -b    an int (default 42)
-  --charlie, -c  an bool
-  --delta, -d    a duration (default 2m0s)
-  --help, -h
-
-```
-
-### All Examples
-
----
-
-#### See all [example](example/)s here
-
----
+Find these examples and more in the [`opts-examples`](https://github.com/jpillora/opts-examples) repository.
 
 ### Package API
 
-See [![GoDoc](https://godoc.org/github.com/jpillora/opts?status.svg)](https://godoc.org/github.com/jpillora/opts)
+See https://godoc.org/github.com/jpillora/opts#Opts
+
+[![GoDoc](https://godoc.org/github.com/jpillora/opts?status.svg)](https://godoc.org/github.com/jpillora/opts)
 
 ### Struct Tag API
 
-**opts** tries to set sane defaults so, for the most part, you'll get the desired behaviour
-by simply providing a configuration struct. These defaults can be overridden using the struct
-tag `key:"value"`s outlined below.
+**opts** tries to set sane defaults so, for the most part, you'll get the desired behaviour by simply providing a configuration struct.
 
-#### **Common tags**
+However, you can customise this behaviour by providing the `opts` struct
+tag with a series of settings in the form of **`key=value`**:
 
-These tags are usable across all `type`s:
+```
+`opts:"key=value,key=value,..."`
+```
 
-* `name` - Name is used to display the field in the help text (defaults to the field name converted to lowercase and dashes)
-* `help` - Help is used to describe the field (defaults to "")
-* `type` - The `opts` type assigned the field (defaults using the table below)
+Where **`key`** must be one of:
 
-#### `type` defaults
+- `-` (dash) - Like `json:"-"`, the dash character will cause opts to ignore the struct field. Unexported fields are always ignored.
 
-All fields will have a **opts** `type`. By default a struct field will be assigned a `type` depending on its field type:
+- `name` - Name is used to display the field in the help text. By default, the flag name is infered by converting the struct field name to lowercase and adding dashes between words.
 
-| Field Type    | Default `type` | Valid `type`s      |
-| ------------- |:-------------:|:-------------------:|
-| int           | opt           | opt, arg            |
-| string        | opt           | opt, arg, cmdname   |
-| bool          | opt           | opt, arg            |
-| flag.Value    | opt           | opt, arg            |
-| time.Duration | opt           | opt, arg            |
-| []string      | arglist       | arglist             |
-| struct        | cmd           | cmd, embedded       |
+- `help` - The help text used to summaryribe the field. It will be displayed next to the flag name in the help output.
 
-This default assignment can be overridden with a `type` struct tag. For example you could set a string struct field to be an `arg` field with `type:"arg"`.
+	*Note:* `help` can also be set as a stand-alone struct tag (i.e. `help:"my text goes here"`). You must use the stand-alone tag if you wish to use a comma `,` in your help string.
 
-#### `type` specific properties
+- `mode` - The **opts** mode assigned to the field. All fields will be given a `mode`. Where the `mode` **`value`** must be one of:
 
-* **`opt`**
+	* `flag` - The field will be treated as a flag: an optional, named, configurable field. Set using `./program --<flag-name> <flag-value>`. The struct field must be a [*flag-value*](#flag-values) type. `flag` is the default `mode` for any [*flag-value*](#flag-values).
 
-	An option (`opt`) field will appear in the options list and by definition, be optional.
+	* `arg` - The field will be treated as an argument: a required, positional, unamed, configurable field. Set using `./program <argument-value>`. The struct field must be a [*flag-value*](#flag-values) type.
 
-	* `short` - An alias or shortcut to this option (defaults to the first letter of the `name` property)
-	* `env` - An environment variable to use to retrieve the default (**when `UseEnv()` is set** this defaults to `name` property converted to uppercase and underscores)
+	* `embedded` - A special mode which causes the fields of struct to be used in the current struct. Useful if you want to split your command-line options across multiple files (default for `struct` fields). The struct field must be a `struct`. `embedded` is the default `mode` for a `struct`. *Tip* You can play group all fields together placing an `group` tag on the struct field.
 
-	Restricted to fields with type `int`,`string`,`bool`,`time.Duration` and `flag.Value`
+	* `cmd` - A inline command, shorthand for `.AddCommmand(opts.New(&field))`, which also implies the struct field must be a `struct`.
 
-* **`arg`**
+	* `cmdname` - A special mode which will assume the name of the selected command. The struct field must be a `string`.
 
-	An argument (`arg`) field will appear in the usage and will be required if it does not have a default value set.
+- `short` - One letter to be used a flag's "short" name. By default, the first letter of `name` will be used. It will remain unset if there is a duplicate short name. Only valid when `mode` is `flag`.
 
-	Restricted to fields with type `string`
+- `group` - The name of the flag group to store the field. Defining this field will create a new group of flags in the help text (will appear as "`<group>` options"). The default flag group is the empty string (which will appear as "Options"). Only valid when `mode` is `flag` or `embedded`.
 
-* **`arglist`**
+- `env` - An environent variable to use as the field's **default** value. It can always be overridden by providing the appropriate flag. Only valid when `mode` is `flag`.
 
-	An argument list (`arglist`) field will appear in the usage. Useful for a you allow any number number of arguments. For example file and directory targets.
+	For example, `opts:"env=FOO"`. It can also be infered using the field name with simply `opts:"env"`. You can enable inference on all flags with the `opts.Opts` method `UseEnv()`.
 
-	* `min` - An integer representing the minimum number of args specified
+- `min` `max` - A minimum or maximum length of a slice. Only valid when `mode` is `arg`, *and* the struct field is a slice.
 
-	Restricted to fields with type `[]string`
+#### flag-values:
 
-* **`cmd`**
+In general an opts _flag-value_ type aims to be any type that can be get and set using a `string`. Currently, **opts** supports the following types:
 
-	A command is nested `opts.Opt` instance, so its fields behave in exactly the same way as the parent struct.
+- `string`
+- `bool`
+- `int`, `int8`, `int16`, `int32`, `int64`
+- `uint`, `uint8`, `uint16`, `uint32`, `uint64`
+- `float32`, `float64`
+- [`opts.Setter`](https://godoc.org/github.com/jpillora/opts#Setter)
+	- *The interface `func Set(string) error`*
+- [`flag.Value`](https://golang.org/pkg/flag/#Value)
+	- *Is an `opts.Setter`*
+- `time.Duration`
+- `encoding.TextUnmarshaler`
+	- *Includes `time.Time` and `net.IP`*
+- `encoding.BinaryUnmarshaler`
+	- *Includes `url.URL`*
 
-	You can access the options of a command with `prog --prog-opt X cmd --cmd-opt Y`
+In addition, `flag`s and `arg`s can also be a slice of any _flag-value_ type. Slices allow multiple flags/args. For example, a struct field flag `Foo []int` could be set with `--foo 1 --foo 2`, and would result in `[]int{1,2}`.
 
-	Restricted to fields with type `struct`
+### Help text
 
-* **`cmdname`**
+By default, **opts** attempts to output well-formatted help text when the user provides the `--help` (`-h`) flag. The [examples](https://github.com/jpillora/opts-examples) repositories shows various combinations of this default help text, resulting from using various features above.
 
-	A special type which will assume the name of the selected command
+Modifications be made by customising the underlying [Go templates](https://golang.org/pkg/text/template/) found here [DefaultTemplates](https://godoc.org/github.com/jpillora/opts#pkg-variables).
 
-	Restricted to fields with type `string`
+### Talk
 
-* **`embedded`**
-
-	A special type which causes the fields of struct to be used in the current struct. Useful if you want to extend existing structs with extra command-line options.
+I gave a talk on **opts** at the Go Meetup Sydney (golang-syd) on the 23rd of May, 2019. You can find the slides here https://github.com/jpillora/opts-talk.
 
 ### Other projects
 
-Other CLI libraries which infer flags from struct tags:
+Other related projects which infer flags from struct tags but aren't as feature-complete:
 
-* https://github.com/jessevdk/go-flags is similar though it still could be simpler and more customizable.
-
-### Why
-
-Why yet another struct-based command-line library? I started this project [back in April](https://github.com/jpillora/opts/commit/b87563662e56b05fbcc326449db57a7761ef4d51)
-when the only thing around was `jessevdk/go-flags` and I wanted more customization. Now there is [tj/go-config](https://github.com/tj/go-config) and [alexflint/go-arg](https://github.com/alexflint/go-arg) and still, these don't yet include [nested structs](example/cmds/) and [customizable help text](example/customhelp/).
-
-### Todo
-
-* More tests
-* Option groups (Separate sets of options in `--help`)
-* Bash completion
-* Multiple short options `-aux` (Requires a non-`pkg/flag` parser)
+- https://github.com/alexflint/go-arg
+- https://github.com/jessevdk/go-flags
 
 #### MIT License
 
-Copyright © 2015 &lt;dev@jpillora.com&gt;
+Copyright © 2019 &lt;dev@jpillora.com&gt;
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
