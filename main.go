@@ -89,6 +89,7 @@ func install(w http.ResponseWriter, r *http.Request) {
 	}
 	//type specific error response
 	showError := func(msg string, code int) {
+		fmt.Printf("error: %s\n", msg)
 		if isTerm {
 			msg = fmt.Sprintf("echo '%s'\n", msg)
 		}
