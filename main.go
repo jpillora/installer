@@ -34,6 +34,13 @@ func main() {
 	if token == "" {
 		token, _ = os.LookupEnv("GH_TOKEN")
 	}
+	if envPort, ok := os.LookupEnv("PORT"); ok {
+		var err error
+		port, err = strconv.Atoi(envPort)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	log.Printf("Default user is '%s', GH token set: %v, listening on %d...", user, token != "", port)
 	if err := http.ListenAndServe(":"+strconv.Itoa(port), http.HandlerFunc(install)); err != nil {
