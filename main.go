@@ -4,35 +4,51 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"text/template"
 	"time"
-
-	"github.com/jpillora/opts"
 )
 
-var c = &struct {
-	Port  int    `help:"port" env:"PORT"`
-	User  string `help:"default user when not provided in URL" env:"USER"`
-	Token string `help:"github api token" env:"GH_TOKEN"`
-}{
-	Port: 3000,
-	User: "jpillora",
-}
-
-var VERSION = "0.0.0-src"
+var port int
+var user string
+var token string
 
 func main() {
-	opts.New(&c).Repo("github.com/jpillora/installer").Version(VERSION).Parse()
-	log.Printf("Default user is '%s', GH token set: %v, listening on %d...", c.User, c.Token != "", c.Port)
-	if err := http.ListenAndServe(":"+strconv.Itoa(c.Port), http.HandlerFunc(install)); err != nil {
+	flag.IntVar(&port, "port", 3000, "port")
+	flag.StringVar(&user, "user", "", "default user when not provided in URL")
+	flag.StringVar(&token, "token", "", "github api token")
+	flag.Parse()
+
+	// if username is not provided as a flag, check the environment
+	// if it's not provided there, use the default of 'jpillora'
+	if user == "" {
+		user, _ = os.LookupEnv("USER")
+		if user == "" {
+			user = "jpillora"
+		}
+	}
+	if token == "" {
+		token, _ = os.LookupEnv("GH_TOKEN")
+	}
+	if envPort, ok := os.LookupEnv("PORT"); ok {
+		var err error
+		port, err = strconv.Atoi(envPort)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	log.Printf("Default user is '%s', GH token set: %v, listening on %d...", user, token != "", port)
+	if err := http.ListenAndServe(":"+strconv.Itoa(port), http.HandlerFunc(install)); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -112,7 +128,7 @@ func install(w http.ResponseWriter, r *http.Request) {
 		Insecure:   r.URL.Query().Get("insecure") == "1",
 	}
 	if data.User == "" {
-		data.User = c.User
+		data.User = user
 	}
 	//fetch assets
 	assets, release, err := getAssets(data.User, data.Program, data.Release)
@@ -259,8 +275,8 @@ func getAssets(user, repo, release string) ([]asset, string, error) {
 func get(url string, v interface{}) error {
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
-	if c.Token != "" {
-		req.Header.Set("Authorization", "token "+c.Token)
+	if token != "" {
+		req.Header.Set("Authorization", "token "+token)
 	}
 	resp, err := http.Get(url)
 	if err != nil {
