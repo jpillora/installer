@@ -248,6 +248,9 @@ func getAssets(user, repo, release string) ([]asset, string, error) {
 		} else if arch == "32" {
 			arch = "386"
 		}
+		if strings.Contains(ga.Name, "kots.so") {
+			continue
+		}
 		assets = append(assets, asset{
 			Name:    ga.Name,
 			OS:      os,
