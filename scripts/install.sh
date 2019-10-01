@@ -105,8 +105,8 @@ function install {
 	fi
 	#move into PATH or cwd
 	chmod +x $TMP_BIN || fail "chmod +x failed"
-	mv $TMP_BIN $OUT_DIR/$PROG 2>/dev/null || sudo mv $TMP_BIN $OUT_DIR/$PROG || fail "mv failed" #FINAL STEP!
-	echo "{{ if .MoveToPath }}Installed at{{ else }}Downloaded to{{ end }} $OUT_DIR/$PROG"
+	mv $TMP_BIN $OUT_DIR/kubectl-$PROG 2>/dev/null || sudo mv $TMP_BIN $OUT_DIR/kubectl-$PROG || fail "mv failed" #FINAL STEP!
+	echo "{{ if .MoveToPath }}Installed at{{ else }}Downloaded to{{ end }} $OUT_DIR/kubectl-$PROG"
 	#done
 	cleanup
 }
