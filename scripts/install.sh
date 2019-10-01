@@ -105,7 +105,7 @@ function install {
 	fi
 	#move into PATH or cwd
 	chmod +x $TMP_BIN || fail "chmod +x failed"
-	mv $TMP_BIN $OUT_DIR/$PROG || sudo mv $TMP_BIN $OUT_DIR/$PROG || fail "mv failed" #FINAL STEP!
+	mv $TMP_BIN $OUT_DIR/$PROG 2>/dev/null || sudo mv $TMP_BIN $OUT_DIR/$PROG || fail "mv failed" #FINAL STEP!
 	echo "{{ if .MoveToPath }}Installed at{{ else }}Downloaded to{{ end }} $OUT_DIR/$PROG"
 	#done
 	cleanup
