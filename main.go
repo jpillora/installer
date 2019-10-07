@@ -24,12 +24,17 @@ var token string
 
 func main() {
 	flag.IntVar(&port, "port", 3000, "port")
-	flag.StringVar(&user, "user", "jpillora", "default user when not provided in URL")
+	flag.StringVar(&user, "user", "", "default user when not provided in URL")
 	flag.StringVar(&token, "token", "", "github api token")
 	flag.Parse()
 
+	// if username is not provided as a flag, check the environment
+	// if it's not provided there, use the default of 'jpillora'
 	if user == "" {
 		user, _ = os.LookupEnv("USER")
+		if user == "" {
+			user = "jpillora"
+		}
 	}
 	if token == "" {
 		token, _ = os.LookupEnv("GH_TOKEN")
