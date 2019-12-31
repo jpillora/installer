@@ -54,7 +54,7 @@ func main() {
 }
 
 const (
-	cacheTTL = time.Hour
+	cacheTTL = time.Minute * 5
 )
 
 var (
