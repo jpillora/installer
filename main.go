@@ -1,3 +1,5 @@
+//go:generate statik -dest=. -f -p=scripts -src=scripts -include=*.sh
+
 package main
 
 import (
@@ -8,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -16,21 +19,37 @@ import (
 	"time"
 
 	"github.com/jpillora/opts"
+	"github.com/rakyll/statik/fs"
+
+	_ "github.com/jpillora/installer/scripts"
 )
 
-var c = &struct {
-	Port  int    `help:"port" env:"PORT"`
-	User  string `help:"default user when not provided in URL" env:"USER"`
-	Token string `help:"github api token" env:"GH_TOKEN"`
+var c = struct {
+	Port  int    `opts:"help=port, env"`
+	User  string `opts:"help=default user when not provided in URL, env"`
+	Token string `opts:"help=github api token, env=GH_TOKEN"`
 }{
 	Port: 3000,
 	User: "jpillora",
 }
 
-var VERSION = "0.0.0-src"
+var (
+	version       = "0.0.0-src"
+	installScript = []byte{}
+)
 
 func main() {
-	opts.New(&c).Repo("github.com/jpillora/installer").Version(VERSION).Parse()
+	//load static file
+	hfs, err := fs.New()
+	if err != nil {
+		log.Fatalf("bad static file system: %s, fix statik", err)
+	}
+	installScript, err = fs.ReadFile(hfs, "/install.sh")
+	if err != nil {
+		log.Fatalf("read script file: %s, fix statik", err)
+	}
+	//run program
+	opts.New(&c).Repo("github.com/jpillora/installer").Version(version).Parse()
 	log.Printf("Default user is '%s', GH token set: %v, listening on %d...", c.User, c.Token != "", c.Port)
 	if err := http.ListenAndServe(":"+strconv.Itoa(c.Port), http.HandlerFunc(install)); err != nil {
 		log.Fatal(err)
@@ -42,24 +61,26 @@ const (
 )
 
 var (
-	userRe       = `(\/([\w\-]+))?`
-	repoRe       = `([\w\-\_]+)`
-	releaseRe    = `(@([\w\-\.\_]+?))?`
-	moveRe       = `(!)?`
+	userRe       = `(\/([\w\-]{1,128}))?`
+	repoRe       = `([\w\-\_]{1,128})`
+	releaseRe    = `(@([\w\-\.\_]{1,128}?))?`
+	moveRe       = `(!*)`
 	pathRe       = regexp.MustCompile(`^` + userRe + `\/` + repoRe + releaseRe + moveRe + `$`)
 	fileExtRe    = regexp.MustCompile(`(\.[a-z][a-z0-9]+)+$`)
 	isTermRe     = regexp.MustCompile(`(?i)^(curl|wget)\/`)
 	isHomebrewRe = regexp.MustCompile(`(?i)^homebrew`)
-	posixOSRe    = regexp.MustCompile(`(darwin|linux|(net|free|open)bsd|mac|osx)`)
+	posixOSRe    = regexp.MustCompile(`(?i)(darwin|linux|(net|free|open)bsd|mac|osx)`)
 	archRe       = regexp.MustCompile(`(arm|386|amd64|32|64)`)
-	cache        = map[string]cacheItem{}
+	cache        = map[string]*query{}
 	cacheMut     = sync.Mutex{}
+	errNotFound  = errors.New("not found")
 )
 
-type cacheItem struct {
-	added   time.Time
-	assets  []asset
-	release string
+type query struct {
+	Timestamp                              time.Time
+	User, Program, Release                 string
+	MoveToPath, SudoMove, Google, Insecure bool
+	Assets                                 []asset
 }
 
 func install(w http.ResponseWriter, r *http.Request) {
@@ -100,33 +121,33 @@ func install(w http.ResponseWriter, r *http.Request) {
 		showError("Invalid path", http.StatusBadRequest)
 		return
 	}
-	data := &struct {
-		User, Program, Release string
-		MoveToPath, Insecure   bool
-		Assets                 []asset
-	}{
+	q := &query{
+		Timestamp:  time.Now(),
 		User:       m[2],
 		Program:    m[3],
 		Release:    m[5],
-		MoveToPath: m[6] == "!",
+		MoveToPath: strings.HasPrefix(m[6], "!"),
+		SudoMove:   strings.HasPrefix(m[6], "!!"),
+		Google:     false,
 		Insecure:   r.URL.Query().Get("insecure") == "1",
 	}
-	if data.User == "" {
-		if data.Program == "micro" {
-			data.User = "zyedidia"
+	//pick a user
+	if q.User == "" {
+		if q.Program == "micro" {
+			//micro > nano!
+			q.User = "zyedidia"
 		} else {
-			data.User = c.User
+			//use default user, but fallback to google
+			q.User = c.User
+			q.Google = true
 		}
 	}
 	//fetch assets
-	assets, release, err := getAssets(data.User, data.Program, data.Release)
-	if err != nil {
+	if err := getAssets(q); err != nil {
 		showError(err.Error(), http.StatusBadGateway)
 		return
 	}
-	data.Release = release //update release
-	data.Assets = assets
-
+	//ready!
 	ext := ""
 	if isTerm {
 		w.Header().Set("Content-Type", "text/x-shellscript")
@@ -138,15 +159,15 @@ func install(w http.ResponseWriter, r *http.Request) {
 		if isText {
 			w.Header().Set("Content-Type", "text/plain")
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprintf(w, "repository: https://github.com/%s/%s\n", data.User, data.Program)
-			fmt.Fprintf(w, "user: %s\n", data.User)
-			fmt.Fprintf(w, "program: %s\n", data.Program)
-			fmt.Fprintf(w, "release: %s\n", data.Release)
+			fmt.Fprintf(w, "repository: https://github.com/%s/%s\n", q.User, q.Program)
+			fmt.Fprintf(w, "user: %s\n", q.User)
+			fmt.Fprintf(w, "program: %s\n", q.Program)
+			fmt.Fprintf(w, "release: %s\n", q.Release)
 			fmt.Fprintf(w, "release assets:\n")
-			for i, a := range data.Assets {
+			for i, a := range q.Assets {
 				fmt.Fprintf(w, "  [#%02d] %s\n", i+1, a.URL)
 			}
-			fmt.Fprintf(w, "move-into-path: %v\n", data.MoveToPath)
+			fmt.Fprintf(w, "move-into-path: %v\n", q.MoveToPath)
 			fmt.Fprintf(w, "\nto see shell script, visit:\n  %s%s?type=script\n", r.Host, r.URL.String())
 			fmt.Fprintf(w, "\nfor more information on this server, visit:\n  github.com/jpillora/installer\n")
 			return
@@ -154,24 +175,18 @@ func install(w http.ResponseWriter, r *http.Request) {
 		showError("Unknown type", http.StatusInternalServerError)
 		return
 	}
-	script := "scripts/install." + ext
-	b, err := ioutil.ReadFile(script)
-	if err != nil {
-		showError("Installer script not found", http.StatusInternalServerError)
-		return
-	}
-	t, err := template.New("installer").Parse(string(b))
+	t, err := template.New("installer").Parse(string(installScript))
 	if err != nil {
 		http.Error(w, "Installer script invalid", http.StatusInternalServerError)
 		return
 	}
 	//execute script
 	buff := bytes.Buffer{}
-	if err := t.Execute(&buff, data); err != nil {
+	if err := t.Execute(&buff, q); err != nil {
 		showError("Template error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("serving script %s/%s@%s (%s)", data.User, data.Program, data.Release, ext)
+	log.Printf("serving script %s/%s@%s (%s)", q.User, q.Program, q.Release, ext)
 	//ready
 	w.Write(buff.Bytes())
 }
@@ -181,84 +196,128 @@ type asset struct {
 	Is32bit, IsMac            bool
 }
 
-func getAssets(user, repo, release string) ([]asset, string, error) {
+func (a asset) target() string {
+	return fmt.Sprintf("%s_%s", a.OS, a.Arch)
+}
+
+func getAssets(q *query) error {
 	//cached?
-	key := strings.Join([]string{user, repo, release}, "|")
+	key := strings.Join([]string{q.User, q.Program, q.Release}, "|")
 	cacheMut.Lock()
-	ci, ok := cache[key]
+	cq, ok := cache[key]
 	cacheMut.Unlock()
-	if ok && time.Now().Sub(ci.added) < cacheTTL {
-		return ci.assets, ci.release, nil
+	if ok && time.Now().Sub(cq.Timestamp) < cacheTTL {
+		//cache hit
+		*q = *cq
+		return nil
+	}
+	//do real operation
+	err := getAssetsNoCache(q)
+	if err == nil {
+		//didn't need google
+		q.Google = false
+	} else if err == errNotFound && q.Google {
+		//use google to auto-detect user...
+		user, program, gerr := searchGoogle(q.Program)
+		if gerr != nil {
+			log.Printf("google search failed: %s", gerr)
+		} else if program == q.Program {
+			q.User = user
+			//retry assets...
+			err = getAssetsNoCache(q)
+		}
+	}
+	//asset fetch failed, dont cache
+	if err != nil {
+		return err
+	}
+	//success store results
+	cacheMut.Lock()
+	cache[key] = q
+	cacheMut.Unlock()
+	return nil
+}
+
+func getAssetsNoCache(q *query) error {
+	user := q.User
+	repo := q.Program
+	release := q.Release
+	if release == "" {
+		release = "latest"
 	}
 	//not cached - ask github
 	log.Printf("fetching asset info for %s/%s@%s", user, repo, release)
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", user, repo)
 	ghas := []ghAsset{}
-	if release == "" {
+	if q.Release == "" {
 		url += "/latest"
 		ghr := ghRelease{}
 		if err := get(url, &ghr); err != nil {
-			return nil, "", err
+			return err
 		}
-		release = ghr.TagName
+		q.Release = ghr.TagName //discovered
 		ghas = ghr.Assets
 	} else {
 		ghrs := []ghRelease{}
 		if err := get(url, &ghrs); err != nil {
-			return nil, "", err
+			return err
 		}
 		found := false
 		for _, ghr := range ghrs {
 			if ghr.TagName == release {
 				found = true
 				if err := get(ghr.AssetsURL, &ghas); err != nil {
-					return nil, "", err
+					return err
 				}
 				ghas = ghr.Assets
 				break
 			}
 		}
 		if !found {
-			return nil, "", fmt.Errorf("Release tag '%s' not found", release)
+			return fmt.Errorf("Release tag '%s' not found", release)
 		}
 	}
 	if len(ghas) == 0 {
-		return nil, "", errors.New("No assets found")
+		return errors.New("No assets found")
 	}
 	assets := []asset{}
 	for _, ga := range ghas {
 		url := ga.BrowserDownloadURL
+		//match
 		os := posixOSRe.FindString(ga.Name)
 		arch := archRe.FindString(ga.Name)
+		//os modifications
 		if os == "" {
 			continue //unknown os
 		}
 		if os == "mac" || os == "osx" {
 			os = "darwin"
 		}
+		//arch modifications
 		if arch == "64" || arch == "" {
 			arch = "amd64" //default
 		} else if arch == "32" {
 			arch = "386"
 		}
 		assets = append(assets, asset{
-			Name:    ga.Name,
-			OS:      os,
+			//target
+			OS:   os,
+			Arch: arch,
+			//
+			Name: ga.Name,
+			URL:  url,
+			Type: fileExtRe.FindString(url),
+			//computed
 			IsMac:   os == "darwin",
-			Arch:    arch,
 			Is32bit: arch == "386",
-			URL:     url,
-			Type:    fileExtRe.FindString(url),
 		})
 	}
 	if len(assets) == 0 {
-		return nil, "", errors.New("No downloads found for this release")
+		return errors.New("No downloads found for this release")
 	}
-	//success store results
-	cacheMut.Lock()
-	cache[key] = cacheItem{time.Now(), assets, release}
-	cacheMut.Unlock()
-	return assets, release, nil
+	//TODO: handle duplicate asset.targets
+	q.Assets = assets
+	return nil
 }
 
 func get(url string, v interface{}) error {
@@ -274,7 +333,7 @@ func get(url string, v interface{}) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 404 {
-		return fmt.Errorf("Download not found (%s)", url)
+		return errNotFound
 	} else if resp.StatusCode != 200 {
 		b, _ := ioutil.ReadAll(resp.Body)
 		return errors.New(http.StatusText(resp.StatusCode) + " " + string(b))
@@ -355,4 +414,44 @@ type ghRelease struct {
 	UploadURL       string      `json:"upload_url"`
 	URL             string      `json:"url"`
 	ZipballURL      string      `json:"zipball_url"`
+}
+
+var searchGithubRe = regexp.MustCompile(`https:\/\/github\.com\/(\w+)\/(\w+)`)
+
+//uses im feeling lucky and grabs the "Location"
+//header from the 302, which contains the IMDB ID
+func searchGoogle(phrase string) (user, project string, err error) {
+	phrase += " site:github.com"
+	log.Printf("google search for '%s'", phrase)
+	v := url.Values{}
+	v.Set("btnI", "") //I'm feeling lucky
+	v.Set("q", phrase)
+	urlstr := "https://www.google.com.au/search?" + v.Encode()
+	req, err := http.NewRequest("HEAD", urlstr, nil)
+	if err != nil {
+		return "", "", err
+	}
+	req.Header.Set("Accept", "*/*")
+	//I'm a browser... :)
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) "+
+		"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.118 Safari/537.36")
+	//roundtripper doesn't follow redirects
+	resp, err := http.DefaultTransport.RoundTrip(req)
+	if err != nil {
+		return "", "", err
+	}
+	defer resp.Body.Close()
+	//assume redirection
+	if resp.StatusCode != 302 {
+		return "", "", fmt.Errorf("non-redirect response: %d", resp.StatusCode)
+	}
+	//extract Location header URL
+	loc := resp.Header.Get("Location")
+	m := searchGithubRe.FindStringSubmatch(loc)
+	if len(m) == 0 {
+		return "", "", fmt.Errorf("github url not found in redirect: %s", loc)
+	}
+	user = m[1]
+	project = m[2]
+	return user, project, nil
 }

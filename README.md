@@ -1,9 +1,9 @@
 
 # `installer`
 
-Quickly install Go (golang) binaries from Github releases.
+Quickly install pre-compiled binaries from Github releases.
 
-Installer is an HTTP server which returns shell scripts to install Go programs. The returned script will detect platform OS and architecture, choose from a selection of URLs, download the appropriate file, un(zip|tar|gzip) the file, find the binary and optionally move it into your `PATH`. Useful for installing your favourite Go programs on hosts without the Go compiler installed.
+Installer is an HTTP server which returns shell scripts to install Go programs. The returned script will detect platform OS and architecture, choose from a selection of URLs, download the appropriate file, un(zip|tar|gzip) the file, find the binary (largest file) and optionally move it into your `PATH`. Useful for installing your favourite Go or Rust programs on hosts using only `curl`.
 
 ## Usage
 

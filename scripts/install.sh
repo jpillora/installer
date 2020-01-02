@@ -68,7 +68,17 @@ function install {
 	*) fail "No asset for platform ${OS}-${ARCH}";;
 	esac
 	#got URL! download it...
-	echo "{{ if .MoveToPath }}Installing{{ else }}Downloading{{ end }} $USER/$PROG $RELEASE..."
+	echo -n "{{ if .MoveToPath }}Installing{{ else }}Downloading{{ end }} $USER/$PROG $RELEASE"
+	{{ if .Google }}
+	#matched using google, give time to cancel
+	echo -n " in 5 seconds"
+	for i in 1 2 3 4 5; do
+		sleep 1
+		echo -n "."
+	done
+	{{ else }}
+	echo "....."
+	{{ end }}
 	#enter tempdir
 	mkdir -p $TMP_DIR
 	cd $TMP_DIR
@@ -105,7 +115,8 @@ function install {
 	fi
 	#move into PATH or cwd
 	chmod +x $TMP_BIN || fail "chmod +x failed"
-	mv $TMP_BIN $OUT_DIR/$PROG || fail "mv failed" #FINAL STEP!
+	{{ if .SudoMove }}echo "using sudo to move binary..."{{ end }}
+	{{ if .SudoMove }}sudo {{ end }}mv $TMP_BIN $OUT_DIR/$PROG || fail "mv failed" #FINAL STEP!
 	echo "{{ if .MoveToPath }}Installed at{{ else }}Downloaded to{{ end }} $OUT_DIR/$PROG"
 	#done
 	cleanup
