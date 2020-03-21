@@ -284,8 +284,8 @@ func getAssetsNoCache(q *query) error {
 	for _, ga := range ghas {
 		url := ga.BrowserDownloadURL
 		//match
-		os := posixOSRe.FindString(ga.Name)
-		arch := archRe.FindString(ga.Name)
+		os := strings.ToLower(posixOSRe.FindString(ga.Name))
+		arch := strings.ToLower(archRe.FindString(ga.Name))
 		//os modifications
 		if os == "" {
 			continue //unknown os
