@@ -1,6 +1,8 @@
 module github.com/jpillora/installer
 
-go 1.13
+go 1.14
+
+// +heroku goVersion go1.14
 
 require (
 	github.com/jpillora/opts v1.1.2

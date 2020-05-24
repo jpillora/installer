@@ -3,7 +3,7 @@
 
 Quickly install pre-compiled binaries from Github releases.
 
-Installer is an HTTP server which returns shell scripts. The returned script will detect platform OS and architecture, choose from a selection of URLs, download the appropriate file, un(zip|tar|gzip) the file, find the binary (largest file) and optionally move it into your `PATH`. Useful for installing your favourite Go or Rust programs on hosts using only `curl`.
+Installer is an HTTP server which returns shell scripts. The returned script will detect platform OS and architecture, choose from a selection of URLs, download the appropriate file, un(zip|tar|gzip) the file, find the binary (largest file) and optionally move it into your `PATH`. Useful for installing your favourite pre-compiled programs on hosts using only `curl`.
 
 ## Usage
 
@@ -11,14 +11,20 @@ Installer is an HTTP server which returns shell scripts. The returned script wil
 curl https://i.jpillora.com/<user>/<repo>@<release>! | bash
 ```
 
+```sh
+# use Google to automatically choose <user>
+curl https://i.jpillora.com/<repo>@<release>! | bash
+```
+
 *Or you can use* `wget -qO- <url> | bash`
 
 **Path API**
 
-* `user` Github user (defaults to @jpillora, customisable if you [host your own](#host-your-own))
+* `user` Github user (defaults to @jpillora, customisable if you [host your own](#host-your-own), uses Google to pick most relevant `user` when `repo` not found)
 * `repo` Github repository belonging to `user` (**required**)
 * `release` Github release name (defaults to the **latest** release)
 * `!` When provided, downloads binary directly into `/usr/local/bin/` (defaults to working directory)
+* `!!` When provided, downloads binary directly into `/usr/local/bin/` (defaults to working directory)
 
 **Query API**
 
@@ -37,13 +43,15 @@ curl https://i.jpillora.com/<user>/<repo>@<release>! | bash
 * https://i.jpillora.com/cloud-torrent
 * https://i.jpillora.com/yudai/gotty@v0.0.12
 * https://i.jpillora.com/mholt/caddy
+* https://i.jpillora.com/caddy
+* https://i.jpillora.com/rclone
 
     ```sh
-    jp /tmp $ curl -s i.jpillora.com/mholt/caddy | bash
+    $ curl -s i.jpillora.com/mholt/caddy! | bash
     Downloading mholt/caddy v0.8.2 (https://github.com/mholt/caddy/releases/download/v0.8.2/caddy_darwin_amd64.zip)
     ######################################################################## 100.0%
-    Downloaded to /private/tmp/caddy
-    jp /tmp $ ./caddy --version
+    Downloaded to /usr/local/bin/caddy
+    $ caddy --version
     Caddy 0.8.2
     ```
 
@@ -82,7 +90,7 @@ However, homebrew formulas require an SHA1 hash of each binary and currently, th
 
 #### MIT License
 
-Copyright © 2016 Jaime Pillora &lt;dev@jpillora.com&gt;
+Copyright © 2020 Jaime Pillora &lt;dev@jpillora.com&gt;
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
