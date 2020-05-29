@@ -29,7 +29,7 @@ func searchGoogle(phrase string) (user, project string, err error) {
 	//roundtripper doesn't follow redirects
 	resp, err := http.DefaultTransport.RoundTrip(req)
 	if err != nil {
-		return "", "", err
+		return "", "", fmt.Errorf("request failed: %s", err)
 	}
 	resp.Body.Close()
 	//assume redirection

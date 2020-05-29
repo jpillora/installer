@@ -8,7 +8,7 @@ import (
 var (
 	archRe    = regexp.MustCompile(`(arm|386|amd64|32|64)`)
 	fileExtRe = regexp.MustCompile(`(\.[a-z][a-z0-9]+)+$`)
-	posixOSRe = regexp.MustCompile(`(darwin|linux|(net|free|open)bsd|mac|osx)`)
+	posixOSRe = regexp.MustCompile(`(darwin|linux|(net|free|open)bsd|mac|osx|windows|win)`)
 )
 
 func getOS(s string) string {
@@ -16,6 +16,9 @@ func getOS(s string) string {
 	o := posixOSRe.FindString(s)
 	if o == "mac" || o == "osx" {
 		o = "darwin"
+	}
+	if o == "win" {
+		o = "windows"
 	}
 	return o
 }

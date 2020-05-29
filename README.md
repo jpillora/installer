@@ -8,12 +8,13 @@ Installer is an HTTP server which returns shell scripts. The returned script wil
 ## Usage
 
 ```sh
+# install <user>/<repo> from github
 curl https://i.jpillora.com/<user>/<repo>@<release>! | bash
 ```
 
 ```sh
-# use Google to automatically choose <user>
-curl https://i.jpillora.com/<repo>@<release>! | bash
+# search Google for github repo <query>
+curl https://i.jpillora.com/<query>! | bash
 ```
 
 *Or you can use* `wget -qO- <url> | bash`
@@ -26,7 +27,7 @@ curl https://i.jpillora.com/<repo>@<release>! | bash
 * `!` When provided, downloads binary directly into `/usr/local/bin/` (defaults to working directory)
 * `!!` Uses `sudo` to `mv` into `/usr/local/bin/`
 
-**Query API**
+**Query Params**
 
 * `?type=` Force the return type to be one of: `script` or `homebrew`
     * `type` is normally detected via `User-Agent` header

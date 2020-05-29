@@ -5,9 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/jpillora/opts"
-
 	"github.com/jpillora/installer/handler"
+	"github.com/jpillora/opts"
 )
 
 var version = "0.0.0-src"

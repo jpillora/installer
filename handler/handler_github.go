@@ -32,7 +32,11 @@ func (h *Handler) getAssets(q *query) error {
 		user, program, gerr := searchGoogle(q.Program)
 		if gerr != nil {
 			log.Printf("google search failed: %s", gerr)
-		} else if program == q.Program {
+		} else {
+			if program == q.Program {
+				log.Printf("program mismatch: got %s: expected %s", q.Program, program)
+			}
+			q.Program = program
 			q.User = user
 			//retry assets...
 			err = h.getAssetsNoCache(q)
@@ -106,6 +110,12 @@ func (h *Handler) getAssetsNoCache(q *query) error {
 		//match
 		os := getOS(ga.Name)
 		arch := getArch(ga.Name)
+		//windows not supported yet
+		if os == "windows" {
+			//TODO: powershell
+			//  EG: iwr https://deno.land/x/install/install.ps1 -useb | iex
+			continue
+		}
 		//unknown os, cant use
 		if os == "" {
 			continue
