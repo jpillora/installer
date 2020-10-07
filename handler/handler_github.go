@@ -4,13 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 )
 
 func (h *Handler) getAssets(q *query) error {
 	//cached?
-	key := strings.Join([]string{q.User, q.Program, q.Release}, "|")
+	key := q.cacheKey()
 	h.cacheMut.Lock()
 	if h.cache == nil {
 		h.cache = map[string]*query{}
@@ -50,6 +49,7 @@ func (h *Handler) getAssets(q *query) error {
 	h.cacheMut.Lock()
 	h.cache[key] = q
 	h.cacheMut.Unlock()
+	log.Printf("cached '%s' = %#v", key, q)
 	return nil
 }
 

@@ -2,6 +2,8 @@ package handler
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -36,6 +38,16 @@ type query struct {
 	User, Program, Release                 string
 	MoveToPath, SudoMove, Google, Insecure bool
 	Assets                                 []asset
+}
+
+func (q query) cacheKey() string {
+	h := sha256.New()
+	q.Timestamp = time.Time{}
+	q.Assets = nil
+	if err := json.NewEncoder(h).Encode(q); err != nil {
+		panic(err)
+	}
+	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
 
 type Handler struct {
