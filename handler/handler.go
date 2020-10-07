@@ -50,6 +50,7 @@ func (q query) cacheKey() string {
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
 
+//Handler serves install scripts using Github releases
 type Handler struct {
 	Config
 	cacheMut sync.Mutex
