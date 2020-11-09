@@ -107,11 +107,11 @@ function install {
 	#search subtree largest file (bin)
 	TMP_BIN=$(find . -type f | xargs du | sort -n | tail -n 1 | cut -f 2)
 	if [ ! -f "$TMP_BIN" ]; then
-		fail "could not find downloaded binary"
+		fail "could not find find binary (largest file)"
 	fi
-	#ensure its larger than 2MB
+	#ensure its larger than 1MB
 	if [[ $(du -m $TMP_BIN | cut -f1) -lt 2 ]]; then
-		fail "resulting file is smaller than 2MB, not a go binary"
+		fail "no binary found ($TMP_BIN is not larger than 1MB)"
 	fi
 	#move into PATH or cwd
 	chmod +x $TMP_BIN || fail "chmod +x failed"
