@@ -110,7 +110,7 @@ function install {
 		fail "could not find find binary (largest file)"
 	fi
 	#ensure its larger than 1MB
-	if [[ $(du -m $TMP_BIN | cut -f1) -lt 2 ]]; then
+	if [[ $(du -m $TMP_BIN | cut -f1) -lt 1 ]]; then
 		fail "no binary found ($TMP_BIN is not larger than 1MB)"
 	fi
 	#move into PATH or cwd
