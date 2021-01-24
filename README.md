@@ -1,4 +1,3 @@
-
 # `installer`
 
 Quickly install pre-compiled binaries from Github releases.
@@ -17,22 +16,22 @@ curl https://i.jpillora.com/<user>/<repo>@<release>! | bash
 curl https://i.jpillora.com/<query>! | bash
 ```
 
-*Or you can use* `wget -qO- <url> | bash`
+_Or you can use_ `wget -qO- <url> | bash`
 
 **Path API**
 
-* `user` Github user (defaults to @jpillora, customisable if you [host your own](#host-your-own), uses Google to pick most relevant `user` when `repo` not found)
-* `repo` Github repository belonging to `user` (**required**)
-* `release` Github release name (defaults to the **latest** release)
-* `!` When provided, downloads binary directly into `/usr/local/bin/` (defaults to working directory)
-* `!!` Uses `sudo` to `mv` into `/usr/local/bin/`
+- `user` Github user (defaults to @jpillora, customisable if you [host your own](#host-your-own), uses Google to pick most relevant `user` when `repo` not found)
+- `repo` Github repository belonging to `user` (**required**)
+- `release` Github release name (defaults to the **latest** release)
+- `!` When provided, downloads binary directly into `/usr/local/bin/` (defaults to working directory)
+- `!!` Uses `sudo` to `mv` into `/usr/local/bin/`
 
 **Query Params**
 
-* `?type=` Force the return type to be one of: `script` or `homebrew`
-    * `type` is normally detected via `User-Agent` header
-    * `type=homebrew` is **not** working at the moment – see [Homebrew](#homebrew)
-* `?insecure=1` Force `curl`/`wget` to skip certificate checks
+- `?type=` Force the return type to be one of: `script` or `homebrew`
+  - `type` is normally detected via `User-Agent` header
+  - `type=homebrew` is **not** working at the moment – see [Homebrew](#homebrew)
+- `?insecure=1` Force `curl`/`wget` to skip certificate checks
 
 ## Security
 
@@ -40,43 +39,52 @@ curl https://i.jpillora.com/<query>! | bash
 
 ## Examples
 
-* https://i.jpillora.com/serve
-* https://i.jpillora.com/cloud-torrent
-* https://i.jpillora.com/yudai/gotty@v0.0.12
-* https://i.jpillora.com/mholt/caddy
-* https://i.jpillora.com/caddy
-* https://i.jpillora.com/rclone
+- https://i.jpillora.com/serve
+- https://i.jpillora.com/cloud-torrent
+- https://i.jpillora.com/yudai/gotty@v0.0.12
+- https://i.jpillora.com/mholt/caddy
+- https://i.jpillora.com/caddy
+- https://i.jpillora.com/rclone
 
-    ```sh
-    $ curl -s i.jpillora.com/mholt/caddy! | bash
-    Downloading mholt/caddy v0.8.2 (https://github.com/mholt/caddy/releases/download/v0.8.2/caddy_darwin_amd64.zip)
-    ######################################################################## 100.0%
-    Downloaded to /usr/local/bin/caddy
-    $ caddy --version
-    Caddy 0.8.2
-    ```
+  ```sh
+  $ curl -s i.jpillora.com/mholt/caddy! | bash
+  Downloading mholt/caddy v0.8.2 (https://github.com/mholt/caddy/releases/download/v0.8.2/caddy_darwin_amd64.zip)
+  ######################################################################## 100.0%
+  Downloaded to /usr/local/bin/caddy
+  $ caddy --version
+  Caddy 0.8.2
+  ```
 
 ## Host your own
 
-* Install installer with installer
+- Install installer with installer
 
-    ```sh
-    curl -s https://i.jpillora.com/installer | bash
-    ```
+  ```sh
+  curl -s https://i.jpillora.com/installer | bash
+  ```
 
-* Install from source
+- Install from source
 
-    ```sh
-    go get github.com/jpillora/installer
-    ```
+  ```sh
+  go get github.com/jpillora/installer
+  ```
 
-* Install on Heroku
+- Install on Heroku
 
-    Click this button to deploy for free on [Heroku](https://heroku.com)
+  Click this button to deploy for free on [Heroku](https://heroku.com)
 
-	[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+  [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
-    *You can optionally add your own domain as a app custom domain.*
+  _You can optionally add your own domain as a app custom domain._
+
+### Modifying the Installation Script for Host Your Own
+
+To modify the installation script for a host-your-own installation, you will need to do the following:
+
+1. Change line 11 of `handler/init.go` to reflect your github username (`_ "github.com/[YOUR-GITHUB-NAME-HERE]/installer/scripts"`)
+1. Similarly, import your handler in `main.go` on line 8 (`"github.com/[YOUR-GITHUB-NAME-HERE]/installer/handler"`)
+1. Change `go.mod` to your module name as well (`module github.com/[YOUR-GITHUB-NAME-HERE]/installer`)
+1. Deploy to heroku
 
 ### Homebrew
 
