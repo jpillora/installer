@@ -103,7 +103,7 @@ func (h *Handler) getAssetsNoCache(q *query) error {
 		//only binary containers are supported
 		//TODO deb,rpm etc
 		fext := getFileExt(url)
-		if fext != ".zip" && fext != ".gz" && fext != ".tar.gz" {
+		if fext != ".zip" && fext != ".gz" && fext != ".tar.gz" && fext != ".tgz" {
 			continue
 		}
 		//match
