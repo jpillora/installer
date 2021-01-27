@@ -17,7 +17,7 @@ function install {
 	MOVE="{{ .MoveToPath }}"
 	RELEASE="{{ .Release }}"
 	INSECURE="{{ .Insecure }}"
-	OUT_DIR="{{ if .MoveToPath }}/usr/local/bin{{ else }}$(pwd){{ end }}"
+	OUT_DIR="{{ if and .SudoMove .MoveToPath }}/usr/local/bin{{ else if .MoveToPath }}$HOME/.local/bin{{ else }}$(pwd){{ end }}"
 	GH="https://github.com"
 	#bash check
 	[ ! "$BASH_VERSION" ] && fail "Please use bash instead"

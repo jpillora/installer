@@ -78,6 +78,15 @@ curl https://i.jpillora.com/<query>! | bash
 
     *You can optionally add your own domain as a app custom domain.*
 
+### Modifying the Installation Script for Host Your Own
+
+To modify the installation script for a host-your-own installation, you will need to do the following:
+
+1. Change line 11 of `handler/init.go` to reflect your github username (`_ "github.com/[YOUR-GITHUB-NAME-HERE]/installer/scripts"`)
+1. Similarly, import your handler in `main.go` on line 8 (`"github.com/[YOUR-GITHUB-NAME-HERE]/installer/handler"`)
+1. Change `go.mod` to your module name as well (`module github.com/[YOUR-GITHUB-NAME-HERE]/installer`)
+1. Deploy to heroku
+
 ### Homebrew
 
 Currently, installing via Homebrew does not work. Homebrew was intended to be supported with:
