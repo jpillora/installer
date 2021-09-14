@@ -10,6 +10,49 @@ function fail {
 	echo "Error: $msg" 1>&2
 	exit 1
 }
+function os_release() {
+if [ -f /etc/os-release ]; then
+        # shellcheck disable=SC1091
+	source /etc/os-release
+        DISTRO=${ID}
+        DISTRO_VERSION=${VERSION_ID}
+fi
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+	OS="linux"
+	# Can keep for extra tasks on linux
+	if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "raspbian" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "kali" ] || [ "${DISTRO}" == "linuxmint" ] || [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ] || [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "archarm" ] || [ "${DISTRO}" == "manjaro" ] || [ "${DISTRO}" == "alpine" ] || [ "${DISTRO}" == "freebsd" ] || [ "${DISTRO}" == "neon" ] || [ "${DISTRO}" == "almalinux" ] || [ "${DISTRO}" == "rocky" ]; }; then
+	echo "$DISTRO"
+		elif { [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ] || [ "${DISTRO}" == "almalinux" ] || [ "${DISTRO}" == "rocky" ]; }; then
+	echo "$DISTRO"
+		elif { [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "archarm" ] || [ "${DISTRO}" == "manjaro" ]; }; then
+	echo "$DISTRO"
+		elif { [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ] || [ "${DISTRO}" == "almalinux" ] || [ "${DISTRO}" == "rocky" ]; }; then
+	echo "$DISTRO"
+		elif { [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "archarm" ] || [ "${DISTRO}" == "manjaro" ]; }; then
+	echo "$DISTRO"
+		elif [ "${DISTRO}" == "alpine" ]; then
+	echo "$DISTRO"
+	fi
+fi
+if [[ "$OSTYPE" == "darwin"* ]]; then
+	# Seperating as most likely darwin will be expanded.
+	OS="darwin"
+fi
+if [[ "$OSTYPE" == "cygwin" ]]; then
+	# POSIX compatibility layer and Linux environment emulation for Windows
+	echo "Your Operating System not supported yet..."
+		elif [[ "$OSTYPE" == "msys" ]]; then
+	# Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+	echo "Your Operating System not supported yet..."
+		elif [[ "$OSTYPE" == "win32" ]]; then
+	# Not sure
+	echo "Your Operating System not supported yet..."
+fi
+if { [[ "$OSTYPE" == "freebsd"* ]] || [[ "$DISTRO" == "freebsd" ]]; }; then
+        # Quite confident freebsd
+	OS="freebsd"
+fi
+}
 function install {
 	#settings
 	USER="{{ .User }}"
@@ -41,12 +84,7 @@ function install {
 	else
 		fail "neither wget/curl are installed"
 	fi
-	#find OS #TODO BSDs and other posixs
-	case `uname -s` in
-	Darwin) OS="darwin";;
-	Linux) OS="linux";;
-	*) fail "unknown os: $(uname -s)";;
-	esac
+	os_release
 	#find ARCH
 	if uname -m | grep 64 > /dev/null; then
 		ARCH="amd64"
