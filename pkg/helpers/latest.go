@@ -9,10 +9,10 @@ import (
 
 // LatestRelease returns the latest matching entry in the provided list, or an error if none is present.
 // by default, it will not include prerelease verisons, which can be changed by setting includePrerelease.
-// if filter is provided, only releases with names containing the filter will be returned.
+// if filter is provided, only releases with names not containing the filter will be returned.
 func LatestRelease(releases []*github.RepositoryRelease, includePrerelease bool, filter string) (*github.RepositoryRelease, error) {
 	for _, release := range releases {
-		if !strings.Contains(release.GetName(), filter) {
+		if filter != "" && strings.Contains(release.GetName(), filter) {
 			continue
 		}
 
