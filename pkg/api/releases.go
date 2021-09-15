@@ -15,6 +15,7 @@ var clientMut sync.Mutex
 
 func InitClient(token string) {
 	clientMut.Lock()
+	defer clientMut.Unlock()
 	if client == nil {
 		ctx := context.Background()
 		ts := oauth2.StaticTokenSource(
