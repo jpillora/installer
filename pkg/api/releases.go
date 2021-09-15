@@ -26,7 +26,7 @@ func InitClient(token string) {
 	return
 }
 
-func FetchReleases(ctx context.Context, repo, owner string) ([]*github.RepositoryRelease, error) {
+func FetchReleases(ctx context.Context, owner, repo string) ([]*github.RepositoryRelease, error) {
 	if client == nil {
 		return nil, fmt.Errorf("initialize the client before fetching releases")
 	}
@@ -42,12 +42,12 @@ func FetchReleases(ctx context.Context, repo, owner string) ([]*github.Repositor
 	return releases, nil
 }
 
-func FetchLatestRelease(ctx context.Context, repo, owner string) (*github.RepositoryRelease, error) {
+func FetchLatestRelease(ctx context.Context, owner, repo string) (*github.RepositoryRelease, error) {
 	if client == nil {
 		return nil, fmt.Errorf("initialize the client before fetching releases")
 	}
 
-	release, resp, err := client.Repositories.GetLatestRelease(ctx, repo, owner)
+	release, resp, err := client.Repositories.GetLatestRelease(ctx, owner, repo)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get latest release for %s/%s: %w", owner, repo, err)
 	}
@@ -58,12 +58,12 @@ func FetchLatestRelease(ctx context.Context, repo, owner string) (*github.Reposi
 	return release, nil
 }
 
-func FetchSpecificRelease(ctx context.Context, repo, owner, version string) (*github.RepositoryRelease, error) {
+func FetchSpecificRelease(ctx context.Context, owner, repo, version string) (*github.RepositoryRelease, error) {
 	if client == nil {
 		return nil, fmt.Errorf("initialize the client before fetching releases")
 	}
 
-	release, resp, err := client.Repositories.GetReleaseByTag(ctx, repo, owner, version)
+	release, resp, err := client.Repositories.GetReleaseByTag(ctx, owner, repo, version)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get release %q for %s/%s: %w", version, owner, repo, err)
 	}

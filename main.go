@@ -34,7 +34,11 @@ func main() {
 	}
 	if token == "" {
 		token, _ = os.LookupEnv("GH_TOKEN")
+		if token != "" {
+			fmt.Printf("First character of the token: %s, last character %s, len %d\n", string(token[0]), string(token[len(token)-1]), len(token))
+		}
 	}
+
 	if envPort, ok := os.LookupEnv("PORT"); ok {
 		var err error
 		port, err = strconv.Atoi(envPort)
