@@ -2,9 +2,11 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
 name: CI
 jobs:
-  release:
+  Release:
     name: Release
     runs-on: ubuntu-latest
     steps:
