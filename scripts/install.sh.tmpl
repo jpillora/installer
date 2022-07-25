@@ -110,6 +110,7 @@ function install {
 		fail "could not find find binary (largest file)"
 	fi
 	#ensure its larger than 1MB
+	#TODO linux=elf/darwin=macho file detection?
 	if [[ $(du -m $TMP_BIN | cut -f1) -lt 1 ]]; then
 		fail "no binary found ($TMP_BIN is not larger than 1MB)"
 	fi

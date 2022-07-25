@@ -16,7 +16,7 @@ func (h *Handler) getAssets(q *query) error {
 	}
 	cq, ok := h.cache[key]
 	h.cacheMut.Unlock()
-	if ok && time.Now().Sub(cq.Timestamp) < cacheTTL {
+	if ok && time.Since(cq.Timestamp) < cacheTTL {
 		//cache hit
 		*q = *cq
 		return nil
@@ -26,13 +26,14 @@ func (h *Handler) getAssets(q *query) error {
 	if err == nil {
 		//didn't need google
 		q.Google = false
-	} else if err == errNotFound && q.Google {
+	} else if errors.Is(err, errNotFound) && q.Google {
 		//use google to auto-detect user...
 		user, program, gerr := searchGoogle(q.Program)
 		if gerr != nil {
 			log.Printf("google search failed: %s", gerr)
 		} else {
-			if program == q.Program {
+			log.Printf("google search found: %s/%s", user, program)
+			if program != q.Program {
 				log.Printf("program mismatch: got %s: expected %s", q.Program, program)
 			}
 			q.Program = program
@@ -88,11 +89,11 @@ func (h *Handler) getAssetsNoCache(q *query) error {
 			}
 		}
 		if !found {
-			return fmt.Errorf("Release tag '%s' not found", release)
+			return fmt.Errorf("release tag '%s' not found", release)
 		}
 	}
 	if len(ghas) == 0 {
-		return errors.New("No assets found")
+		return errors.New("no assets found")
 	}
 	assets := []asset{}
 
@@ -140,7 +141,7 @@ func (h *Handler) getAssetsNoCache(q *query) error {
 		})
 	}
 	if len(assets) == 0 {
-		return errors.New("No downloads found for this release")
+		return errors.New("no downloads found for this release")
 	}
 	//TODO: handle duplicate asset.targets
 	q.Assets = assets

@@ -11,7 +11,7 @@ import (
 var searchGithubRe = regexp.MustCompile(`https:\/\/github\.com\/(\w+)\/(\w+)`)
 
 //uses im feeling lucky and grabs the "Location"
-//header from the 302, which contains the IMDB ID
+//header from the 302, which contains the github repo
 func searchGoogle(phrase string) (user, project string, err error) {
 	phrase += " site:github.com"
 	log.Printf("google search for '%s'", phrase)
