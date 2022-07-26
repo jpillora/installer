@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/jpillora/installer/handler"
 	"github.com/jpillora/opts"
@@ -25,6 +26,9 @@ func main() {
 	h := &handler.Handler{Config: c}
 	lh := requestlog.WrapWith(h, requestlog.Options{
 		TrustProxy: true, // assume will be run in paas
+		Filter: func(r *http.Request, code int, duration time.Duration, size int64) bool {
+			return r.URL.Path != "/healthz"
+		},
 	})
 	if err := http.Serve(l, lh); err != nil {
 		log.Fatal(err)

@@ -31,7 +31,7 @@ var (
 	pathRe       = regexp.MustCompile(`^` + userRe + `\/` + repoRe + releaseRe + moveRe + `$`)
 	isTermRe     = regexp.MustCompile(`(?i)^(curl|wget)\/`)
 	isHomebrewRe = regexp.MustCompile(`(?i)^homebrew`)
-	errMsgRe     = regexp.MustCompile(`[^A-Za-z0-9\ :]`)
+	errMsgRe     = regexp.MustCompile(`[^A-Za-z0-9\ :\/\.]`)
 	errNotFound  = errors.New("not found")
 )
 
@@ -64,8 +64,13 @@ type Handler struct {
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/healthz" {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+		return
+	}
 	if r.URL.Path == "/" {
-		http.Redirect(w, r, "https:// github.com/jpillora/installer", http.StatusMovedPermanently)
+		http.Redirect(w, r, "https://github.com/jpillora/installer", http.StatusMovedPermanently)
 		return
 	}
 	// calculate reponse type
