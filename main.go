@@ -8,6 +8,7 @@ import (
 
 	"github.com/jpillora/installer/handler"
 	"github.com/jpillora/opts"
+	"github.com/jpillora/requestlog"
 )
 
 var version = "0.0.0-src"
@@ -22,7 +23,10 @@ func main() {
 	}
 	log.Printf("listening on port %d...", c.Port)
 	h := &handler.Handler{Config: c}
-	if err := http.Serve(l, h); err != nil {
+	lh := requestlog.WrapWith(h, requestlog.Options{
+		TrustProxy: true, // assume will be run in paas
+	})
+	if err := http.Serve(l, lh); err != nil {
 		log.Fatal(err)
 	}
 	log.Print("exiting")
