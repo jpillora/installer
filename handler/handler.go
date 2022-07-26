@@ -29,34 +29,38 @@ var (
 	releaseRe    = `(@([\w\-\.\_]{1,128}?))?`
 	moveRe       = `(!*)`
 	pathRe       = regexp.MustCompile(`^` + userRe + `\/` + repoRe + releaseRe + moveRe + `$`)
-	lettersRe    = regexp.MustCompile(`[^A-Za-z0-9\ :]`)
 	isTermRe     = regexp.MustCompile(`(?i)^(curl|wget)\/`)
 	isHomebrewRe = regexp.MustCompile(`(?i)^homebrew`)
+	errMsgRe     = regexp.MustCompile(`[^A-Za-z0-9\ :]`)
 	errNotFound  = errors.New("not found")
 )
 
-type query struct {
-	Timestamp                              time.Time
+type Query struct {
 	User, Program, Release                 string
 	MoveToPath, SudoMove, Google, Insecure bool
-	Assets                                 []asset
 }
 
-func (q query) cacheKey() string {
-	h := sha256.New()
-	q.Timestamp = time.Time{}
-	q.Assets = nil
-	if err := json.NewEncoder(h).Encode(q); err != nil {
+type Result struct {
+	Query
+	Timestamp time.Time
+	Assets    Assets
+	M1Asset   bool
+}
+
+func (q Query) cacheKey() string {
+	hw := sha256.New()
+	jw := json.NewEncoder(hw)
+	if err := jw.Encode(q); err != nil {
 		panic(err)
 	}
-	return base64.StdEncoding.EncodeToString(h.Sum(nil))
+	return base64.StdEncoding.EncodeToString(hw.Sum(nil))
 }
 
 // Handler serves install scripts using Github releases
 type Handler struct {
 	Config
 	cacheMut sync.Mutex
-	cache    map[string]*query
+	cache    map[string]Result
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -81,8 +85,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	// type specific error response
 	showError := func(msg string, code int) {
-		cleaned := lettersRe.ReplaceAllString(msg, "")
-		if qtype == "text" {
+		// prevent shell injection
+		cleaned := errMsgRe.ReplaceAllString(msg, "")
+		if qtype == "script" {
 			cleaned = fmt.Sprintf("echo '%s'", cleaned)
 		}
 		http.Error(w, cleaned, http.StatusInternalServerError)
@@ -110,8 +115,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		showError("Invalid path", http.StatusBadRequest)
 		return
 	}
-	q := &query{
-		Timestamp:  time.Now(),
+	q := &Query{
 		User:       m[2],
 		Program:    m[3],
 		Release:    m[5],
@@ -132,7 +136,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// fetch assets
-	if err := h.getAssets(q); err != nil {
+	result, err := h.execute(q)
+	if err != nil {
 		showError(err.Error(), http.StatusBadGateway)
 		return
 	}
@@ -144,7 +149,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	// execute template
 	buff := bytes.Buffer{}
-	if err := t.Execute(&buff, q); err != nil {
+	if err := t.Execute(&buff, result); err != nil {
 		showError("Template error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -153,10 +158,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write(buff.Bytes())
 }
 
-type asset struct {
+type Asset struct {
 	Name, OS, Arch, URL, Type string
 	Is32bit, IsMac            bool
 }
+
+type Assets []Asset
 
 func (h *Handler) get(url string, v interface{}) error {
 	req, _ := http.NewRequest("GET", url, nil)

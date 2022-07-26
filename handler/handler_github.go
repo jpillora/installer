@@ -7,22 +7,22 @@ import (
 	"time"
 )
 
-func (h *Handler) getAssets(q *query) error {
+func (h *Handler) execute(q *Query) (Result, error) {
 	//cached?
 	key := q.cacheKey()
 	h.cacheMut.Lock()
 	if h.cache == nil {
-		h.cache = map[string]*query{}
+		h.cache = map[string]Result{}
 	}
-	cq, ok := h.cache[key]
+	result, ok := h.cache[key]
 	h.cacheMut.Unlock()
-	if ok && time.Since(cq.Timestamp) < cacheTTL {
+	if ok && time.Since(result.Timestamp) < cacheTTL {
 		//cache hit
-		*q = *cq
-		return nil
+		return result, nil
 	}
 	//do real operation
-	err := h.getAssetsNoCache(q)
+	result.Timestamp = time.Now()
+	assets, err := h.getAssetsNoCache(q)
 	if err == nil {
 		//didn't need google
 		q.Google = false
@@ -39,21 +39,29 @@ func (h *Handler) getAssets(q *query) error {
 			q.Program = program
 			q.User = user
 			//retry assets...
-			err = h.getAssetsNoCache(q)
+			assets, err = h.getAssetsNoCache(q)
 		}
 	}
+	//detect if we have a native m1 asset
+	for _, a := range assets {
+		if a.OS == "darwin" && a.Arch == "arm64" {
+			result.M1Asset = true
+			break
+		}
+	}
+	result.Assets = assets
 	//asset fetch failed, dont cache
 	if err != nil {
-		return err
+		return result, err
 	}
 	//success store results
 	h.cacheMut.Lock()
-	h.cache[key] = q
+	h.cache[key] = result
 	h.cacheMut.Unlock()
-	return nil
+	return result, nil
 }
 
-func (h *Handler) getAssetsNoCache(q *query) error {
+func (h *Handler) getAssetsNoCache(q *Query) (Assets, error) {
 	user := q.User
 	repo := q.Program
 	release := q.Release
@@ -68,37 +76,38 @@ func (h *Handler) getAssetsNoCache(q *query) error {
 		url += "/latest"
 		ghr := ghRelease{}
 		if err := h.get(url, &ghr); err != nil {
-			return err
+			return nil, err
 		}
 		q.Release = ghr.TagName //discovered
 		ghas = ghr.Assets
 	} else {
 		ghrs := []ghRelease{}
 		if err := h.get(url, &ghrs); err != nil {
-			return err
+			return nil, err
 		}
 		found := false
 		for _, ghr := range ghrs {
 			if ghr.TagName == release {
 				found = true
 				if err := h.get(ghr.AssetsURL, &ghas); err != nil {
-					return err
+					return nil, err
 				}
 				ghas = ghr.Assets
 				break
 			}
 		}
 		if !found {
-			return fmt.Errorf("release tag '%s' not found", release)
+			return nil, fmt.Errorf("release tag '%s' not found", release)
 		}
 	}
 	if len(ghas) == 0 {
-		return errors.New("no assets found")
+		return nil, errors.New("no assets found")
 	}
-	assets := []asset{}
+	assets := Assets{}
 
 	index := map[string]bool{}
 
+	//TODO: handle duplicate asset.targets
 	for _, ga := range ghas {
 		url := ga.BrowserDownloadURL
 		//only binary containers are supported
@@ -127,7 +136,7 @@ func (h *Handler) getAssetsNoCache(q *query) error {
 		}
 		index[key] = true
 		//include!
-		assets = append(assets, asset{
+		assets = append(assets, Asset{
 			//target
 			OS:   os,
 			Arch: arch,
@@ -141,11 +150,9 @@ func (h *Handler) getAssetsNoCache(q *query) error {
 		})
 	}
 	if len(assets) == 0 {
-		return errors.New("no downloads found for this release")
+		return nil, errors.New("no downloads found for this release")
 	}
-	//TODO: handle duplicate asset.targets
-	q.Assets = assets
-	return nil
+	return assets, nil
 }
 
 type ghAsset struct {

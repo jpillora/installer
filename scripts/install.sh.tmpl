@@ -48,7 +48,11 @@ function install {
 	*) fail "unknown os: $(uname -s)";;
 	esac
 	#find ARCH
-	if uname -m | grep 64 > /dev/null; then
+	{{ if .M1Asset }}if uname -m | grep arm64 > /dev/null; then
+		# this case only included if arm64 assets are present
+		# to allow fallback to amd64 (m1 rosetta TODO darwin check)
+		ARCH="arm64"
+	el{{ end }}if uname -m | grep 64 > /dev/null; then
 		ARCH="amd64"
 	elif uname -m | grep arm > /dev/null; then
 		ARCH="arm" #TODO armv6/v7
