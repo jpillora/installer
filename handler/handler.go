@@ -115,7 +115,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		showError("Invalid path", http.StatusBadRequest)
 		return
 	}
-	q := &Query{
+	q := Query{
 		User:       m[2],
 		Program:    m[3],
 		Release:    m[5],

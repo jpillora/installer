@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (h *Handler) execute(q *Query) (Result, error) {
+func (h *Handler) execute(q Query) (Result, error) {
 	//cached?
 	key := q.cacheKey()
 	h.cacheMut.Lock()
@@ -21,6 +21,7 @@ func (h *Handler) execute(q *Query) (Result, error) {
 		return result, nil
 	}
 	//do real operation
+	result.Query = q
 	result.Timestamp = time.Now()
 	assets, err := h.getAssetsNoCache(q)
 	if err == nil {
@@ -61,7 +62,7 @@ func (h *Handler) execute(q *Query) (Result, error) {
 	return result, nil
 }
 
-func (h *Handler) getAssetsNoCache(q *Query) (Assets, error) {
+func (h *Handler) getAssetsNoCache(q Query) (Assets, error) {
 	user := q.User
 	repo := q.Program
 	release := q.Release
