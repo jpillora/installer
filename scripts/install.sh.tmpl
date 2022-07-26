@@ -72,7 +72,12 @@ function install {
 	*) fail "No asset for platform ${OS}-${ARCH}";;
 	esac
 	#got URL! download it...
-	echo -n "{{ if .MoveToPath }}Installing{{ else }}Downloading{{ end }} $USER/$PROG $RELEASE"
+	echo -n "{{ if .MoveToPath }}Installing{{ else }}Downloading{{ end }}"
+	echo -n " $USER/$PROG"
+	if [ ! -z "$RELEASE" ]; then
+		echo -n " <$RELEASE>"
+	fi
+	echo -n " (${OS}/${ARCH})"
 	{{ if .Google }}
 	#matched using google, give time to cancel
 	echo -n " in 5 seconds"
