@@ -15,7 +15,7 @@ var version = "0.0.0-src"
 func main() {
 	c := handler.DefaultConfig
 	opts.New(&c).Repo("github.com/jpillora/installer").Version(version).Parse()
-	log.Printf("default user is '%s', github token set: %v, listening on %d...", c.User, c.Token != "", c.Port)
+	log.Printf("default user is '%s', github token set: %v", c.User, c.Token != "")
 	l, err := net.Listen("tcp4", "0.0.0.0:"+strconv.Itoa(c.Port))
 	if err != nil {
 		log.Fatal(err)
