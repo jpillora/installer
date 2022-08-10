@@ -78,7 +78,7 @@ function install {
 	echo -n "{{ if .MoveToPath }}Installing{{ else }}Downloading{{ end }}"
 	echo -n " $USER/$PROG"
 	if [ ! -z "$RELEASE" ]; then
-		echo -n " <$RELEASE>"
+		echo -n " $RELEASE"
 	fi
 	echo -n " (${OS}/${ARCH})"
 	{{ if .Google }}

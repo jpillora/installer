@@ -25,7 +25,6 @@ curl https://i.jpillora.com/<query>! | bash
 * `repo` Github repository belonging to `user` (**required**)
 * `release` Github release name (defaults to the **latest** release)
 * `!` When provided, downloads binary directly into `/usr/local/bin/` (defaults to working directory)
-* `!!` Uses `sudo` to `mv` into `/usr/local/bin/`
 
 **Query Params**
 
