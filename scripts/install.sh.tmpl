@@ -1,5 +1,8 @@
 #!/bin/bash
-TMP_DIR="/tmp/tmpinstalldir"
+if [ "$DEBUG" == "1" ]; then
+	set -x
+fi
+TMP_DIR=$(mktemp -d -t jpillora-installer-XXXXXXXXXX)
 function cleanup {
 	echo rm -rf $TMP_DIR > /dev/null
 }
@@ -128,13 +131,13 @@ function install {
 	#move without sudo
 	OUT=$(mv $TMP_BIN $OUT_DIR/$PROG 2>&1)
 	STATUS=$?
-	# failed and string contains "permission denied"
+	# failed and string contains "Permission denied"
 	if [ $STATUS -ne 0 ]; then
-		if [[ $OUT =~ "permission denied" ]]; then
+		if [[ $OUT =~ "Permission denied" ]]; then
 			echo "mv with sudo..."
-			sudo mv $TMP_BIN $OUT_DIR/$PROG || fail "mv failed" 
+			sudo mv $TMP_BIN $OUT_DIR/$PROG || fail "sudo mv failed" 
 		else
-			fail "mv failed"
+			fail "mv failed ($OUT)"
 		fi
 	fi
 	echo "{{ if .MoveToPath }}Installed at{{ else }}Downloaded to{{ end }} $OUT_DIR/$PROG"

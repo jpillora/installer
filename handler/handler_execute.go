@@ -1,29 +1,31 @@
 package handler
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
+	"strings"
 	"time"
 )
 
 func (h *Handler) execute(q Query) (Result, error) {
-	//cached?
+	//load from cache
 	key := q.cacheKey()
 	h.cacheMut.Lock()
 	if h.cache == nil {
 		h.cache = map[string]Result{}
 	}
-	result, ok := h.cache[key]
+	cached, ok := h.cache[key]
 	h.cacheMut.Unlock()
-	if ok && time.Since(result.Timestamp) < cacheTTL {
-		//cache hit
-		return result, nil
+	//cache hit
+	if ok && time.Since(cached.Timestamp) < cacheTTL {
+		return cached, nil
 	}
 	//do real operation
-	result.Query = q
-	result.Timestamp = time.Now()
-	assets, err := h.getAssetsNoCache(q)
+	ts := time.Now()
+	release, assets, err := h.getAssetsNoCache(q)
 	if err == nil {
 		//didn't need google
 		q.Google = false
@@ -40,20 +42,23 @@ func (h *Handler) execute(q Query) (Result, error) {
 			q.Program = program
 			q.User = user
 			//retry assets...
-			assets, err = h.getAssetsNoCache(q)
+			release, assets, err = h.getAssetsNoCache(q)
 		}
 	}
-	//detect if we have a native m1 asset
-	for _, a := range assets {
-		if a.OS == "darwin" && a.Arch == "arm64" {
-			result.M1Asset = true
-			break
-		}
-	}
-	result.Assets = assets
 	//asset fetch failed, dont cache
 	if err != nil {
-		return result, err
+		return Result{}, err
+	}
+	//success
+	if q.Release == "" && release != "" {
+		log.Printf("detected release: %s", release)
+		q.Release = release
+	}
+	result := Result{
+		Timestamp: ts,
+		Query:     q,
+		Assets:    assets,
+		M1Asset:   assets.HasM1(),
 	}
 	//success store results
 	h.cacheMut.Lock()
@@ -62,53 +67,51 @@ func (h *Handler) execute(q Query) (Result, error) {
 	return result, nil
 }
 
-func (h *Handler) getAssetsNoCache(q Query) (Assets, error) {
+func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 	user := q.User
 	repo := q.Program
 	release := q.Release
-	if release == "" {
-		release = "latest"
-	}
 	//not cached - ask github
 	log.Printf("fetching asset info for %s/%s@%s", user, repo, release)
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", user, repo)
-	ghas := []ghAsset{}
-	if q.Release == "" {
+	ghas := ghAssets{}
+	if release == "" {
 		url += "/latest"
 		ghr := ghRelease{}
 		if err := h.get(url, &ghr); err != nil {
-			return nil, err
+			return release, nil, err
 		}
-		q.Release = ghr.TagName //discovered
+		release = ghr.TagName //discovered
 		ghas = ghr.Assets
 	} else {
 		ghrs := []ghRelease{}
 		if err := h.get(url, &ghrs); err != nil {
-			return nil, err
+			return release, nil, err
 		}
 		found := false
 		for _, ghr := range ghrs {
 			if ghr.TagName == release {
 				found = true
 				if err := h.get(ghr.AssetsURL, &ghas); err != nil {
-					return nil, err
+					return release, nil, err
 				}
 				ghas = ghr.Assets
 				break
 			}
 		}
 		if !found {
-			return nil, fmt.Errorf("release tag '%s' not found", release)
+			return release, nil, fmt.Errorf("release tag '%s' not found", release)
 		}
 	}
 	if len(ghas) == 0 {
-		return nil, errors.New("no assets found")
+		return release, nil, errors.New("no assets found")
+	}
+	sumIndex, _ := ghas.getSumIndex()
+	if l := len(sumIndex); l > 0 {
+		log.Printf("fetched %d asset shasums", l)
 	}
 	assets := Assets{}
-
 	index := map[string]bool{}
-
-	//TODO: handle duplicate asset.targets
 	for _, ga := range ghas {
 		url := ga.BrowserDownloadURL
 		//only binary containers are supported
@@ -123,37 +126,68 @@ func (h *Handler) getAssetsNoCache(q Query) (Assets, error) {
 		//windows not supported yet
 		if os == "windows" {
 			//TODO: powershell
-			//  EG: iwr https://deno.land/x/install/install.ps1 -useb | iex
+			// EG: iwr https://deno.land/x/install/install.ps1 -useb | iex
 			continue
 		}
 		//unknown os, cant use
 		if os == "" {
 			continue
 		}
+		asset := Asset{
+			OS:     os,
+			Arch:   arch,
+			Name:   ga.Name,
+			URL:    url,
+			Type:   fext,
+			SHA256: sumIndex[ga.Name],
+		}
 		//there can only be 1 file for each OS/Arch
-		key := os + "/" + arch
-		if index[key] {
+		if index[asset.Key()] {
 			continue
 		}
-		index[key] = true
+		index[asset.Key()] = true
 		//include!
-		assets = append(assets, Asset{
-			//target
-			OS:   os,
-			Arch: arch,
-			//
-			Name: ga.Name,
-			URL:  url,
-			Type: fext,
-			//computed
-			IsMac:   os == "darwin",
-			Is32bit: arch == "386",
-		})
+		assets = append(assets, asset)
 	}
 	if len(assets) == 0 {
-		return nil, errors.New("no downloads found for this release")
+		return release, nil, errors.New("no downloads found for this release")
 	}
-	return assets, nil
+	return release, assets, nil
+}
+
+type ghAssets []ghAsset
+
+func (as ghAssets) getSumIndex() (map[string]string, error) {
+	url := ""
+	for _, ga := range as {
+		//is checksum file?
+		if ga.IsChecksumFile() {
+			url = ga.BrowserDownloadURL
+			break
+		}
+	}
+	if url == "" {
+		return nil, errors.New("no sum file found")
+	}
+	resp, err := http.DefaultClient.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	// take each line and insert into the index
+	index := map[string]string{}
+	s := bufio.NewScanner(resp.Body)
+	for s.Scan() {
+		fs := strings.Fields(s.Text())
+		if len(fs) != 2 {
+			continue
+		}
+		index[fs[1]] = fs[0]
+	}
+	if err := s.Err(); err != nil {
+		return nil, err
+	}
+	return index, nil
 }
 
 type ghAsset struct {
@@ -168,47 +202,22 @@ type ghAsset struct {
 	State              string `json:"state"`
 	UpdatedAt          string `json:"updated_at"`
 	Uploader           struct {
-		AvatarURL         string `json:"avatar_url"`
-		EventsURL         string `json:"events_url"`
-		FollowersURL      string `json:"followers_url"`
-		FollowingURL      string `json:"following_url"`
-		GistsURL          string `json:"gists_url"`
-		GravatarID        string `json:"gravatar_id"`
-		HTMLURL           string `json:"html_url"`
-		ID                int    `json:"id"`
-		Login             string `json:"login"`
-		OrganizationsURL  string `json:"organizations_url"`
-		ReceivedEventsURL string `json:"received_events_url"`
-		ReposURL          string `json:"repos_url"`
-		SiteAdmin         bool   `json:"site_admin"`
-		StarredURL        string `json:"starred_url"`
-		SubscriptionsURL  string `json:"subscriptions_url"`
-		Type              string `json:"type"`
-		URL               string `json:"url"`
+		ID    int    `json:"id"`
+		Login string `json:"login"`
 	} `json:"uploader"`
 	URL string `json:"url"`
 }
+
+func (g ghAsset) IsChecksumFile() bool {
+	return checksumRe.MatchString(strings.ToLower(g.Name)) && g.Size < 64*1024 //maximum file size 64KB
+}
+
 type ghRelease struct {
 	Assets    []ghAsset `json:"assets"`
 	AssetsURL string    `json:"assets_url"`
 	Author    struct {
-		AvatarURL         string `json:"avatar_url"`
-		EventsURL         string `json:"events_url"`
-		FollowersURL      string `json:"followers_url"`
-		FollowingURL      string `json:"following_url"`
-		GistsURL          string `json:"gists_url"`
-		GravatarID        string `json:"gravatar_id"`
-		HTMLURL           string `json:"html_url"`
-		ID                int    `json:"id"`
-		Login             string `json:"login"`
-		OrganizationsURL  string `json:"organizations_url"`
-		ReceivedEventsURL string `json:"received_events_url"`
-		ReposURL          string `json:"repos_url"`
-		SiteAdmin         bool   `json:"site_admin"`
-		StarredURL        string `json:"starred_url"`
-		SubscriptionsURL  string `json:"subscriptions_url"`
-		Type              string `json:"type"`
-		URL               string `json:"url"`
+		ID    int    `json:"id"`
+		Login string `json:"login"`
 	} `json:"author"`
 	Body            string      `json:"body"`
 	CreatedAt       string      `json:"created_at"`

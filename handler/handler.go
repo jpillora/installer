@@ -149,7 +149,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// load template
 	t, err := template.New("installer").Parse(script)
 	if err != nil {
-		http.Error(w, "Installer script invalid", http.StatusInternalServerError)
+		showError("installer BUG: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// execute template
@@ -164,11 +164,36 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type Asset struct {
-	Name, OS, Arch, URL, Type string
-	Is32bit, IsMac            bool
+	Name, OS, Arch, URL, Type, SHA256 string
+}
+
+func (a Asset) Key() string {
+	return a.OS + "/" + a.Arch
+}
+
+func (a Asset) Is32Bit() bool {
+	return a.Arch == "386"
+}
+
+func (a Asset) IsMac() bool {
+	return a.OS == "darwin"
+}
+
+func (a Asset) IsMacM1() bool {
+	return a.IsMac() && a.Arch == "arm64"
 }
 
 type Assets []Asset
+
+func (as Assets) HasM1() bool {
+	//detect if we have a native m1 asset
+	for _, a := range as {
+		if a.IsMacM1() {
+			return true
+		}
+	}
+	return false
+}
 
 func (h *Handler) get(url string, v interface{}) error {
 	req, _ := http.NewRequest("GET", url, nil)

@@ -6,9 +6,10 @@ import (
 )
 
 var (
-	archRe    = regexp.MustCompile(`(arm64|arm|386|amd64|32|64)`)
-	fileExtRe = regexp.MustCompile(`(\.[a-z][a-z0-9]+)+$`)
-	posixOSRe = regexp.MustCompile(`(darwin|linux|(net|free|open)bsd|mac|osx|windows|win)`)
+	archRe     = regexp.MustCompile(`(arm64|arm|386|amd64|32|64)`)
+	fileExtRe  = regexp.MustCompile(`(\.[a-z][a-z0-9]+)+$`)
+	posixOSRe  = regexp.MustCompile(`(darwin|linux|(net|free|open)bsd|mac|osx|windows|win)`)
+	checksumRe = regexp.MustCompile(`(checksums|sha256sums)`)
 )
 
 func getOS(s string) string {

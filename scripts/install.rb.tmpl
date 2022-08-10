@@ -4,9 +4,9 @@ class Installer < Formula
   homepage "https://github.com/{{ .User }}/{{ .Program }}"
   version "{{ .Release }}"
 
-  {{ range .Assets }}{{ if ne .Arch "arm" }}if {{if .IsMac }}!{{end}}OS.linux? && {{if .Is32bit }}!{{end}}Hardware.is_64_bit?
+  {{ range .Assets }}{{ if ne .Arch "arm" }}if {{if .IsMac }}!{{end}}OS.linux? && {{if .Is32Bit }}!{{end}}Hardware.is_64_bit?
     url "{{ .URL }}"
-    # sha1 "223411f5fd0f49bfef6d2e0fd34b47ad7c48fd1b"
+    {{if .SHA256 }}sha256 "{{ .SHA256 }}"{{end}}
   els{{end}}{{end}}e
     onoe "Not supported"
   end

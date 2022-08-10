@@ -7,10 +7,14 @@ sudo-move: {{ .SudoMove }}
 used-google: {{ .Google }}
 
 release assets:
-{{ range .Assets }}  {{ .URL }}
+{{ range .Assets }}  {{ .Key }}
+    url:    {{ .URL }} {{if .SHA256 }}
+    sha256: {{ .SHA256 }}{{end}}
 {{end}}
 has-m1-asset: {{ .M1Asset }}
 
 to see shell script, append ?type=script
 for more information on this server, visit:
   github.com/jpillora/installer
+
+
