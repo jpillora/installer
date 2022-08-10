@@ -1,11 +1,11 @@
 name: CI
 on:
-  pull_request:
+  pull_request: {}
   push:
     tags:
       - "v*"
   workflow_dispatch:
-    inputs:
+    inputs: {}
 jobs:
   # ================
   # TEST JOB
