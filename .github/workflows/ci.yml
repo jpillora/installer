@@ -7,11 +7,8 @@ on:
   workflow_dispatch:
     inputs: {}
 jobs:
-  # ================
-  # TEST JOB
-  # ================
-  test:
-    name: Test
+  ci:
+    name: CI
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,28 +27,8 @@ jobs:
         run: go build -v .
       - name: Test
         run: go test -v ./...
-  # ================
-  # RELEASE JOB
-  #   runs after a success test
-  #   only runs on push "v*" tag
-  # ================
-  release:
-    name: Release
-    needs: test
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: '1.18'
-          check-latest: true
-          cache: true
       - name: Run GoReleaser
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: goreleaser/goreleaser-action@v3
         with:
           distribution: goreleaser
