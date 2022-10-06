@@ -54,6 +54,7 @@ func main() {
 	r.HandleFunc("/healthz", handlers.Healthz)
 	r.HandleFunc("/{project}", handlers.InstallScript)
 	r.HandleFunc("/{owner}/{project}", handlers.InstallScript)
+	r.HandleFunc("/{owner}/{project}/latest", handlers.GetLatestVersion)
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), r); err != nil {
 		log.Fatal(err)

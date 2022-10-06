@@ -154,3 +154,48 @@ func InstallScript(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write(buff.Bytes())
 }
+
+// GetLatestVersion returns the name of the latest version of the specified project
+func GetLatestVersion(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	owner := vars["owner"]
+	project := vars["project"]
+	if owner == "" {
+		owner = "replicatedhq"
+	}
+
+	includePrerelease := r.URL.Query().Get("prerelease") // set to 'true' to include prerelease releases
+	filter := r.URL.Query().Get("filter")                // if this is set, get the latest release with a name containing this substring
+
+	var desiredRelease *github.RepositoryRelease
+	var err error
+
+	if filter == "" && includePrerelease != "true" { // get the latest release
+		desiredRelease, err = api.FetchLatestRelease(r.Context(), owner, project)
+		if err != nil {
+			fmt.Printf("Got error %q", err.Error())
+			http.Error(w, fmt.Sprintf("Unable to get latest release: %s", err.Error()), http.StatusInternalServerError)
+			return
+		}
+	} else { // get the list of releases, and find the best one from that list
+		releases, err := api.FetchReleases(r.Context(), owner, project)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			fmt.Printf("Got error %q", err.Error())
+			return
+		}
+
+		includePrerelease := includePrerelease == "true"
+
+		// figure out which release is the latest matching the criteria
+		desiredRelease, err = helpers.LatestRelease(releases, includePrerelease, filter)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Printf("Got error %q for owner %q project %q", err.Error(), owner, project)
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(desiredRelease.GetName()))
+}
