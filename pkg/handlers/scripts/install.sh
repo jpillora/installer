@@ -10,6 +10,44 @@ function fail {
 	echo "Error: $msg" 1>&2
 	exit 1
 }
+function prompts_can_prompt() {
+	# Need the TTY to accept input and stdout to display
+	# Prompts when running the script through the terminal but not as a subshell
+	if [ -t 1 ] && [ -c /dev/tty ]; then
+			return 0
+	fi
+	return 1
+}
+function read_installation_path {
+	if ! prompts_can_prompt ; then
+		echo "Automatically setting default path: ${OUT_DIR}, shell is not interactive"
+		return
+	fi
+	printf "Select installation path:[press 'Enter' to use default path ${OUT_DIR}]: \n"
+	filepath=
+	while true ; do
+		read -r -p "Path:  " filepath </dev/tty
+		filepath="${filepath:-$OUT_DIR}"
+		if [ -d "$filepath" ] ; then
+			break
+		fi
+		printf "$filepath is not a directory...\n"
+	done
+	OUT_DIR="$filepath"
+}
+function confirmY {
+		if ! prompts_can_prompt ; then
+			echo "Automatically denying prompt, shell is not interactive"
+			return 1
+		fi
+		read -r -p "" response < /dev/tty
+		if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]
+		then
+			return 0
+		else
+			return 1
+		fi
+}
 function install {
 	#settings
 	USER="{{ .User }}"
@@ -21,7 +59,6 @@ function install {
 	GH="https://github.com"
 	#bash check
 	[ ! "$BASH_VERSION" ] && fail "Please use bash instead"
-	[ ! -d $OUT_DIR ] && fail "output directory missing: $OUT_DIR"
 	#dependency check, assume we are a standard POISX machine
 	which find > /dev/null || fail "find not installed"
 	which xargs > /dev/null || fail "xargs not installed"
@@ -105,7 +142,24 @@ function install {
 	fi
 	#move into PATH or cwd
 	chmod +x $TMP_BIN || fail "chmod +x failed"
-	mv $TMP_BIN $OUT_DIR/kubectl-$PROG 2>/dev/null || sudo mv $TMP_BIN $OUT_DIR/kubectl-$PROG || fail "mv failed" #FINAL STEP!
+	# read installation path
+	read_installation_path
+	echo "Installing to $OUT_DIR"
+	[ ! -d $OUT_DIR ] && fail "output directory missing: $OUT_DIR"
+	if [ ! -w $OUT_DIR ]; then 
+		echo "You don't have write permissions to $OUT_DIR"
+		echo "Would you like to enter your password to grant write permissions"
+		echo "to $OUT_DIR? [y/n]"
+		if confirmY ; then
+			sudo mv $TMP_BIN $OUT_DIR/kubectl-$PROG || fail "mv failed" #FINAL STEP!
+		else
+			echo "Please run the following command to complete the installation:"
+			echo "        sudo mv $TMP_DIR/${TMP_BIN:2} $OUT_DIR/kubectl-$PROG"
+			exit 1
+		fi
+	else
+		mv $TMP_BIN $OUT_DIR/kubectl-$PROG || fail "mv failed" #FINAL STEP!
+	fi
 	echo "{{ if .MoveToPath }}Installed at{{ else }}Downloaded to{{ end }} $OUT_DIR/kubectl-$PROG"
 	#done
 	cleanup
