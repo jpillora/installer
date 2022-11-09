@@ -1,6 +1,7 @@
 repository: https://github.com/{{ .User }}/{{ .Program }}
 user: {{ .User }}
-program: {{ .Program }}
+program: {{ .Program }}{{if .AsProgram }}
+as: {{ .AsProgram }}{{end}}
 release: {{ .Release }}
 move-into-path: {{ .MoveToPath }}
 sudo-move: {{ .SudoMove }}

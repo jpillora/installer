@@ -32,6 +32,7 @@ curl https://i.jpillora.com/<query>! | bash
     * `type` is normally detected via `User-Agent` header
     * `type=homebrew` is **not** working at the moment – see [Homebrew](#homebrew)
 * `?insecure=1` Force `curl`/`wget` to skip certificate checks
+* `?as=` Force the binary to be named as this parameter value
 
 ## Security
 

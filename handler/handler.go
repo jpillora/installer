@@ -36,7 +36,7 @@ var (
 )
 
 type Query struct {
-	User, Program, Release                 string
+	User, Program, AsProgram, Release      string
 	MoveToPath, SudoMove, Google, Insecure bool
 }
 
@@ -73,7 +73,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "https://github.com/jpillora/installer", http.StatusMovedPermanently)
 		return
 	}
-	// calculate reponse type
+	// calculate response type
 	ext := ""
 	script := ""
 	qtype := r.URL.Query().Get("type")
@@ -128,6 +128,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		SudoMove:   strings.HasPrefix(m[6], "!!"),
 		Google:     false,
 		Insecure:   r.URL.Query().Get("insecure") == "1",
+		AsProgram:  r.URL.Query().Get("as"),
 	}
 	// pick a user
 	if q.User == "" {

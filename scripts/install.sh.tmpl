@@ -17,6 +17,7 @@ function install {
 	#settings
 	USER="{{ .User }}"
 	PROG="{{ .Program }}"
+	ASPROG="{{ .AsProgram }}"
 	MOVE="{{ .MoveToPath }}"
 	RELEASE="{{ .Release }}"
 	INSECURE="{{ .Insecure }}"
@@ -80,6 +81,9 @@ function install {
 	if [ ! -z "$RELEASE" ]; then
 		echo -n " $RELEASE"
 	fi
+	if [ ! -z "$ASPROG" ]; then
+		echo -n " as $ASPROG"
+	fi
 	echo -n " (${OS}/${ARCH})"
 	{{ if .Google }}
 	#matched using google, give time to cancel
@@ -131,19 +135,23 @@ function install {
 	fi
 	#move into PATH or cwd
 	chmod +x $TMP_BIN || fail "chmod +x failed"
+	DEST="$OUT_DIR/$PROG"	
+	if [ ! -z "$ASPROG" ]; then
+		DEST="$OUT_DIR/$ASPROG"
+	fi
 	#move without sudo
-	OUT=$(mv $TMP_BIN $OUT_DIR/$PROG 2>&1)
+	OUT=$(mv $TMP_BIN $DEST 2>&1)
 	STATUS=$?
 	# failed and string contains "Permission denied"
 	if [ $STATUS -ne 0 ]; then
 		if [[ $OUT =~ "Permission denied" ]]; then
 			echo "mv with sudo..."
-			sudo mv $TMP_BIN $OUT_DIR/$PROG || fail "sudo mv failed" 
+			sudo mv $TMP_BIN $DEST || fail "sudo mv failed" 
 		else
 			fail "mv failed ($OUT)"
 		fi
 	fi
-	echo "{{ if .MoveToPath }}Installed at{{ else }}Downloaded to{{ end }} $OUT_DIR/$PROG"
+	echo "{{ if .MoveToPath }}Installed at{{ else }}Downloaded to{{ end }} $DEST"
 	#done
 	cleanup
 }
