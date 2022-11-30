@@ -118,7 +118,7 @@ function install {
 		bash -c "$GET $URL" > tmp.zip || fail "download failed"
 		unzip -o -qq tmp.zip || fail "unzip failed"
 		rm tmp.zip || fail "cleanup failed"
-	elif [[ $FTYPE = "" ]]; then
+	elif [[ $FTYPE = ".bin" ]]; then
 		bash -c "$GET $URL" > "{{ .Program }}_${OS}_${ARCH}" || fail "download failed"
 	else
 		fail "unknown file type: $FTYPE"

@@ -117,7 +117,11 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		//only binary containers are supported
 		//TODO deb,rpm etc
 		fext := getFileExt(url)
-		if fext != ".zip" && fext != ".gz" && fext != ".tar.gz" && fext != ".tgz" {
+		if fext == "" && ga.Size > 1024*1024 {
+			fext = ".bin" // +1MB binary
+		}
+		if fext != ".bin" && fext != ".zip" && fext != ".gz" && fext != ".tar.gz" && fext != ".tgz" {
+			log.Printf("fetched asset has unsupported file type: %s (ext '%s')", ga.Name, fext)
 			continue
 		}
 		//match
@@ -125,14 +129,17 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		arch := getArch(ga.Name)
 		//windows not supported yet
 		if os == "windows" {
+			log.Printf("fetched asset is for windows: %s", ga.Name)
 			//TODO: powershell
 			// EG: iwr https://deno.land/x/install/install.ps1 -useb | iex
 			continue
 		}
 		//unknown os, cant use
 		if os == "" {
+			log.Printf("fetched asset has unknown os: %s", ga.Name)
 			continue
 		}
+		log.Printf("fetched asset: %s", ga.Name)
 		asset := Asset{
 			OS:     os,
 			Arch:   arch,
