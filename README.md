@@ -5,6 +5,9 @@ Quickly install pre-compiled binaries from Github releases.
 
 Installer is an HTTP server which returns shell scripts. The returned script will detect platform OS and architecture, choose from a selection of URLs, download the appropriate file, un(zip|tar|gzip) the file, find the binary (largest file) and optionally move it into your `PATH`. Useful for installing your favourite pre-compiled programs on hosts using only `curl`.
 
+[![GoDev](https://img.shields.io/static/v1?label=godoc&message=reference&color=00add8)](https://pkg.go.dev/github.com/jpillora/installer)
+[![CI](https://github.com/jpillora/installer/workflows/CI/badge.svg)](https://github.com/jpillora/installer/actions?workflow=CI)
+
 ## Usage
 
 ```sh
@@ -83,6 +86,18 @@ See https://github.com/jpillora/installer/issues/31 for how this could improved
 	[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
     *You can optionally add your own domain as a app custom domain.*
+
+## Force a particular `user/repo`
+
+In some cases, people want an installer server for a single tool
+
+```sh
+export FORCE_USER=zyedidia
+export FORCE_REPO=micro
+./installer
+```
+
+Then calls to `curl 'localhost:3000` will return the install script for `zyedidia/micro`
 
 ### Homebrew
 

@@ -25,6 +25,12 @@ func main() {
 	if c.Token != "" {
 		log.Printf("github token will be used for requests to api.github.com")
 	}
+	if c.ForceUser != "" {
+		log.Printf("locked user to '%s'", c.ForceUser)
+	}
+	if c.ForceRepo != "" {
+		log.Printf("locked repo to '%s'", c.ForceRepo)
+	}
 	addr := fmt.Sprintf("%s:%d", c.Host, c.Port)
 	l, err := net.Listen("tcp4", addr)
 	if err != nil {

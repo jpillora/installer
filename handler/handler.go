@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"regexp"
@@ -27,8 +27,7 @@ var (
 	userRe       = `(\/([\w\-]{1,128}))?`
 	repoRe       = `([\w\-\_]{1,128})`
 	releaseRe    = `(@([\w\-\.\_]{1,128}?))?`
-	moveRe       = `(!*)`
-	pathRe       = regexp.MustCompile(`^` + userRe + `\/` + repoRe + releaseRe + moveRe + `$`)
+	pathRe       = regexp.MustCompile(`^` + userRe + `\/` + repoRe + releaseRe)
 	isTermRe     = regexp.MustCompile(`(?i)^(curl|wget)\/`)
 	isHomebrewRe = regexp.MustCompile(`(?i)^homebrew`)
 	errMsgRe     = regexp.MustCompile(`[^A-Za-z0-9\ :\/\.]`)
@@ -36,8 +35,9 @@ var (
 )
 
 type Query struct {
-	User, Program, AsProgram, Release      string
-	MoveToPath, SudoMove, Google, Insecure bool
+	User, Program, AsProgram, Release string
+	MoveToPath, Google, Insecure      bool
+	SudoMove                          bool // deprecated: not used, now automatically detected
 }
 
 type Result struct {
@@ -67,10 +67,6 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/healthz" {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
-		return
-	}
-	if r.URL.Path == "/" {
-		http.Redirect(w, r, "https://github.com/jpillora/installer", http.StatusMovedPermanently)
 		return
 	}
 	// calculate response type
@@ -114,23 +110,23 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		showError("Unknown type", http.StatusInternalServerError)
 		return
 	}
-	// "route"
-	m := pathRe.FindStringSubmatch(r.URL.Path)
-	if len(m) == 0 {
-		showError("Invalid path", http.StatusBadRequest)
-		return
-	}
 	q := Query{
-		User:       m[2],
-		Program:    m[3],
-		Release:    m[5],
-		MoveToPath: strings.HasPrefix(m[6], "!"),
-		SudoMove:   strings.HasPrefix(m[6], "!!"),
-		Google:     false,
-		Insecure:   r.URL.Query().Get("insecure") == "1",
-		AsProgram:  r.URL.Query().Get("as"),
+		User:      "",
+		Program:   "",
+		Release:   "",
+		Insecure:  r.URL.Query().Get("insecure") == "1",
+		AsProgram: r.URL.Query().Get("as"),
 	}
-	// pick a user
+	// set query from route
+	m := pathRe.FindStringSubmatch(r.URL.Path)
+	if len(m) > 0 {
+		q.User = m[2]
+		q.Program = m[3]
+		q.Release = m[5]
+	}
+	// move to path with !
+	q.MoveToPath = strings.HasSuffix(r.URL.Path, "!")
+	// default user
 	if q.User == "" {
 		if q.Program == "micro" {
 			// micro > nano!
@@ -140,6 +136,23 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			q.User = h.Config.User
 			q.Google = true
 		}
+	}
+	// force user/repo
+	if h.Config.ForceUser != "" {
+		q.User = h.Config.ForceUser
+	}
+	if h.Config.ForceRepo != "" {
+		q.Program = h.Config.ForceRepo
+	}
+	// validate query
+	valid := q.User != "" && q.Program != ""
+	if !valid && r.URL.Path == "/" {
+		http.Redirect(w, r, "https://github.com/jpillora/installer", http.StatusMovedPermanently)
+		return
+	}
+	if !valid {
+		showError("Invalid path", http.StatusBadRequest)
+		return
 	}
 	// fetch assets
 	result, err := h.execute(q)
@@ -212,7 +225,7 @@ func (h *Handler) get(url string, v interface{}) error {
 		return fmt.Errorf("%w: url %s", errNotFound, url)
 	}
 	if resp.StatusCode != 200 {
-		b, _ := ioutil.ReadAll(resp.Body)
+		b, _ := io.ReadAll(resp.Body)
 		return errors.New(http.StatusText(resp.StatusCode) + " " + string(b))
 	}
 

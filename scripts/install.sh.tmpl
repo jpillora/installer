@@ -115,10 +115,6 @@ function install {
 	cd $TMP_DIR
 	if [[ $FTYPE = ".gz" ]]; then
 		which gzip > /dev/null || fail "gzip is not installed"
-		#gzipped binary
-		NAME="${PROG}_${OS}_${ARCH}.gz"
-		GZURL="$GH/releases/download/$RELEASE/$NAME"
-		#gz download!
 		bash -c "$GET $URL" | gzip -d - > $PROG || fail "download failed"
 	elif [[ $FTYPE = ".tar.bz" ]] || [[ $FTYPE = ".tar.bz2" ]]; then
 		which tar > /dev/null || fail "tar is not installed"
