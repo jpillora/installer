@@ -1,10 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"net/http"
-	"strconv"
+	"os"
 	"time"
 
 	"github.com/jpillora/installer/handler"
@@ -17,12 +18,19 @@ var version = "0.0.0-src"
 func main() {
 	c := handler.DefaultConfig
 	opts.New(&c).Repo("github.com/jpillora/installer").Version(version).Parse()
-	log.Printf("default user is '%s', github token set: %v", c.User, c.Token != "")
-	l, err := net.Listen("tcp4", "0.0.0.0:"+strconv.Itoa(c.Port))
+	log.Printf("default user is '%s'", c.User)
+	if c.Token == "" && os.Getenv("GH_TOKEN") != "" {
+		c.Token = os.Getenv("GH_TOKEN") // GH_TOKEN was renamed
+	}
+	if c.Token != "" {
+		log.Printf("github token will be used for requests to api.github.com")
+	}
+	addr := fmt.Sprintf("%s:%d", c.Host, c.Port)
+	l, err := net.Listen("tcp4", addr)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("listening on port %d...", c.Port)
+	log.Printf("listening on %s...", addr)
 	h := &handler.Handler{Config: c}
 	lh := requestlog.WrapWith(h, requestlog.Options{
 		TrustProxy: true, // assume will be run in paas

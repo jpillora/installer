@@ -33,6 +33,7 @@ function install {
 	which tail > /dev/null || fail "tail not installed"
 	which cut > /dev/null || fail "cut not installed"
 	which du > /dev/null || fail "du not installed"
+	#choose an HTTP client
 	GET=""
 	if which curl > /dev/null; then
 		GET="curl"
@@ -44,6 +45,16 @@ function install {
 		GET="$GET -qO-"
 	else
 		fail "neither wget/curl are installed"
+	fi
+	#debug HTTP
+	if [ "$DEBUG" == "1" ]; then
+		GET="$GET -v"
+	fi
+	#optional auth to install from private repos
+	#NOTE: this also needs to be set on your instance of installer
+	AUTH="${GITHUB_TOKEN}"
+	if [ ! -z "$AUTH" ]; then
+		GET="$GET -H 'Authorization: $AUTH'"
 	fi
 	#find OS #TODO BSDs and other posixs
 	case `uname -s` in

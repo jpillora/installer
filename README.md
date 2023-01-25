@@ -56,6 +56,12 @@ curl https://i.jpillora.com/<query>! | bash
     Caddy 0.8.2
     ```
 
+## Private repos
+
+You'll have to set `GITHUB_TOKEN` on both your server (instance of `installer`) and client (before you run `curl https://i.jpillora.com/foobar | bash`)
+
+See https://github.com/jpillora/installer/issues/31 for how this could improved
+
 ## Host your own
 
 * Install installer with installer
