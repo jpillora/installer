@@ -22,7 +22,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build
-        run: go build -v .
+        run: go build -v -o /dev/null .
       - name: Test
         run: go test -v ./...
       - name: Run GoReleaser
