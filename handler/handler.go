@@ -24,10 +24,6 @@ const (
 )
 
 var (
-	userRe       = `(\/([\w\-]{1,128}))?`
-	repoRe       = `([\w\-\_]{1,128})`
-	releaseRe    = `(@([\w\-\.\_]{1,128}?))?`
-	pathRe       = regexp.MustCompile(`^` + userRe + `\/` + repoRe + releaseRe)
 	isTermRe     = regexp.MustCompile(`(?i)^(curl|wget)\/`)
 	isHomebrewRe = regexp.MustCompile(`(?i)^homebrew`)
 	errMsgRe     = regexp.MustCompile(`[^A-Za-z0-9\ :\/\.]`)
@@ -118,24 +114,24 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		AsProgram: r.URL.Query().Get("as"),
 	}
 	// set query from route
-	m := pathRe.FindStringSubmatch(r.URL.Path)
-	if len(m) > 0 {
-		q.User = m[2]
-		q.Program = m[3]
-		q.Release = m[5]
-	}
+	path := strings.TrimPrefix(r.URL.Path, "/")
+	var rest string
+	q.User, rest = splitHalf(path, "/")
 	// move to path with !
-	q.MoveToPath = strings.HasSuffix(r.URL.Path, "!")
-	// default user
-	if q.User == "" {
-		if q.Program == "micro" {
-			// micro > nano!
-			q.User = "zyedidia"
-		} else {
-			// use default user, but fallback to google
-			q.User = h.Config.User
-			q.Google = true
-		}
+	if strings.HasSuffix(rest, "!") {
+		q.MoveToPath = true
+		rest = strings.TrimSuffix(rest, "!")
+	}
+	q.Program, q.Release = splitHalf(rest, "@")
+	// no program? treat first part as program, use default user
+	if q.Program == "" {
+		q.Program = q.User
+		q.User = h.Config.User
+		q.Google = true
+	}
+	// micro > nano!
+	if q.User == "" && q.Program == "micro" {
+		q.User = "zyedidia"
 	}
 	// force user/repo
 	if h.Config.ForceUser != "" {
@@ -145,12 +141,13 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		q.Program = h.Config.ForceRepo
 	}
 	// validate query
-	valid := q.User != "" && q.Program != ""
-	if !valid && r.URL.Path == "/" {
+	valid := q.User != ""
+	if !valid && path == "" {
 		http.Redirect(w, r, "https://github.com/jpillora/installer", http.StatusMovedPermanently)
 		return
 	}
 	if !valid {
+		log.Printf("invalid path: query: %#v", q)
 		showError("Invalid path", http.StatusBadRequest)
 		return
 	}

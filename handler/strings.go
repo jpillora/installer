@@ -39,3 +39,11 @@ func getArch(s string) string {
 func getFileExt(s string) string {
 	return fileExtRe.FindString(s)
 }
+
+func splitHalf(s, by string) (string, string) {
+	i := strings.Index(s, by)
+	if i == -1 {
+		return s, ""
+	}
+	return s[:i], s[i+len(by):]
+}
