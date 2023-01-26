@@ -31,6 +31,17 @@ func TestMicro(t *testing.T) {
 	}
 }
 
+func TestMicroDoubleBang(t *testing.T) {
+	h := &handler.Handler{}
+	r := httptest.NewRequest("GET", "/micro!!", nil)
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+	t.Log(w.Body.String())
+	if w.Result().StatusCode != 200 {
+		t.Fatalf("failed to get micro!! asset status")
+	}
+}
+
 func TestGotty(t *testing.T) {
 	h := &handler.Handler{}
 	r := httptest.NewRequest("GET", "/yudai/gotty@v0.0.12", nil)

@@ -115,13 +115,13 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	// set query from route
 	path := strings.TrimPrefix(r.URL.Path, "/")
+	// move to path with !
+	if strings.HasSuffix(path, "!") {
+		q.MoveToPath = true
+		path = strings.TrimRight(path, "!")
+	}
 	var rest string
 	q.User, rest = splitHalf(path, "/")
-	// move to path with !
-	if strings.HasSuffix(rest, "!") {
-		q.MoveToPath = true
-		rest = strings.TrimSuffix(rest, "!")
-	}
 	q.Program, q.Release = splitHalf(rest, "@")
 	// no program? treat first part as program, use default user
 	if q.Program == "" {
