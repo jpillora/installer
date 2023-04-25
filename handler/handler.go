@@ -141,7 +141,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		q.Program = h.Config.ForceRepo
 	}
 	// validate query
-	valid := q.User != ""
+	valid := q.Program != ""
 	if !valid && path == "" {
 		http.Redirect(w, r, "https://github.com/jpillora/installer", http.StatusMovedPermanently)
 		return
