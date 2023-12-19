@@ -60,7 +60,7 @@ type Handler struct {
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/healthz" {
+	if r.URL.Path == "/healthz" || r.URL.Path == "/favicon.ico" {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 		return
