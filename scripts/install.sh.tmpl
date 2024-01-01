@@ -100,8 +100,8 @@ function install {
 		echo -n " as $ASPROG"
 	fi
 	echo -n " (${OS}/${ARCH})"
-	{{ if .Google }}
-	#matched using google, give time to cancel
+	{{ if .Search }}
+	# web search, give time to cancel
 	echo -n " in 5 seconds"
 	for i in 1 2 3 4 5; do
 		sleep 1
@@ -116,6 +116,9 @@ function install {
 	if [[ $FTYPE = ".gz" ]]; then
 		which gzip > /dev/null || fail "gzip is not installed"
 		bash -c "$GET $URL" | gzip -d - > $PROG || fail "download failed"
+	elif [[ $FTYPE = ".bz2" ]]; then
+		which bzip2 > /dev/null || fail "bzip2 is not installed"
+		bash -c "$GET $URL" | bzip2 -d - > $PROG || fail "download failed"
 	elif [[ $FTYPE = ".tar.bz" ]] || [[ $FTYPE = ".tar.bz2" ]]; then
 		which tar > /dev/null || fail "tar is not installed"
 		which bzip2 > /dev/null || fail "bzip2 is not installed"

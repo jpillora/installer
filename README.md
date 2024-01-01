@@ -16,7 +16,7 @@ curl https://i.jpillora.com/<user>/<repo>@<release>! | bash
 ```
 
 ```sh
-# search Google for github repo <query>
+# search web for github repo <query>
 curl https://i.jpillora.com/<query>! | bash
 ```
 
@@ -24,7 +24,7 @@ curl https://i.jpillora.com/<query>! | bash
 
 **Path API**
 
-* `user` Github user (defaults to @jpillora, customisable if you [host your own](#host-your-own), uses Google to pick most relevant `user` when `repo` not found)
+* `user` Github user (defaults to @jpillora, customisable if you [host your own](#host-your-own), searches the web to pick most relevant `user` when `repo` not found)
 * `repo` Github repository belonging to `user` (**required**)
 * `release` Github release name (defaults to the **latest** release)
 * `!` When provided, downloads binary directly into `/usr/local/bin/` (defaults to working directory)

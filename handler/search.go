@@ -1,8 +1,8 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -10,18 +10,30 @@ import (
 
 var searchGithubRe = regexp.MustCompile(`https:\/\/github\.com\/(\w+)\/(\w+)`)
 
-//uses im feeling lucky and grabs the "Location"
-//header from the 302, which contains the github repo
-func searchGoogle(phrase string) (user, project string, err error) {
+func imFeelingLuck(phrase string) (user, project string, err error) {
 	phrase += " site:github.com"
-	log.Printf("google search for '%s'", phrase)
+	// try dgg
 	v := url.Values{}
+	v.Set("q", "! " /*I'm feeling lucky*/ +phrase)
+	if user, project, err := captureRepoLocation(("https://html.duckduckgo.com/html?" + v.Encode())); err == nil {
+		return user, project, nil
+	}
+	// try google
+	v = url.Values{}
 	v.Set("btnI", "") //I'm feeling lucky
 	v.Set("q", phrase)
-	urlstr := "https://www.google.com/search?" + v.Encode()
-	req, err := http.NewRequest("GET", urlstr, nil)
+	if user, project, err := captureRepoLocation(("https://www.google.com/search?" + v.Encode())); err == nil {
+		return user, project, nil
+	}
+	return "", "", errors.New("not found")
+}
+
+// uses im feeling lucky and grabs the "Location"
+// header from the 302, which contains the github repo
+func captureRepoLocation(url string) (user, project string, err error) {
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return "", "", err
+		panic(err)
 	}
 	req.Header.Set("Accept", "*/*")
 	//I'm a browser... :)
@@ -33,7 +45,7 @@ func searchGoogle(phrase string) (user, project string, err error) {
 	}
 	resp.Body.Close()
 	//assume redirection
-	if resp.StatusCode != 302 {
+	if resp.StatusCode/100 != 3 {
 		return "", "", fmt.Errorf("non-redirect response: %d", resp.StatusCode)
 	}
 	//extract Location header URL

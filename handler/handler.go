@@ -32,7 +32,7 @@ var (
 
 type Query struct {
 	User, Program, AsProgram, Release string
-	MoveToPath, Google, Insecure      bool
+	MoveToPath, Search, Insecure      bool
 	SudoMove                          bool // deprecated: not used, now automatically detected
 }
 
@@ -127,7 +127,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if q.Program == "" {
 		q.Program = q.User
 		q.User = h.Config.User
-		q.Google = true
+		q.Search = true
+	}
+	if q.Release == "" {
+		q.Release = "latest"
 	}
 	// micro > nano!
 	if q.User == "" && q.Program == "micro" {

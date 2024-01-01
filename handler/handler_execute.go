@@ -27,15 +27,15 @@ func (h *Handler) execute(q Query) (Result, error) {
 	ts := time.Now()
 	release, assets, err := h.getAssetsNoCache(q)
 	if err == nil {
-		//didn't need google
-		q.Google = false
-	} else if errors.Is(err, errNotFound) && q.Google {
-		//use google to auto-detect user...
-		user, program, gerr := searchGoogle(q.Program)
+		//didn't need search
+		q.Search = false
+	} else if errors.Is(err, errNotFound) && q.Search {
+		//use ddg/google to auto-detect user...
+		user, program, gerr := imFeelingLuck(q.Program)
 		if gerr != nil {
-			log.Printf("google search failed: %s", gerr)
+			log.Printf("web search failed: %s", gerr)
 		} else {
-			log.Printf("google search found: %s/%s", user, program)
+			log.Printf("web search found: %s/%s", user, program)
 			if program != q.Program {
 				log.Printf("program mismatch: got %s: expected %s", q.Program, program)
 			}
@@ -75,7 +75,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 	log.Printf("fetching asset info for %s/%s@%s", user, repo, release)
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", user, repo)
 	ghas := ghAssets{}
-	if release == "" {
+	if release == "" || release == "latest" {
 		url += "/latest"
 		ghr := ghRelease{}
 		if err := h.get(url, &ghr); err != nil {
@@ -120,7 +120,10 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		if fext == "" && ga.Size > 1024*1024 {
 			fext = ".bin" // +1MB binary
 		}
-		if fext != ".bin" && fext != ".zip" && fext != ".gz" && fext != ".tar.gz" && fext != ".tgz" {
+		switch fext {
+		case ".bin", ".zip", ".tar.bz", ".tar.bz2", ".bz2", ".gz", ".tar.gz", ".tgz":
+			// valid
+		default:
 			log.Printf("fetched asset has unsupported file type: %s (ext '%s')", ga.Name, fext)
 			continue
 		}

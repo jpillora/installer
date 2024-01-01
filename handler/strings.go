@@ -7,7 +7,7 @@ import (
 
 var (
 	archRe     = regexp.MustCompile(`(arm64|arm|386|amd64|x86_64|aarch64|32|64)`)
-	fileExtRe  = regexp.MustCompile(`(\.[a-z][a-z0-9]+)+$`)
+	fileExtRe  = regexp.MustCompile(`(\.tar)?(\.[a-z][a-z0-9]+)$`)
 	posixOSRe  = regexp.MustCompile(`(darwin|linux|(net|free|open)bsd|mac|osx|windows|win)`)
 	checksumRe = regexp.MustCompile(`(checksums|sha256sums)`)
 )
