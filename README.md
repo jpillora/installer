@@ -82,6 +82,12 @@ See https://github.com/jpillora/installer/issues/31 for how this could improved
 
 * Install on [Fly.io](https://fly.io)
 
+    * Clone this repo
+    * Setup the `fly` CLI tool
+    * Create a new app
+    * Replace `app = "installer"` in `fly.toml` with your app name
+    * Run `fly deploy`
+
 ## Force a particular `user/repo`
 
 In some cases, people want an installer server for a single tool
