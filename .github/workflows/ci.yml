@@ -80,7 +80,7 @@ jobs:
       - name: Build & Push Image
         if: startsWith(github.ref, 'refs/heads/release') || startsWith(github.ref, 'refs/tags/')
         run: |
-          image_name="ghcr.io/${{ github.repository }}/bin-installer
+          image_name="ghcr.io/${{ github.repository }}"
 
           docker manifest inspect $image_name:$IMAGE_TAG
 
