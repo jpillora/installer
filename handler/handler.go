@@ -31,9 +31,9 @@ var (
 )
 
 type Query struct {
-	User, Program, AsProgram, Release string
-	MoveToPath, Search, Insecure      bool
-	SudoMove                          bool // deprecated: not used, now automatically detected
+	User, Program, AsProgram, Release, BinSource string
+	MoveToPath, Search, Insecure                 bool
+	SudoMove                                     bool // deprecated: not used, now automatically detected
 }
 
 type Result struct {
@@ -112,6 +112,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Release:   "",
 		Insecure:  r.URL.Query().Get("insecure") == "1",
 		AsProgram: r.URL.Query().Get("as"),
+		BinSource: r.URL.Query().Get("source"),
 	}
 	// set query from route
 	path := strings.TrimPrefix(r.URL.Path, "/")
@@ -123,55 +124,66 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var rest string
 	q.User, rest = splitHalf(path, "/")
 	q.Program, q.Release = splitHalf(rest, "@")
+
 	// no program? treat first part as program, use default user
 	if q.Program == "" {
 		q.Program = q.User
 		q.User = h.Config.User
 		q.Search = true
 	}
+
 	if q.Release == "" {
 		q.Release = "latest"
 	}
+
 	// micro > nano!
 	if q.User == "" && q.Program == "micro" {
 		q.User = "zyedidia"
 	}
+
 	// force user/repo
 	if h.Config.ForceUser != "" {
 		q.User = h.Config.ForceUser
 	}
+
 	if h.Config.ForceRepo != "" {
 		q.Program = h.Config.ForceRepo
 	}
+
 	// validate query
 	valid := q.Program != ""
 	if !valid && path == "" {
 		http.Redirect(w, r, "https://github.com/jpillora/installer", http.StatusMovedPermanently)
 		return
 	}
+
 	if !valid {
 		log.Printf("invalid path: query: %#v", q)
 		showError("Invalid path", http.StatusBadRequest)
 		return
 	}
+
 	// fetch assets
 	result, err := h.execute(q)
 	if err != nil {
 		showError(err.Error(), http.StatusBadGateway)
 		return
 	}
+
 	// load template
 	t, err := template.New("installer").Parse(script)
 	if err != nil {
 		showError("installer BUG: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	// execute template
 	buff := bytes.Buffer{}
 	if err := t.Execute(&buff, result); err != nil {
 		showError("Template error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	log.Printf("serving script %s/%s@%s (%s)", q.User, q.Program, q.Release, ext)
 	// ready
 	w.Write(buff.Bytes())

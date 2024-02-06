@@ -26,6 +26,8 @@ func (h *Handler) execute(q Query) (Result, error) {
 	//do real operation
 	ts := time.Now()
 	release, assets, err := h.getAssetsNoCache(q)
+
+	// fmt.Printf("release: %s\n", assets)
 	if err == nil {
 		//didn't need search
 		q.Search = false
@@ -64,6 +66,8 @@ func (h *Handler) execute(q Query) (Result, error) {
 	h.cacheMut.Lock()
 	h.cache[key] = result
 	h.cacheMut.Unlock()
+
+	// fmt.Printf("result: %v\n", result.Assets)
 	return result, nil
 }
 
@@ -74,6 +78,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 	//not cached - ask github
 	log.Printf("fetching asset info for %s/%s@%s", user, repo, release)
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", user, repo)
+
 	ghas := ghAssets{}
 	if release == "" || release == "latest" {
 		url += "/latest"
@@ -81,13 +86,16 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		if err := h.get(url, &ghr); err != nil {
 			return release, nil, err
 		}
+
 		release = ghr.TagName //discovered
 		ghas = ghr.Assets
 	} else {
+
 		ghrs := []ghRelease{}
 		if err := h.get(url, &ghrs); err != nil {
 			return release, nil, err
 		}
+
 		found := false
 		for _, ghr := range ghrs {
 			if ghr.TagName == release {
@@ -95,21 +103,26 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 				if err := h.get(ghr.AssetsURL, &ghas); err != nil {
 					return release, nil, err
 				}
+
 				ghas = ghr.Assets
 				break
 			}
 		}
+
 		if !found {
 			return release, nil, fmt.Errorf("release tag '%s' not found", release)
 		}
 	}
+
 	if len(ghas) == 0 {
 		return release, nil, errors.New("no assets found")
 	}
+
 	sumIndex, _ := ghas.getSumIndex()
 	if l := len(sumIndex); l > 0 {
 		log.Printf("fetched %d asset shasums", l)
 	}
+
 	assets := Assets{}
 	index := map[string]bool{}
 	for _, ga := range ghas {
@@ -117,6 +130,14 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		//only binary containers are supported
 		//TODO deb,rpm etc
 		fext := getFileExt(url)
+
+		if q.BinSource != "" {
+			//filter by bin source
+			if !strings.Contains(ga.Name[0:len(q.BinSource)], fmt.Sprint(q.BinSource, "-")) {
+				continue
+			}
+		}
+
 		if fext == "" && ga.Size > 1024*1024 {
 			fext = ".bin" // +1MB binary
 		}
@@ -143,6 +164,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 			continue
 		}
 		log.Printf("fetched asset: %s", ga.Name)
+
 		asset := Asset{
 			OS:     os,
 			Arch:   arch,
@@ -151,6 +173,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 			Type:   fext,
 			SHA256: sumIndex[ga.Name],
 		}
+
 		//there can only be 1 file for each OS/Arch
 		if index[asset.Key()] {
 			continue
