@@ -80,17 +80,9 @@ jobs:
       - name: Build & Push Image
         if: startsWith(github.ref, 'refs/heads/release') || startsWith(github.ref, 'refs/tags/')
         run: |
-          set +e
           image_name="ghcr.io/${{ github.repository }}/bin-installer
 
           docker manifest inspect $image_name:$IMAGE_TAG
-          exit_status=$?
-          if [ $exit_status -eq 0 ]; then
-            [ "$OVERRIDE_PUSHED_IMAGE" = "false" ] && echo "image ($image_name:$IMAGE_TAG) already exists, and override image is disable, exiting" && exit 0
-            echo "image exists, but override pushed image is set to true. proceeding with building image"
-          fi
-
-          set -e
 
           docker build -t $image_name:$IMAGE_TAG .
           docker push $image_name:$IMAGE_TAG
