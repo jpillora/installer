@@ -82,7 +82,5 @@ jobs:
         run: |
           image_name="ghcr.io/${{ github.repository }}"
 
-          docker manifest inspect $image_name:$IMAGE_TAG
-
           docker build -t $image_name:$IMAGE_TAG .
           docker push $image_name:$IMAGE_TAG
