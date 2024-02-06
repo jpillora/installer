@@ -133,7 +133,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 
 		if q.BinSource != "" {
 			//filter by bin source
-			if !strings.Contains(ga.Name[0:len(q.BinSource)], fmt.Sprint(q.BinSource, "-")) {
+			if !strings.Contains(ga.Name[0:len(q.BinSource)+1], fmt.Sprint(q.BinSource, "-")) {
 				continue
 			}
 		}
