@@ -114,6 +114,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		AsProgram: r.URL.Query().Get("as"),
 		BinSource: r.URL.Query().Get("source"),
 	}
+
+	if q.AsProgram == "" && q.BinSource != "" {
+		q.AsProgram = q.BinSource
+	}
+
 	// set query from route
 	path := strings.TrimPrefix(r.URL.Path, "/")
 	// move to path with !
