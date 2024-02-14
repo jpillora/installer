@@ -26,6 +26,7 @@ const (
 var (
 	isTermRe     = regexp.MustCompile(`(?i)^(curl|wget)\/`)
 	isHomebrewRe = regexp.MustCompile(`(?i)^homebrew`)
+	isPowershell = regexp.MustCompile(`(?i)windows`)
 	errMsgRe     = regexp.MustCompile(`[^A-Za-z0-9\ :\/\.]`)
 	errNotFound  = errors.New("not found")
 )
@@ -69,17 +70,22 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ext := ""
 	script := ""
 	qtype := r.URL.Query().Get("type")
+
 	if qtype == "" {
 		ua := r.Header.Get("User-Agent")
+
 		switch {
 		case isTermRe.MatchString(ua):
 			qtype = "script"
 		case isHomebrewRe.MatchString(ua):
 			qtype = "ruby"
+		case isPowershell.MatchString(ua):
+			qtype = "powershell"
 		default:
 			qtype = "text"
 		}
 	}
+
 	// type specific error response
 	showError := func(msg string, code int) {
 		// prevent shell injection
@@ -98,6 +104,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/ruby")
 		ext = "rb"
 		script = string(scripts.Homebrew)
+	case "powershell":
+		w.Header().Set("Content-Type", "text/plain")
+		ext = "ps1"
+		script = string(scripts.Powershell)
 	case "text":
 		w.Header().Set("Content-Type", "text/plain")
 		ext = "txt"
@@ -176,16 +186,34 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// load template
-	t, err := template.New("installer").Parse(script)
-	if err != nil {
+
+	t := template.New("installer")
+	funcs := template.FuncMap{}
+
+	funcs["getArchURL"] = func(res Result, os string, arch string) (string, error) {
+		for _, asset := range res.Assets {
+			if string(asset.OS) == os && string(asset.Arch) == arch {
+				return string(asset.URL), nil
+			}
+		}
+		return "", fmt.Errorf("no asset found for %s/%s", os, arch)
+	}
+
+	t = t.Funcs(funcs)
+
+	if _, err := t.Parse(script); err != nil {
 		showError("installer BUG: "+err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	if result.BinSource == "" {
+		result.BinSource = result.Program
 	}
 
 	// execute template
 	buff := bytes.Buffer{}
 	if err := t.Execute(&buff, result); err != nil {
-		showError("Template error: "+err.Error(), http.StatusInternalServerError)
+		// showError("Template error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 

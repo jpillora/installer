@@ -1,0 +1,76 @@
+{{/* $appversion = "v1.0.3" */}}
+
+{{- $urlamd64 := getArchURL . "windows" "amd64" }} 
+{{- $urlarm64 := getArchURL . "windows" "arm64" }} 
+
+$url = "--not-generated--"
+
+$urlamd64 = "{{$urlamd64}}"
+$urlarm64 = "{{$urlarm64}}"
+$destinationPath = "$env:USERPROFILE\Documents\kl"
+
+$arch = "$env:PROCESSOR_ARCHITECTURE"
+
+$filename = "kloudlite-windows-$arch.zip"
+
+$zipFilePath = "$env:TEMP\$filename"
+$tempPath = "$env:TEMP\kl"
+
+$arch_lower=$arch.ToLower()
+
+Write-Host ""
+Write-Host "Installing kloudlite binary {{.BinSource}} ($arch_lower) version {{.Release}} at path '$destinationPath'"
+
+if ($arch -eq "ARM64") {
+    $url = $urlarm64
+} else {
+    $url = $urlamd64
+}
+
+# Create the destination directory if it doesn't exist
+if (-not (Test-Path $destinationPath)) {
+    New-Item -ItemType Directory -Force -Path $destinationPath
+}
+
+# Use Invoke-WebRequest to download the file
+Invoke-WebRequest -Uri $url -OutFile $zipFilePath
+
+# Expand the archive
+Expand-Archive -Path $zipFilePath -DestinationPath $tempPath
+
+Get-ChildItem -Path $tempPath -Filter *.exe -Recurse | Move-Item -Destination $destinationPath -Force
+
+# Clean up the downloaded ZIP and temporary extracted folder
+Remove-Item -Path $zipFilePath -Force
+Remove-Item -Path $tempPath -Recurse -Force
+
+# Get the current user's PATH environment variable
+$currentPath = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
+
+# Split the PATH variable into an array of individual paths
+$pathArray = $currentPath -split ";"
+
+$hasPath = "false"
+# Iterate over each path in the PATH variable
+foreach ($path in $pathArray) {
+    # Check if the current path contains the specific directory
+    if ($path -eq $destinationPath) {
+        $hasPath = "true"
+    }
+}
+
+if ($hasPath -eq "false") {
+# Update the PATH environment variable
+  if (-not [string]::IsNullOrWhiteSpace($currentPath)) {
+      $updatedPath = $currentPath + ";" + $destinationPath
+  } else {
+      $updatedPath = $destinationPath
+  }
+}
+
+# Set the updated PATH
+[System.Environment]::SetEnvironmentVariable("PATH", $updatedPath, [System.EnvironmentVariableTarget]::User)
+
+Write-Host ""
+Write-Host "[#] installation complete, use `{{.BinSource}} --help` to get started."
+Write-Host ""

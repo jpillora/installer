@@ -27,7 +27,6 @@ func (h *Handler) execute(q Query) (Result, error) {
 	ts := time.Now()
 	release, assets, err := h.getAssetsNoCache(q)
 
-	// fmt.Printf("release: %s\n", assets)
 	if err == nil {
 		//didn't need search
 		q.Search = false
@@ -152,8 +151,8 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		os := getOS(ga.Name)
 		arch := getArch(ga.Name)
 		//windows not supported yet
-		if os == "windows" {
-			log.Printf("fetched asset is for windows: %s", ga.Name)
+		if os == "windows" && fext != ".zip" {
+			// log.Printf("fetched asset is for windows: %s", ga.Name)
 			//TODO: powershell
 			// EG: iwr https://deno.land/x/install/install.ps1 -useb | iex
 			continue
