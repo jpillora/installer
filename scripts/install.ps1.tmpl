@@ -11,7 +11,7 @@ $destinationPath = "$env:USERPROFILE\Documents\kl"
 
 $arch = "$env:PROCESSOR_ARCHITECTURE"
 
-$filename = "kloudlite-windows-$arch.zip"
+$filename = "app-windows-$arch.zip"
 
 $zipFilePath = "$env:TEMP\$filename"
 $tempPath = "$env:TEMP\kl"
@@ -19,7 +19,7 @@ $tempPath = "$env:TEMP\kl"
 $arch_lower=$arch.ToLower()
 
 Write-Host ""
-Write-Host "Installing kloudlite binary {{.BinSource}} ($arch_lower) version {{.Release}} at path '$destinationPath'"
+Write-Host "Installing binary {{.BinSource}} ($arch_lower) version {{.Release}} at path '$destinationPath'"
 
 if ($arch -eq "ARM64") {
     $url = $urlarm64
