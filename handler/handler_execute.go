@@ -119,7 +119,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		fext := getFileExt(url)
 
 		if q.BinaryName != "" {
-			//filter by binary with it's name
+			//filter binary with it's name
 			if !strings.Contains(ga.Name[0:len(q.BinaryName)+1], fmt.Sprint(q.BinaryName, "-")) {
 				continue
 			}
