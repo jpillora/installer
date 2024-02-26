@@ -17,6 +17,7 @@ function install {
 	#settings
 	USER="{{ .User }}"
 	PROG="{{ .Program }}"
+	BIN_NAME="{{ .BinaryName }}"
 	ASPROG="{{ .AsProgram }}"
 	MOVE="{{ .MoveToPath }}"
 	RELEASE="{{ .Release }}"
@@ -93,6 +94,9 @@ function install {
 	#got URL! download it...
 	echo -n "{{ if .MoveToPath }}Installing{{ else }}Downloading{{ end }}"
 	echo -n " $USER/$PROG"
+	if [ ! -z "$BIN_NAME" ]; then
+		echo -n "/$BIN_NAME"
+	fi
 	if [ ! -z "$RELEASE" ]; then
 		echo -n " $RELEASE"
 	fi

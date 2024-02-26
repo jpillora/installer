@@ -31,9 +31,9 @@ var (
 )
 
 type Query struct {
-	User, Program, AsProgram, Release string
-	MoveToPath, Search, Insecure      bool
-	SudoMove                          bool // deprecated: not used, now automatically detected
+	User, Program, AsProgram, BinaryName, Release string
+	MoveToPath, Search, Insecure                  bool
+	SudoMove                                      bool // deprecated: not used, now automatically detected
 }
 
 type Result struct {
@@ -107,11 +107,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	q := Query{
-		User:      "",
-		Program:   "",
-		Release:   "",
-		Insecure:  r.URL.Query().Get("insecure") == "1",
-		AsProgram: r.URL.Query().Get("as"),
+		User:       "",
+		Program:    "",
+		Release:    "",
+		BinaryName: r.URL.Query().Get("bin"),
+		Insecure:   r.URL.Query().Get("insecure") == "1",
+		AsProgram:  r.URL.Query().Get("as"),
 	}
 	// set query from route
 	path := strings.TrimPrefix(r.URL.Path, "/")
@@ -124,6 +125,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	q.User, rest = splitHalf(path, "/")
 	q.Program, q.Release = splitHalf(rest, "@")
 	// no program? treat first part as program, use default user
+
+	if q.AsProgram == "" && q.BinaryName != "" {
+		q.AsProgram = q.BinaryName
+	}
+
 	if q.Program == "" {
 		q.Program = q.User
 		q.User = h.Config.User
