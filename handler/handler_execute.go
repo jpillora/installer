@@ -118,9 +118,9 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		//TODO deb,rpm etc
 		fext := getFileExt(url)
 
-		if q.BinaryName != "" {
+		if q.Selected != "" {
 			//filter binary with it's name
-			if !strings.Contains(ga.Name[0:len(q.BinaryName)+1], fmt.Sprint(q.BinaryName, "-")) {
+			if !strings.Contains(ga.Name[0:len(q.Selected)+1], fmt.Sprint(q.Selected, "-")) {
 				continue
 			}
 		}

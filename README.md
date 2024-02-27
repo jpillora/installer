@@ -36,8 +36,8 @@ curl https://i.jpillora.com/<query>! | bash
     * `type=homebrew` is **not** working at the moment – see [Homebrew](#homebrew)
 * `?insecure=1` Force `curl`/`wget` to skip certificate checks
 * `?as=` Force the binary to be named as this parameter value
-* `?bin=` Binary name, if **repository name** and **binary name** in release differs.
-    * **eg**: repo_name is **foobar** and binary name is **fb** in release then `?bin=fb`.
+* `?select=` Select binary, if **repository name** and **binary name** in release differs.
+    * **eg**: repo_name is **foobar** and binary name is **fb-client** and **fb-server** in release, Then `?select=fb-client` & `?select=fb-server` accordingly.
 
 ## Security
 
