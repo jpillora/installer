@@ -1,7 +1,7 @@
 repository: https://github.com/{{ .User }}/{{ .Program }}
 user: {{ .User }}
 program: {{ .Program }}{{if .Selected }}
-binary-name: {{.Selected}}{{end}}{{if .AsProgram }}
+selected-binary: {{.Selected}}{{end}}{{if .AsProgram }}
 as: {{ .AsProgram }}{{end}}
 release: {{ .Release }}
 move-into-path: {{ .MoveToPath }}
