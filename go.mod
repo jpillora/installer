@@ -1,6 +1,6 @@
 module github.com/jpillora/installer
 
-go 1.18
+go 1.19
 
 require (
 	github.com/jpillora/opts v1.1.2

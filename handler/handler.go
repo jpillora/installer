@@ -26,6 +26,7 @@ const (
 var (
 	isTermRe     = regexp.MustCompile(`(?i)^(curl|wget)\/`)
 	isHomebrewRe = regexp.MustCompile(`(?i)^homebrew`)
+	isPowershell = regexp.MustCompile(`(?i)windows`)
 	errMsgRe     = regexp.MustCompile(`[^A-Za-z0-9\ :\/\.]`)
 	errNotFound  = errors.New("not found")
 )
@@ -76,12 +77,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			qtype = "script"
 		case isHomebrewRe.MatchString(ua):
 			qtype = "ruby"
+		case isPowershell.MatchString(ua):
+			qtype = "powershell"
 		default:
 			qtype = "text"
 		}
 	}
 	// type specific error response
-	showError := func(msg string, code int) {
+	showError := func(msg string, _ int) {
 		// prevent shell injection
 		cleaned := errMsgRe.ReplaceAllString(msg, "")
 		if qtype == "script" {
@@ -102,6 +105,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
 		ext = "txt"
 		script = string(scripts.Text)
+	case "powershell":
+		w.Header().Set("Content-Type", "text/plain")
+		ext = "ps1"
+		script = string(scripts.Powershell)
 	default:
 		showError("Unknown type", http.StatusInternalServerError)
 		return
@@ -166,6 +173,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		showError(err.Error(), http.StatusBadGateway)
 		return
 	}
+
 	// load template
 	t, err := template.New("installer").Parse(script)
 	if err != nil {

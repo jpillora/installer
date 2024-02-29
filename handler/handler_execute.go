@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 )
@@ -128,6 +129,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		if fext == "" && ga.Size > 1024*1024 {
 			fext = ".bin" // +1MB binary
 		}
+
 		switch fext {
 		case ".bin", ".zip", ".tar.bz", ".tar.bz2", ".bz2", ".gz", ".tar.gz", ".tgz":
 			// valid
@@ -140,10 +142,11 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		arch := getArch(ga.Name)
 		//windows not supported yet
 		if os == "windows" {
-			log.Printf("fetched asset is for windows: %s", ga.Name)
-			//TODO: powershell
-			// EG: iwr https://deno.land/x/install/install.ps1 -useb | iex
-			continue
+			// with windows system commands, only zip can be extracted
+			if !slices.Contains([]string{".zip"}, fext) {
+				log.Printf("windows don't support fileextension %s ", fext)
+				continue
+			}
 		}
 		//unknown os, cant use
 		if os == "" {

@@ -1,0 +1,108 @@
+$user = "{{.User}}"
+$prog="{{ .Program }}"
+$sel_bin="{{ .Selected }}"
+$asProgram="{{ .AsProgram }}"
+$move="{{ .MoveToPath }}"
+$release="{{ .Release }}"
+$insecure="{{ .Insecure }}"
+
+$arch = "$env:PROCESSOR_ARCHITECTURE".ToLower()
+$url = ""
+$fext = ""
+
+{{- range .Assets}} {{- if eq .OS "windows" }}
+if ("{{.Arch}}" -eq $arch -and "{{.Type}}" -eq ".zip"){
+  $url = "{{.URL}}"
+  $fext = "{{.Type}}"
+}
+{{- end}} {{- end}}
+
+if($url -eq ""){
+  echo "No asset for platform windows-$arch"
+  return
+}
+
+
+if ($move -eq "true"){
+  # $out_dir="$env:USERPROFILE\bin"
+  $out_dir="C:\bin"
+}else{
+  $out_dir="$PWD"
+}
+
+# Create the destination directory if it doesn't exist
+if (-not (Test-Path $out_dir)) {
+  New-Item -ItemType Directory -Force -Path $out_dir
+}
+
+$filename = ""
+
+# to extract another file type rather than zip, third party application is needed.
+# so as windows only capable of extracting zip file with system commands.
+switch ($fext)
+{
+  .zip {
+    $filename = "app-$prog-$arch.zip";
+  }
+}
+
+if("" -eq $filename){
+  echo "file extension $fext not supported"
+  return
+}
+
+$zipFilePath = "$env:TEMP\$filename";
+$extPath = "$env:TEMP\$prog"
+
+# Downloading File
+if($sel_bin){
+  echo "[#] downloading $user/$prog/$sel_bin as $asProgram from $url"
+}else{
+  echo "[#] downloading $user/$prog as $asProgram from $url"
+}
+
+Invoke-WebRequest -Uri $url -OutFile $zipFilePath
+# Extracting zip
+echo "[#] extracting file"
+Expand-Archive -Path $zipFilePath -DestinationPath $extPath
+# Moving To out_dir
+Get-ChildItem -Path $extPath -Filter *.exe -Recurse | Move-Item -Destination $out_dir -Force
+# Clean up the downloaded ZIP and temporary extracted folder
+Remove-Item -Path $zipFilePath -Force
+Remove-Item -Path $extPath -Recurse -Force
+
+echo "[#] downloaded successfully to path $out_dir"
+if ($move -eq "false"){
+  return
+}
+
+echo "[#] setting $out_dir to path"
+# Get the current user's PATH environment variable
+$currentPath = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
+
+# Split the PATH variable into an array of individual paths
+$pathArray = $currentPath -split ";"
+
+$hasPath = "false"
+# Iterate over each path in the PATH variable
+foreach ($path in $pathArray) {
+    # Check if the current path contains the specific directory
+    if ($path -eq $out_dir) {
+        $hasPath = "true"
+    }
+}
+
+if ($hasPath -eq "false") {
+  # Update the PATH environment variable
+  if (-not [string]::IsNullOrWhiteSpace($currentPath)) {
+      $updatedPath = $currentPath + ";" + $out_dir
+  } else {
+      $updatedPath = $out_dir
+  }
+
+  # Set the updated PATH
+  [System.Environment]::SetEnvironmentVariable("PATH", $updatedPath, [System.EnvironmentVariableTarget]::User)
+  $env:Path = $out_dir 
+}
+
+echo "[#] installation complete"

@@ -1,0 +1,12 @@
+version: 3
+
+tasks:
+  run:
+    cmds:
+      - go run main.go
+  dev:
+    cmds:
+      - nodemon -q -e 'go,tmpl' --signal SIGTERM --exec "echo '# building' && task build && echo '# build success' && ./bin/installer || exit"
+  build:
+    cmds:
+      - go build -o ./bin/installer main.go
