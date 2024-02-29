@@ -120,7 +120,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 
 		if q.Selected != "" {
 			//filter binary with it's name
-			if !strings.Contains(ga.Name[0:len(q.Selected)+1], fmt.Sprint(q.Selected, "-")) {
+			if len(ga.Name) > len(q.Selected)+1 && !strings.Contains(ga.Name[0:len(q.Selected)+1], fmt.Sprint(q.Selected, "-")) {
 				continue
 			}
 		}
