@@ -31,9 +31,9 @@ var (
 )
 
 type Query struct {
-	User, Program, AsProgram, Release string
-	MoveToPath, Search, Insecure      bool
-	SudoMove                          bool // deprecated: not used, now automatically detected
+	User, Program, AsProgram, Selected, Release string
+	MoveToPath, Search, Insecure                bool
+	SudoMove                                    bool // deprecated: not used, now automatically detected
 }
 
 type Result struct {
@@ -110,6 +110,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		User:      "",
 		Program:   "",
 		Release:   "",
+		Selected:  r.URL.Query().Get("select"),
 		Insecure:  r.URL.Query().Get("insecure") == "1",
 		AsProgram: r.URL.Query().Get("as"),
 	}
@@ -124,6 +125,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	q.User, rest = splitHalf(path, "/")
 	q.Program, q.Release = splitHalf(rest, "@")
 	// no program? treat first part as program, use default user
+
+	if q.AsProgram == "" && q.Selected != "" {
+		q.AsProgram = q.Selected
+	}
+
 	if q.Program == "" {
 		q.Program = q.User
 		q.User = h.Config.User

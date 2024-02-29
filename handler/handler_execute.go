@@ -117,6 +117,14 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		//only binary containers are supported
 		//TODO deb,rpm etc
 		fext := getFileExt(url)
+
+		if q.Selected != "" {
+			//filter binary with it's name
+			if len(ga.Name) > len(q.Selected)+1 && !strings.Contains(ga.Name[0:len(q.Selected)+1], fmt.Sprint(q.Selected, "-")) {
+				continue
+			}
+		}
+
 		if fext == "" && ga.Size > 1024*1024 {
 			fext = ".bin" // +1MB binary
 		}
