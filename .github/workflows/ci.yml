@@ -1,9 +1,15 @@
 name: Build & Release
+
 on:
   pull_request: {}
   push: {}
   workflow_dispatch:
     inputs: {}
+
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build-binary:
     name: build-binary

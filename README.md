@@ -21,6 +21,7 @@ curl https://i.jpillora.com/<query>! | bash
 ```
 
 *Or you can use* `wget -qO- <url> | bash`
+
 *For windows use* `iwr <url> | iex`
 
 **Path API**
