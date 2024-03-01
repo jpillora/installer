@@ -26,14 +26,15 @@ const (
 var (
 	isTermRe     = regexp.MustCompile(`(?i)^(curl|wget)\/`)
 	isHomebrewRe = regexp.MustCompile(`(?i)^homebrew`)
+	isPowershell = regexp.MustCompile(`(?i)windows`)
 	errMsgRe     = regexp.MustCompile(`[^A-Za-z0-9\ :\/\.]`)
 	errNotFound  = errors.New("not found")
 )
 
 type Query struct {
-	User, Program, AsProgram, Release string
-	MoveToPath, Search, Insecure      bool
-	SudoMove                          bool // deprecated: not used, now automatically detected
+	User, Program, AsProgram, Selected, Release string
+	MoveToPath, Search, Insecure                bool
+	SudoMove                                    bool // deprecated: not used, now automatically detected
 }
 
 type Result struct {
@@ -76,12 +77,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			qtype = "script"
 		case isHomebrewRe.MatchString(ua):
 			qtype = "ruby"
+		case isPowershell.MatchString(ua):
+			qtype = "powershell"
 		default:
 			qtype = "text"
 		}
 	}
 	// type specific error response
-	showError := func(msg string, code int) {
+	showError := func(msg string, _ int) {
 		// prevent shell injection
 		cleaned := errMsgRe.ReplaceAllString(msg, "")
 		if qtype == "script" {
@@ -102,6 +105,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
 		ext = "txt"
 		script = string(scripts.Text)
+	case "powershell":
+		w.Header().Set("Content-Type", "text/plain")
+		ext = "ps1"
+		script = string(scripts.Powershell)
 	default:
 		showError("Unknown type", http.StatusInternalServerError)
 		return
@@ -110,6 +117,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		User:      "",
 		Program:   "",
 		Release:   "",
+		Selected:  r.URL.Query().Get("select"),
 		Insecure:  r.URL.Query().Get("insecure") == "1",
 		AsProgram: r.URL.Query().Get("as"),
 	}
@@ -120,9 +128,16 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		q.MoveToPath = true
 		path = strings.TrimRight(path, "!")
 	}
-	var rest string
-	q.User, rest = splitHalf(path, "/")
-	q.Program, q.Release = splitHalf(rest, "@")
+
+	var initial string
+	initial, q.Release = splitHalf(path, "@")
+	q.User, q.Program = splitHalf(initial, "/")
+
+	// change binary name to selected-binary
+	if q.AsProgram == "" && q.Selected != "" {
+		q.AsProgram = q.Selected
+	}
+
 	// no program? treat first part as program, use default user
 	if q.Program == "" {
 		q.Program = q.User
@@ -143,6 +158,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.Config.ForceRepo != "" {
 		q.Program = h.Config.ForceRepo
 	}
+
 	// validate query
 	valid := q.Program != ""
 	if !valid && path == "" {
@@ -160,6 +176,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		showError(err.Error(), http.StatusBadGateway)
 		return
 	}
+
 	// load template
 	t, err := template.New("installer").Parse(script)
 	if err != nil {

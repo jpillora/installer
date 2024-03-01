@@ -22,6 +22,8 @@ curl https://i.jpillora.com/<query>! | bash
 
 *Or you can use* `wget -qO- <url> | bash`
 
+*For windows use* `iwr <url> | iex`
+
 **Path API**
 
 * `user` Github user (defaults to @jpillora, customisable if you [host your own](#host-your-own), searches the web to pick most relevant `user` when `repo` not found)
@@ -36,6 +38,8 @@ curl https://i.jpillora.com/<query>! | bash
     * `type=homebrew` is **not** working at the moment – see [Homebrew](#homebrew)
 * `?insecure=1` Force `curl`/`wget` to skip certificate checks
 * `?as=` Force the binary to be named as this parameter value
+* `?select=` Select binary, if **repository name** and **binary name** in release differs.
+    * **eg**: repo_name is **foobar** and binary name is **fb-client** and **fb-server** in release, Then `?select=fb-client` & `?select=fb-server` accordingly.
 
 ## Security
 

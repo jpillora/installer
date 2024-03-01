@@ -10,3 +10,6 @@ var Shell []byte
 
 //go:embed install.rb.tmpl
 var Homebrew []byte
+
+//go:embed install.ps1.tmpl
+var Powershell []byte
