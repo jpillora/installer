@@ -128,15 +128,17 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		q.MoveToPath = true
 		path = strings.TrimRight(path, "!")
 	}
-	var rest string
-	q.User, rest = splitHalf(path, "/")
-	q.Program, q.Release = splitHalf(rest, "@")
-	// no program? treat first part as program, use default user
 
+	var initial string
+	initial, q.Release = splitHalf(path, "@")
+	q.User, q.Program = splitHalf(initial, "/")
+
+	// change binary name to selected-binary
 	if q.AsProgram == "" && q.Selected != "" {
 		q.AsProgram = q.Selected
 	}
 
+	// no program? treat first part as program, use default user
 	if q.Program == "" {
 		q.Program = q.User
 		q.User = h.Config.User
@@ -156,6 +158,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.Config.ForceRepo != "" {
 		q.Program = h.Config.ForceRepo
 	}
+
 	// validate query
 	valid := q.Program != ""
 	if !valid && path == "" {
