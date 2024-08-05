@@ -2,7 +2,7 @@ repository: https://github.com/{{ .User }}/{{ .Program }}
 user: {{ .User }}
 program: {{ .Program }}{{if .AsProgram }}
 as: {{ .AsProgram }}{{end}}
-release: {{ .ResolvedResolve }}
+release: {{ .ResolvedRelease }}
 move-into-path: {{ .MoveToPath }}
 sudo-move: {{ .SudoMove }}
 used-search: {{ .Search }}

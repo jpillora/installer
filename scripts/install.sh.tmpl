@@ -19,7 +19,7 @@ function install {
 	PROG="{{ .Program }}"
 	ASPROG="{{ .AsProgram }}"
 	MOVE="{{ .MoveToPath }}"
-	RELEASE="{{ .Release }}" # {{ .ResolvedResolve }}
+	RELEASE="{{ .Release }}" # {{ .ResolvedRelease }}
 	INSECURE="{{ .Insecure }}"
 	OUT_DIR="{{ if .MoveToPath }}/usr/local/bin{{ else }}$(pwd){{ end }}"
 	GH="https://github.com"

@@ -39,7 +39,7 @@ type Query struct {
 
 type Result struct {
 	Query
-	ResolvedResolve string
+	ResolvedRelease string
 	Timestamp       time.Time
 	Assets          Assets
 	M1Asset         bool

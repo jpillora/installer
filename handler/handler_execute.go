@@ -58,7 +58,7 @@ func (h *Handler) execute(q Query) (Result, error) {
 	result := Result{
 		Timestamp:       ts,
 		Query:           q,
-		ResolvedResolve: release,
+		ResolvedRelease: release,
 		Assets:          assets,
 		M1Asset:         assets.HasM1(),
 	}
