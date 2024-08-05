@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 )
@@ -55,10 +56,11 @@ func (h *Handler) execute(q Query) (Result, error) {
 		q.Release = release
 	}
 	result := Result{
-		Timestamp: ts,
-		Query:     q,
-		Assets:    assets,
-		M1Asset:   assets.HasM1(),
+		Timestamp:       ts,
+		Query:           q,
+		ResolvedResolve: release,
+		Assets:          assets,
+		M1Asset:         assets.HasM1(),
 	}
 	//success store results
 	h.cacheMut.Lock()
@@ -110,8 +112,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 	if l := len(sumIndex); l > 0 {
 		log.Printf("fetched %d asset shasums", l)
 	}
-	assets := Assets{}
-	index := map[string]bool{}
+	index := map[string]Asset{}
 	for _, ga := range ghas {
 		url := ga.BrowserDownloadURL
 		//only binary containers are supported
@@ -142,7 +143,11 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 			log.Printf("fetched asset has unknown os: %s", ga.Name)
 			continue
 		}
-		log.Printf("fetched asset: %s", ga.Name)
+		// user selecting a particular asset?
+		if q.Select != "" && !strings.Contains(ga.Name, q.Select) {
+			log.Printf("select excludes asset: %s", ga.Name)
+			continue
+		}
 		asset := Asset{
 			OS:     os,
 			Arch:   arch,
@@ -152,16 +157,30 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 			SHA256: sumIndex[ga.Name],
 		}
 		//there can only be 1 file for each OS/Arch
-		if index[asset.Key()] {
-			continue
+		key := asset.Key()
+		other, exists := index[key]
+		if exists {
+			gnu := func(s string) bool { return strings.Contains(s, "gnu") }
+			musl := func(s string) bool { return strings.Contains(s, "musl") }
+			g2m := gnu(other.Name) && !musl(other.Name) && !gnu(asset.Name) && musl(asset.Name)
+			// prefer musl over glib for portability, override with select=gnu
+			if !g2m {
+				continue
+			}
 		}
-		index[asset.Key()] = true
-		//include!
-		assets = append(assets, asset)
+		index[key] = asset
 	}
-	if len(assets) == 0 {
+	if len(index) == 0 {
 		return release, nil, errors.New("no downloads found for this release")
 	}
+	assets := Assets{}
+	for _, a := range index {
+		log.Printf("including asset: %s (%s)", a.Name, a.Key())
+		assets = append(assets, a)
+	}
+	sort.Slice(assets, func(i, j int) bool {
+		return assets[i].Key() < assets[j].Key()
+	})
 	return release, assets, nil
 }
 

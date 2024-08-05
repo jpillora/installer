@@ -31,16 +31,18 @@ var (
 )
 
 type Query struct {
-	User, Program, AsProgram, Release string
-	MoveToPath, Search, Insecure      bool
-	SudoMove                          bool // deprecated: not used, now automatically detected
+	User, Program, Release       string
+	AsProgram, Select            string
+	MoveToPath, Search, Insecure bool
+	SudoMove                     bool // deprecated: not used, now automatically detected
 }
 
 type Result struct {
 	Query
-	Timestamp time.Time
-	Assets    Assets
-	M1Asset   bool
+	ResolvedResolve string
+	Timestamp       time.Time
+	Assets          Assets
+	M1Asset         bool
 }
 
 func (q Query) cacheKey() string {
@@ -90,6 +92,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, cleaned, http.StatusInternalServerError)
 	}
 	switch qtype {
+	case "json":
+		w.Header().Set("Content-Type", "application/json")
+		ext = "json"
+		script = ""
 	case "script":
 		w.Header().Set("Content-Type", "text/x-shellscript")
 		ext = "sh"
@@ -112,6 +118,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Release:   "",
 		Insecure:  r.URL.Query().Get("insecure") == "1",
 		AsProgram: r.URL.Query().Get("as"),
+		Select:    r.URL.Query().Get("select"),
 	}
 	// set query from route
 	path := strings.TrimPrefix(r.URL.Path, "/")
@@ -119,6 +126,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if strings.HasSuffix(path, "!") {
 		q.MoveToPath = true
 		path = strings.TrimRight(path, "!")
+	}
+	if r.URL.Query().Get("move") == "1" {
+		q.MoveToPath = true // also allow move=1 if bang in urls cause issues
 	}
 	var rest string
 	q.User, rest = splitHalf(path, "/")
@@ -160,6 +170,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		showError(err.Error(), http.StatusBadGateway)
 		return
 	}
+	// no render script? just output as json
+	if script == "" {
+		b, _ := json.MarshalIndent(result, "", "  ")
+		w.Write(b)
+		return
+	}
 	// load template
 	t, err := template.New("installer").Parse(script)
 	if err != nil {
@@ -172,7 +188,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		showError("Template error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("serving script %s/%s@%s (%s)", q.User, q.Program, q.Release, ext)
+	log.Printf("serving script %s/%s@%s (%s)", result.User, result.Program, result.Release, ext)
 	// ready
 	w.Write(buff.Bytes())
 }
@@ -228,10 +244,8 @@ func (h *Handler) get(url string, v interface{}) error {
 		b, _ := io.ReadAll(resp.Body)
 		return errors.New(http.StatusText(resp.StatusCode) + " " + string(b))
 	}
-
 	if err := json.NewDecoder(resp.Body).Decode(v); err != nil {
 		return fmt.Errorf("download failed: %s: %s", url, err)
 	}
-
 	return nil
 }

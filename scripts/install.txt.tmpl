@@ -2,10 +2,11 @@ repository: https://github.com/{{ .User }}/{{ .Program }}
 user: {{ .User }}
 program: {{ .Program }}{{if .AsProgram }}
 as: {{ .AsProgram }}{{end}}
-release: {{ .Release }}
+release: {{ .ResolvedResolve }}
 move-into-path: {{ .MoveToPath }}
 sudo-move: {{ .SudoMove }}
 used-search: {{ .Search }}
+asset-select: {{ .Select }}
 
 release assets:
 {{ range .Assets }}  {{ .Key }}
