@@ -11,12 +11,12 @@ import (
 	"time"
 )
 
-func (h *Handler) execute(q Query) (Result, error) {
+func (h *Handler) execute(q Query) (QueryResult, error) {
 	//load from cache
 	key := q.cacheKey()
 	h.cacheMut.Lock()
 	if h.cache == nil {
-		h.cache = map[string]Result{}
+		h.cache = map[string]QueryResult{}
 	}
 	cached, ok := h.cache[key]
 	h.cacheMut.Unlock()
@@ -48,14 +48,14 @@ func (h *Handler) execute(q Query) (Result, error) {
 	}
 	//asset fetch failed, dont cache
 	if err != nil {
-		return Result{}, err
+		return QueryResult{}, err
 	}
 	//success
 	if q.Release == "" && release != "" {
 		log.Printf("detected release: %s", release)
 		q.Release = release
 	}
-	result := Result{
+	result := QueryResult{
 		Timestamp:       ts,
 		Query:           q,
 		ResolvedRelease: release,

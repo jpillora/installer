@@ -57,13 +57,22 @@ function install {
 		GET="$GET -H 'Authorization: $AUTH'"
 	fi
 	#find OS #TODO BSDs and other posixs
-	case `uname -s` in
-	Darwin) OS="darwin";;
-	Linux) OS="linux";;
-	*) fail "unknown os: $(uname -s)";;
-	esac
+	OS="{{ .OS }}"
+	if [ -n "$OS" ]; then
+		echo "Override OS: $OS"
+	else
+		OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+		case "$OS" in
+		darwin) OS="darwin";;
+		linux) OS="linux";;
+		*) fail "unknown os: $(uname -s)";;
+		esac
+	fi
 	#find ARCH
-	if uname -m | grep -E '(arm|arch)64' > /dev/null; then
+	ARCH="{{ .Arch }}"
+	if [ -n "$ARCH" ]; then
+		echo "Override architecture: $ARCH"
+	elif uname -m | grep -E '(arm|arch)64' > /dev/null; then
 		ARCH="arm64"
 		{{ if not .M1Asset }}
 		# no m1 assets. if on mac arm64, rosetta allows fallback to amd64

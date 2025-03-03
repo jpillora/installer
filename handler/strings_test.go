@@ -20,3 +20,18 @@ func TestFilExt(t *testing.T) {
 		}
 	}
 }
+
+func TestOSArch(t *testing.T) {
+	for _, tc := range []struct {
+		name, os, arch string
+	}{
+		// m"arm"ite
+		{"marmite-0.2.5-x86_64-unknown-linux-musl.tar.gz", "linux", "amd64"},
+	} {
+		os := getOS(tc.name)
+		arch := getArch(tc.name)
+		if os != tc.os || arch != tc.arch {
+			t.Fatalf("file '%s' results in %s/%s, expected %s/%s", tc.name, os, arch, tc.os, tc.arch)
+		}
+	}
+}

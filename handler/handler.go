@@ -34,10 +34,11 @@ type Query struct {
 	User, Program, Release       string
 	AsProgram, Select            string
 	MoveToPath, Search, Insecure bool
-	SudoMove                     bool // deprecated: not used, now automatically detected
+	SudoMove                     bool   // deprecated: not used, now automatically detected
+	OS, Arch                     string // override OS and Arch
 }
 
-type Result struct {
+type QueryResult struct {
 	Query
 	ResolvedRelease string
 	Timestamp       time.Time
@@ -58,7 +59,7 @@ func (q Query) cacheKey() string {
 type Handler struct {
 	Config
 	cacheMut sync.Mutex
-	cache    map[string]Result
+	cache    map[string]QueryResult
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -119,6 +120,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Insecure:  r.URL.Query().Get("insecure") == "1",
 		AsProgram: r.URL.Query().Get("as"),
 		Select:    r.URL.Query().Get("select"),
+		OS:        r.URL.Query().Get("os"),
+		Arch:      r.URL.Query().Get("arch"),
 	}
 	// set query from route
 	path := strings.TrimPrefix(r.URL.Path, "/")

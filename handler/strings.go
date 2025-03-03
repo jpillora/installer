@@ -1,12 +1,13 @@
 package handler
 
 import (
+	"log"
 	"regexp"
 	"strings"
 )
 
 var (
-	archRe     = regexp.MustCompile(`(arm64|arm|386|686|amd64|x86_64|aarch64|32|64)`)
+	archRe     = regexp.MustCompile(`(arm64|386|686|amd64|x86_64|aarch64|\barm\b|\b32\b|\b64\b)`)
 	fileExtRe  = regexp.MustCompile(`(\.tar)?(\.[a-z][a-z0-9]+)$`)
 	posixOSRe  = regexp.MustCompile(`(darwin|linux|(net|free|open)bsd|mac|osx|windows|win)`)
 	checksumRe = regexp.MustCompile(`(checksums|sha256sums)`)
@@ -27,6 +28,7 @@ func getOS(s string) string {
 func getArch(s string) string {
 	s = strings.ToLower(s)
 	a := archRe.FindString(s)
+	log.Printf(">>> %s = %s", s, a)
 	//arch modifications
 	if a == "64" || a == "x86_64" || a == "" {
 		a = "amd64" //default
