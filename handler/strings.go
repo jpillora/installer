@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"regexp"
 	"strings"
 )
@@ -28,7 +27,6 @@ func getOS(s string) string {
 func getArch(s string) string {
 	s = strings.ToLower(s)
 	a := archRe.FindString(s)
-	log.Printf(">>> %s = %s", s, a)
 	//arch modifications
 	if a == "64" || a == "x86_64" || a == "" {
 		a = "amd64" //default
