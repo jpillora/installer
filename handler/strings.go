@@ -6,7 +6,6 @@ import (
 )
 
 var (
-	archRe     = regexp.MustCompile(`(arm64|386|686|amd64|x86_64|aarch64|\barm\b|\b32\b|\b64\b)`)
 	fileExtRe  = regexp.MustCompile(`(\.tar)?(\.[a-z][a-z0-9]+)$`)
 	posixOSRe  = regexp.MustCompile(`(darwin|linux|(net|free|open)bsd|mac|osx|windows|win)`)
 	checksumRe = regexp.MustCompile(`(checksums|sha256sums)`)
@@ -25,17 +24,28 @@ func getOS(s string) string {
 }
 
 func getArch(s string) string {
+	var (
+		// in case of no match, default to amd64
+		arch = "amd64"
+		// '_' in 'linux_x32' will not match '\b', so the '\b' can only match the end of string
+		archReAmd64 = regexp.MustCompile(`(amd64|x86_64|x?64(bit)?)\b`)
+		archRe386   = regexp.MustCompile(`(386|686|x?32(bit)?)\b`)
+		archReArm64 = regexp.MustCompile(`(arm64|aarch64)\b`)
+		archReArm   = regexp.MustCompile(`(arm(v[567])?)\b`)
+	)
+
 	s = strings.ToLower(s)
-	a := archRe.FindString(s)
-	//arch modifications
-	if a == "64" || a == "x86_64" || a == "" {
-		a = "amd64" //default
-	} else if a == "32" || a == "686" {
-		a = "386"
-	} else if a == "aarch64" {
-		a = "arm64"
+	switch {
+	case archReArm64.MatchString(s):
+		return "arm64"
+	case archReAmd64.MatchString(s):
+		return "amd64"
+	case archReArm.MatchString(s):
+		return "arm"
+	case archRe386.MatchString(s):
+		return "386"
 	}
-	return a
+	return arch
 }
 
 func getFileExt(s string) string {

@@ -27,6 +27,24 @@ func TestOSArch(t *testing.T) {
 	}{
 		// m"arm"ite
 		{"marmite-0.2.5-x86_64-unknown-linux-musl.tar.gz", "linux", "amd64"},
+		{"yt-dlp_linux", "linux", "amd64"},
+		{"gitleaks_8.24.0_linux_x64.tar.gz", "linux", "amd64"},
+		{"gitleaks_8.24.0_linux_x32.tar.gz", "linux", "386"},
+		{"gitleaks_8.24.0_linux_armv6.tar.gz", "linux", "arm"},
+		{"gitleaks_8.24.0_linux_arm64.tar.gz", "linux", "arm64"},
+		{"gitui-linux-x86_64.tar.gz", "linux", "amd64"},
+		{"gitui-linux-arm.tar.gz", "linux", "arm"},
+		{"gitui-linux-aarch64.tar.gz", "linux", "arm64"},
+		{"gg-linux-x86_64", "linux", "amd64"},
+		{"gg-linux-armv5", "linux", "arm"},
+		{"gg-linux-arm64", "linux", "arm64"},
+		{"croc_v10.2.1_Linux-64bit.tar.gz", "linux", "amd64"},
+		{"croc_v10.2.1_Linux-32bit.tar.gz", "linux", "386"},
+		{"croc_v10.2.1_Linux-ARM.tar.gz", "linux", "arm"},
+		{"croc_v10.2.1_Linux-ARM64.tar.gz", "linux", "arm64"},
+		{"ouch-x86_64-unknown-linux-musl.tar.gz", "linux", "amd64"},
+		{"ouch-armv7-unknown-linux-musleabihf.tar.gz", "linux", "arm"},
+		{"ouch-aarch64-unknown-linux-musl.tar.gz", "linux", "arm64"},
 	} {
 		os := getOS(tc.name)
 		arch := getArch(tc.name)
