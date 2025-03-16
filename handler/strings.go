@@ -20,8 +20,6 @@ func getOS(s string) string {
 
 func getArch(s string) string {
 	var (
-		// in case of no match, default to amd64
-		arch = "amd64"
 		// '_' in 'linux_x32' will not match '\b', so the '\b' can only match the end of string
 		archReAmd64 = regexp.MustCompile(`(amd64|x86_64|x?64(bit)?)\b`)
 		archRe386   = regexp.MustCompile(`(386|686|x?32(bit)?)\b`)
@@ -39,8 +37,10 @@ func getArch(s string) string {
 		return "arm"
 	case archRe386.MatchString(s):
 		return "386"
+	// in case of no match, default to amd64
+	default:
+		return "amd64"
 	}
-	return arch
 }
 
 func getFileExt(s string) string {
