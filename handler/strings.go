@@ -5,14 +5,9 @@ import (
 	"strings"
 )
 
-var (
-	fileExtRe  = regexp.MustCompile(`(\.tar)?(\.[a-z][a-z0-9]+)$`)
-	posixOSRe  = regexp.MustCompile(`(darwin|linux|(net|free|open)bsd|mac|osx|windows|win)`)
-	checksumRe = regexp.MustCompile(`(checksums|sha256sums)`)
-)
-
 func getOS(s string) string {
 	s = strings.ToLower(s)
+	posixOSRe := regexp.MustCompile(`(darwin|linux|(net|free|open)bsd|mac|osx|windows|win)`)
 	o := posixOSRe.FindString(s)
 	if o == "mac" || o == "osx" {
 		o = "darwin"
@@ -49,6 +44,7 @@ func getArch(s string) string {
 }
 
 func getFileExt(s string) string {
+	fileExtRe := regexp.MustCompile(`(\.tar)?(\.[a-z][a-z0-9]+)$`)
 	return fileExtRe.FindString(s)
 }
 
