@@ -6,16 +6,25 @@ import (
 )
 
 func getOS(s string) string {
+	var (
+		// '_' in 'linux_x32' will not match '\b', so the '\b' can only match the start of string
+		oSReDarwin  = regexp.MustCompile(`\b(darwin|mac|osx)`)
+		osReWindows = regexp.MustCompile(`\b(win|windows)`)
+		unixOSRe    = regexp.MustCompile(`\b(linux|(net|free|open)bsd)`)
+	)
+
 	s = strings.ToLower(s)
-	posixOSRe := regexp.MustCompile(`(darwin|linux|(net|free|open)bsd|mac|osx|windows|win)`)
-	o := posixOSRe.FindString(s)
-	if o == "mac" || o == "osx" {
-		o = "darwin"
+	switch {
+	case oSReDarwin.MatchString(s):
+		return "darwin"
+	case osReWindows.MatchString(s):
+		return "windows"
+	case unixOSRe.MatchString(s):
+		return unixOSRe.FindString(s)
+	// in case of no match, default to linux
+	default:
+		return "linux"
 	}
-	if o == "win" {
-		o = "windows"
-	}
-	return o
 }
 
 func getArch(s string) string {

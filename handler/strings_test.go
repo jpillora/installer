@@ -49,6 +49,10 @@ func TestOSArch(t *testing.T) {
 		{"crun-1.20-linux-ppc64le", "linux", "ppc64le"},
 		{"crun-1.20-linux-riscv64", "linux", "riscv64"},
 		{"crun-1.20-linux-s390x", "linux", "s390x"},
+		{"libtree_aarch64", "linux", "arm64"},
+		{"libtree_armv6l", "linux", "arm"},
+		{"libtree_i686", "linux", "386"},
+		{"libtree_x86_64", "linux", "amd64"},
 	} {
 		os := getOS(tc.name)
 		arch := getArch(tc.name)
