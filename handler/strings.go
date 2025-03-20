@@ -30,18 +30,11 @@ func getOS(s string) string {
 func getArch(s string) string {
 	var (
 		// '_' in 'linux_x32' will not match '\b', so the '\b' can only match the end of string
-		archReAmd64    = regexp.MustCompile(`(amd64|x86_64)\b`)
-		archRe386      = regexp.MustCompile(`(386|686)\b`)
-		archReArm64    = regexp.MustCompile(`(arm64|aarch64)\b`)
-		archReArm      = regexp.MustCompile(`(arm(v[567])?[eh]?[fl]?)\b`)
-		archReMips     = regexp.MustCompile(`(mips)\b`)
-		archReMips64   = regexp.MustCompile(`(mips64)\b`)
-		archReMips64Le = regexp.MustCompile(`(mips64le)\b`)
-		archReMipsLe   = regexp.MustCompile(`(mipsle)\b`)
-		archRePpc64    = regexp.MustCompile(`(ppc64)\b`)
-		archRePpc64Le  = regexp.MustCompile(`(ppc64le)\b`)
-		archReRiscv64  = regexp.MustCompile(`(riscv64)\b`)
-		archReS390x    = regexp.MustCompile(`(s390x)\b`)
+		archReAmd64 = regexp.MustCompile(`(amd64|x86_64)\b`)
+		archRe386   = regexp.MustCompile(`(386|686)\b`)
+		archReArm64 = regexp.MustCompile(`(arm64|aarch64)\b`)
+		archReArm   = regexp.MustCompile(`(arm(v[567])?[eh]?[fl]?)\b`)
+		archReMisc  = regexp.MustCompile(`(mips|mips64|mips64le|mipsle|ppc64|ppc64le|riscv64|s390x)\b`)
 	)
 
 	s = strings.ToLower(s)
@@ -54,22 +47,8 @@ func getArch(s string) string {
 		return "arm"
 	case archRe386.MatchString(s):
 		return "386"
-	case archReMips.MatchString(s):
-		return "mips"
-	case archReMips64.MatchString(s):
-		return "mips64"
-	case archReMips64Le.MatchString(s):
-		return "mips64le"
-	case archReMipsLe.MatchString(s):
-		return "mipsle"
-	case archRePpc64.MatchString(s):
-		return "ppc64"
-	case archRePpc64Le.MatchString(s):
-		return "ppc64le"
-	case archReRiscv64.MatchString(s):
-		return "riscv64"
-	case archReS390x.MatchString(s):
-		return "s390x"
+	case archReMisc.MatchString(s):
+		return archReMisc.FindString(s)
 
 	// fuzz match 'x?32(bit)?'
 	case regexp.MustCompile(`(x?32(bit)?)\b`).
