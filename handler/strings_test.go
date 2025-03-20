@@ -28,6 +28,7 @@ func TestOSArch(t *testing.T) {
 		// m"arm"ite
 		{"marmite-0.2.5-x86_64-unknown-linux-musl.tar.gz", "linux", "amd64"},
 		{"yt-dlp_linux", "linux", "amd64"},
+		{"yt-dlp_linux_armv7l", "linux", "arm"},
 		{"gitleaks_8.24.0_linux_x64.tar.gz", "linux", "amd64"},
 		{"gitleaks_8.24.0_linux_x32.tar.gz", "linux", "386"},
 		{"gitleaks_8.24.0_linux_armv6.tar.gz", "linux", "arm"},
