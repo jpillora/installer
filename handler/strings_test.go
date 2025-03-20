@@ -45,6 +45,9 @@ func TestOSArch(t *testing.T) {
 		{"ouch-x86_64-unknown-linux-musl.tar.gz", "linux", "amd64"},
 		{"ouch-armv7-unknown-linux-musleabihf.tar.gz", "linux", "arm"},
 		{"ouch-aarch64-unknown-linux-musl.tar.gz", "linux", "arm64"},
+		{"crun-1.20-linux-ppc64le", "linux", "ppc64le"},
+		{"crun-1.20-linux-riscv64", "linux", "riscv64"},
+		{"crun-1.20-linux-s390x", "linux", "s390x"},
 	} {
 		os := getOS(tc.name)
 		arch := getArch(tc.name)
