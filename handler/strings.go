@@ -21,8 +21,8 @@ func getOS(s string) string {
 func getArch(s string) string {
 	var (
 		// '_' in 'linux_x32' will not match '\b', so the '\b' can only match the end of string
-		archReAmd64    = regexp.MustCompile(`(amd64|x86_64|x?64(bit)?)\b`)
-		archRe386      = regexp.MustCompile(`(386|686|x?32(bit)?)\b`)
+		archReAmd64    = regexp.MustCompile(`(amd64|x86_64)\b`)
+		archRe386      = regexp.MustCompile(`(386|686)\b`)
 		archReArm64    = regexp.MustCompile(`(arm64|aarch64)\b`)
 		archReArm      = regexp.MustCompile(`(arm(v[567])?)\b`)
 		archReMips     = regexp.MustCompile(`(mips)\b`)
@@ -61,7 +61,13 @@ func getArch(s string) string {
 		return "riscv64"
 	case archReS390x.MatchString(s):
 		return "s390x"
+
+	// fuzz match 'x?32(bit)?'
+	case regexp.MustCompile(`(x?32(bit)?)\b`).
+		MatchString(s):
+		return "386"
 	// in case of no match, default to amd64
+	// fuzz match 'x?64(bit)?'
 	default:
 		return "amd64"
 	}
