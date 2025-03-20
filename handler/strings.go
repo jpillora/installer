@@ -33,7 +33,7 @@ func getArch(s string) string {
 		archReAmd64    = regexp.MustCompile(`(amd64|x86_64)\b`)
 		archRe386      = regexp.MustCompile(`(386|686)\b`)
 		archReArm64    = regexp.MustCompile(`(arm64|aarch64)\b`)
-		archReArm      = regexp.MustCompile(`(arm(v[567]h?l?)?)\b`)
+		archReArm      = regexp.MustCompile(`(arm(v[567])?[eh]?[fl]?)\b`)
 		archReMips     = regexp.MustCompile(`(mips)\b`)
 		archReMips64   = regexp.MustCompile(`(mips64)\b`)
 		archReMips64Le = regexp.MustCompile(`(mips64le)\b`)
