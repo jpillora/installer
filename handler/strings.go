@@ -7,10 +7,20 @@ import (
 
 func getOS(s string) string {
 	var (
-		// '_' in 'linux_x32' will not match '\b', so the '\b' can only match the start of string
-		oSReDarwin  = regexp.MustCompile(`\b(darwin|mac|osx)`)
-		osReWindows = regexp.MustCompile(`\b(win|windows)`)
-		unixOSRe    = regexp.MustCompile(`\b(linux|(net|free|open)bsd)`)
+		// '\b' ([^a-zA-Z0-9_]) is not ideal for matching the boundary
+		// for example: gitleaks_8.24.0_darwin_x64.tar.gz
+		// Since the RE2 does not support lookaheads & lookbehinds, we use the following workaround:
+		// (?:[^a-zA-Z0-9]|^) to match the beginning of the substring,
+		// and (?:[^a-zA-Z0-9]|$) to match the end of the substring.
+		// Then we use the regexp.FindStringSubmatch to extract the first capturing group.
+
+		// for OS detection, it is prefered to do a prefix match,
+		// so that example_macos_x64.tar.gz can also be matched.
+		oSReDarwin  = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(darwin|mac|osx)`)
+		osReWindows = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(win|windows)`)
+		// It is only necessary to match both the beginning and end of the substring,
+		// if the regexp is meant to match the whole string.
+		unixOSRe = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(linux|(net|free|open)bsd)(?:[^a-zA-Z0-9]|$)`)
 	)
 
 	s = strings.ToLower(s)
@@ -20,7 +30,8 @@ func getOS(s string) string {
 	case osReWindows.MatchString(s):
 		return "windows"
 	case unixOSRe.MatchString(s):
-		return unixOSRe.FindString(s)
+		// return the first capturing group (contains only the alphanumeric characters)
+		return unixOSRe.FindStringSubmatch(s)[1]
 	// in case of no match, default to linux
 	default:
 		return "linux"
@@ -29,12 +40,13 @@ func getOS(s string) string {
 
 func getArch(s string) string {
 	var (
-		// '_' in 'linux_x32' will not match '\b', so the '\b' can only match the end of string
-		archReAmd64 = regexp.MustCompile(`(amd64|x86_64)\b`)
-		archRe386   = regexp.MustCompile(`(386|686)\b`)
-		archReArm64 = regexp.MustCompile(`(arm64|aarch64)\b`)
-		archReArm   = regexp.MustCompile(`(arm(v[567])?[eh]?[fl]?)\b`)
-		archReMisc  = regexp.MustCompile(`(mips|mips64|mips64le|mipsle|ppc64|ppc64le|riscv64|s390x)\b`)
+		// for architecture detection, it is prefered to do a suffix match,
+		// so that example_i686.tar.gz can also be matched.
+		archReAmd64 = regexp.MustCompile(`(amd64|x86_64)(?:[^a-zA-Z0-9]|$)`)
+		archRe386   = regexp.MustCompile(`(386|686)(?:[^a-zA-Z0-9]|$)`)
+		archReArm64 = regexp.MustCompile(`(arm64|aarch64)(?:[^a-zA-Z0-9]|$)`)
+		archReArm   = regexp.MustCompile(`(arm(v[567])?[eh]?[fl]?)(?:[^a-zA-Z0-9]|$)`)
+		archReMisc  = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(mips|mips64|mips64le|mipsle|ppc64|ppc64le|riscv64|s390x)(?:[^a-zA-Z0-9]|$)`)
 	)
 
 	s = strings.ToLower(s)
@@ -48,7 +60,7 @@ func getArch(s string) string {
 	case archRe386.MatchString(s):
 		return "386"
 	case archReMisc.MatchString(s):
-		return archReMisc.FindString(s)
+		return archReMisc.FindStringSubmatch(s)[1]
 
 	// fuzz match 'x?32(bit)?'
 	case regexp.MustCompile(`(x?32(bit)?)\b`).
