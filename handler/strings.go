@@ -17,10 +17,10 @@ func getOS(s string) string {
 		// for OS detection, it is prefered to do a prefix match,
 		// so that example_macos_x64.tar.gz can also be matched.
 		oSReDarwin  = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(darwin|mac|osx)`)
-		osReWindows = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(win|windows)`)
+		osReWindows = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(win)`)
 		// It is only necessary to match both the beginning and end of the substring,
 		// if the regexp is meant to match the whole string.
-		unixOSRe = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(linux|(net|free|open)bsd)(?:[^a-zA-Z0-9]|$)`)
+		unixOSRe = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(linux|(free|net|open)bsd)(?:[^a-zA-Z0-9]|$)`)
 	)
 
 	s = strings.ToLower(s)
