@@ -16,17 +16,22 @@ func getOS(s string) string {
 
 		// for OS detection, it is prefered to do a prefix match,
 		// so that example_macos_x64.tar.gz can also be matched.
-		oSReDarwin  = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(darwin|mac|osx)`)
-		osReWindows = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(win)`)
+		oSReDarwin    = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(darwin|mac|osx)`)
+		osReDragonfly = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(dragonfly)`)
+		osReWindows   = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(win)`)
 		// It is only necessary to match both the beginning and end of the substring,
 		// if the regexp is meant to match the whole string.
-		unixOSRe = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(linux|(free|net|open)bsd)(?:[^a-zA-Z0-9]|$)`)
+		unixOSRe = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)` +
+			`(aix|android|illumos|ios|linux|(free|net|open)bsd|plan9|solaris)` +
+			`(?:[^a-zA-Z0-9]|$)`)
 	)
 
 	s = strings.ToLower(s)
 	switch {
 	case oSReDarwin.MatchString(s):
 		return "darwin"
+	case osReDragonfly.MatchString(s):
+		return "dragonfly"
 	case osReWindows.MatchString(s):
 		return "windows"
 	case unixOSRe.MatchString(s):
@@ -46,7 +51,9 @@ func getArch(s string) string {
 		archRe386   = regexp.MustCompile(`(386|686)(?:[^a-zA-Z0-9]|$)`)
 		archReArm64 = regexp.MustCompile(`(arm64|aarch64)(?:[^a-zA-Z0-9]|$)`)
 		archReArm   = regexp.MustCompile(`(arm(v[567])?[eh]?[fl]?)(?:[^a-zA-Z0-9]|$)`)
-		archReMisc  = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(mips|mips64|mips64le|mipsle|ppc64|ppc64le|riscv64|s390x)(?:[^a-zA-Z0-9]|$)`)
+		archReMisc  = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)` +
+			`(mips|mips64|mips64le|mipsle|ppc64|ppc64le|riscv64|s390x|wasm)` +
+			`(?:[^a-zA-Z0-9]|$)`)
 	)
 
 	s = strings.ToLower(s)
