@@ -16,27 +16,27 @@ func getOS(s string) string {
 
 		// for OS detection, it is prefered to do a prefix match,
 		// so that example_macos_x64.tar.gz can also be matched.
-		oSReDarwin    = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(darwin|mac|osx)`)
+		osReDarwin    = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(darwin|mac|osx)`)
 		osReDragonfly = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(dragonfly)`)
 		osReWindows   = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)(win)`)
 		// It is only necessary to match both the beginning and end of the substring,
 		// if the regexp is meant to match the whole string.
-		unixOSRe = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)` +
+		osReMisc = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)` +
 			`(aix|android|illumos|ios|linux|(free|net|open)bsd|plan9|solaris)` +
 			`(?:[^a-zA-Z0-9]|$)`)
 	)
 
 	s = strings.ToLower(s)
 	switch {
-	case oSReDarwin.MatchString(s):
+	case osReDarwin.MatchString(s):
 		return "darwin"
 	case osReDragonfly.MatchString(s):
 		return "dragonfly"
 	case osReWindows.MatchString(s):
 		return "windows"
-	case unixOSRe.MatchString(s):
+	case osReMisc.MatchString(s):
 		// return the first capturing group (contains only the alphanumeric characters)
-		return unixOSRe.FindStringSubmatch(s)[1]
+		return osReMisc.FindStringSubmatch(s)[1]
 	// in case of no match, default to linux
 	default:
 		return "linux"
