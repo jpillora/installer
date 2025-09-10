@@ -5,7 +5,7 @@ go 1.24
 toolchain go1.24.3
 
 require (
-	github.com/jpillora/opts v1.1.2
+	github.com/jpillora/opts v1.2.3
 	github.com/jpillora/requestlog/v2 v2.0.1
 	gopkg.in/dnaeon/go-vcr.v4 v4.0.5
 )
