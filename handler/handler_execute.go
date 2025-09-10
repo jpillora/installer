@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -112,7 +113,12 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 	if l := len(sumIndex); l > 0 {
 		log.Printf("fetched %d asset shasums", l)
 	}
-	index := map[string]Asset{}
+
+	var (
+		candidates      = map[string]Asset{}
+		index           = map[string]Asset{}
+		foundLinuxAMD64 = false
+	)
 	for _, ga := range ghas {
 		url := ga.BrowserDownloadURL
 		// only binary containers are supported
@@ -138,11 +144,25 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 			// EG: iwr https://deno.land/x/install/install.ps1 -useb | iex
 			continue
 		}
-		// unknown os, cant use
-		if os == "" {
-			log.Printf("fetched asset has unknown os: %s", ga.Name)
-			continue
+
+		// stop guessing for linux/amd64 assets when the exact match is found
+		if os == "linux" && arch == "amd64" {
+			foundLinuxAMD64 = true
 		}
+		assumedLinuxAsset := false
+		// unknown arch/os, the asset will be regarded as linux/amd64 if no other assets match
+		if os == "" {
+			assumedLinuxAsset = true
+			if arch == "" || arch == "amd64" {
+				if foundLinuxAMD64 {
+					continue
+				}
+			}
+		}
+		if arch == "" && os == "linux" {
+			assumedLinuxAsset = true
+		}
+
 		// user selecting a particular asset?
 		if q.Select != "" && !strings.Contains(ga.Name, q.Select) {
 			log.Printf("select excludes asset: %s", ga.Name)
@@ -156,10 +176,20 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 			Type:   fext,
 			SHA256: sumIndex[ga.Name],
 		}
+
+		if assumedLinuxAsset {
+			// "linux/", "/amd64", "/" will all be assumed as "linux/amd64"
+			// "linux/" always win,
+			if _, exists := candidates["linux/"]; exists {
+				continue
+			}
+			// while the other two follow the rule "Last In Wins"
+			candidates[asset.Key()] = asset
+			continue
+		}
 		// there can only be 1 file for each OS/Arch
 		key := asset.Key()
-		other, exists := index[key]
-		if exists {
+		if other, exists := index[key]; exists {
 			gnu := func(s string) bool { return strings.Contains(s, "gnu") }
 			musl := func(s string) bool { return strings.Contains(s, "musl") }
 			g2m := gnu(other.Name) && !musl(other.Name) && !gnu(asset.Name) && musl(asset.Name)
@@ -169,6 +199,19 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 			}
 		}
 		index[key] = asset
+	}
+
+	for _, cAsset := range candidates {
+		cArch := cAsset.Arch
+		if cArch == "" {
+			cArch = "amd64"
+		}
+		// "/loong64" will be assumed to be "linux/loong64"
+		indexKey := "linux/" + cArch
+		// and will only be selected if the exact match failed
+		if _, exists := index[indexKey]; !exists {
+			index[indexKey] = cAsset
+		}
 	}
 	if len(index) == 0 {
 		return release, nil, errors.New("no downloads found for this release")
@@ -203,6 +246,9 @@ func (as ghAssets) getSumIndex() (map[string]string, error) {
 		return nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("sum file request returned status: %s", resp.Status)
+	}
 	// take each line and insert into the index
 	index := map[string]string{}
 	s := bufio.NewScanner(resp.Body)
@@ -238,6 +284,7 @@ type ghAsset struct {
 }
 
 func (g ghAsset) IsChecksumFile() bool {
+	checksumRe := regexp.MustCompile(`(checksums|sha256sums)`)
 	return checksumRe.MatchString(strings.ToLower(g.Name)) && g.Size < 64*1024 // maximum file size 64KB
 }
 
