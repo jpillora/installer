@@ -138,3 +138,154 @@ func TestOSArch(t *testing.T) {
 		}
 	}
 }
+
+func TestQueryCacheKey(t *testing.T) {
+	q := Query{
+		User:    "testuser",
+		Program: "testrepo",
+		Release: "v1.0.0",
+		OS:      "linux",
+		Arch:    "amd64",
+	}
+
+	key1 := q.cacheKey()
+	key2 := q.cacheKey()
+
+	if key1 != key2 {
+		t.Errorf("cacheKey should be deterministic, got %s and %s", key1, key2)
+	}
+
+	// Different query should produce different key
+	q2 := q
+	q2.Arch = "arm64"
+	key3 := q2.cacheKey()
+	if key1 == key3 {
+		t.Error("different queries should produce different cache keys")
+	}
+}
+
+func TestAssetMethods(t *testing.T) {
+	tests := []struct {
+		asset   Asset
+		key     string
+		is32Bit bool
+		isMac   bool
+		isMacM1 bool
+	}{
+		{
+			asset:   Asset{OS: "linux", Arch: "amd64"},
+			key:     "linux/amd64",
+			is32Bit: false,
+			isMac:   false,
+			isMacM1: false,
+		},
+		{
+			asset:   Asset{OS: "linux", Arch: "386"},
+			key:     "linux/386",
+			is32Bit: true,
+			isMac:   false,
+			isMacM1: false,
+		},
+		{
+			asset:   Asset{OS: "darwin", Arch: "arm64"},
+			key:     "darwin/arm64",
+			is32Bit: false,
+			isMac:   true,
+			isMacM1: true,
+		},
+		{
+			asset:   Asset{OS: "darwin", Arch: "amd64"},
+			key:     "darwin/amd64",
+			is32Bit: false,
+			isMac:   true,
+			isMacM1: false,
+		},
+	}
+
+	for _, tt := range tests {
+		if got := tt.asset.Key(); got != tt.key {
+			t.Errorf("Asset.Key() = %v, want %v", got, tt.key)
+		}
+		if got := tt.asset.Is32Bit(); got != tt.is32Bit {
+			t.Errorf("Asset.Is32Bit() = %v, want %v", got, tt.is32Bit)
+		}
+		if got := tt.asset.IsMac(); got != tt.isMac {
+			t.Errorf("Asset.IsMac() = %v, want %v", got, tt.isMac)
+		}
+		if got := tt.asset.IsMacM1(); got != tt.isMacM1 {
+			t.Errorf("Asset.IsMacM1() = %v, want %v", got, tt.isMacM1)
+		}
+	}
+}
+
+func TestAssetsHasM1(t *testing.T) {
+	tests := []struct {
+		name   string
+		assets Assets
+		want   bool
+	}{
+		{
+			name:   "no assets",
+			assets: Assets{},
+			want:   false,
+		},
+		{
+			name: "no M1 assets",
+			assets: Assets{
+				{OS: "linux", Arch: "amd64"},
+				{OS: "darwin", Arch: "amd64"},
+			},
+			want: false,
+		},
+		{
+			name: "has M1 asset",
+			assets: Assets{
+				{OS: "linux", Arch: "amd64"},
+				{OS: "darwin", Arch: "arm64"},
+				{OS: "darwin", Arch: "amd64"},
+			},
+			want: true,
+		},
+		{
+			name:   "only M1 asset",
+			assets: Assets{{OS: "darwin", Arch: "arm64"}},
+			want:   true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.assets.HasM1(); got != tt.want {
+				t.Errorf("Assets.HasM1() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSplitHalf(t *testing.T) {
+	tests := []struct {
+		input  string
+		sep    string
+		first  string
+		second string
+	}{
+		{"user/repo", "/", "user", "repo"},
+		{"only", "/", "only", ""},
+		{"", "/", "", ""},
+		{"a/b/c", "/", "a", "b/c"},
+		{"user@repo", "@", "user", "repo"},
+		{"repo@v1.0", "@", "repo", "v1.0"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			first, second := splitHalf(tt.input, tt.sep)
+			if first != tt.first {
+				t.Errorf("first = %v, want %v", first, tt.first)
+			}
+			if second != tt.second {
+				t.Errorf("second = %v, want %v", second, tt.second)
+			}
+		})
+	}
+}
