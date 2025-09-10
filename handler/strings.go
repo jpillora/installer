@@ -28,10 +28,10 @@ func getOS(s string) string {
 func getArch(s string) string {
 	s = strings.ToLower(s)
 	a := archRe.FindString(s)
-	//arch modifications
+	// arch modifications
 	switch a {
 	case "64", "x86_64", "":
-		a = "amd64" //default
+		a = "amd64" // default
 	case "32", "686":
 		a = "386"
 	case "aarch64":

@@ -12,7 +12,7 @@ import (
 )
 
 func (h *Handler) execute(q Query) (QueryResult, error) {
-	//load from cache
+	// load from cache
 	key := q.cacheKey()
 	h.cacheMut.Lock()
 	if h.cache == nil {
@@ -20,18 +20,18 @@ func (h *Handler) execute(q Query) (QueryResult, error) {
 	}
 	cached, ok := h.cache[key]
 	h.cacheMut.Unlock()
-	//cache hit
+	// cache hit
 	if ok && time.Since(cached.Timestamp) < cacheTTL {
 		return cached, nil
 	}
-	//do real operation
+	// do real operation
 	ts := time.Now()
 	release, assets, err := h.getAssetsNoCache(q)
 	if err == nil {
-		//didn't need search
+		// didn't need search
 		q.Search = false
 	} else if errors.Is(err, errNotFound) && q.Search {
-		//use ddg/google to auto-detect user...
+		// use ddg/google to auto-detect user...
 		user, program, gerr := imFeelingLuck(q.Program)
 		if gerr != nil {
 			log.Printf("web search failed: %s", gerr)
@@ -42,15 +42,15 @@ func (h *Handler) execute(q Query) (QueryResult, error) {
 			}
 			q.Program = program
 			q.User = user
-			//retry assets...
+			// retry assets...
 			release, assets, err = h.getAssetsNoCache(q)
 		}
 	}
-	//asset fetch failed, dont cache
+	// asset fetch failed, dont cache
 	if err != nil {
 		return QueryResult{}, err
 	}
-	//success
+	// success
 	if q.Release == "" && release != "" {
 		log.Printf("detected release: %s", release)
 		q.Release = release
@@ -62,7 +62,7 @@ func (h *Handler) execute(q Query) (QueryResult, error) {
 		Assets:          assets,
 		M1Asset:         assets.HasM1(),
 	}
-	//success store results
+	// success store results
 	h.cacheMut.Lock()
 	h.cache[key] = result
 	h.cacheMut.Unlock()
@@ -73,7 +73,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 	user := q.User
 	repo := q.Program
 	release := q.Release
-	//not cached - ask github
+	// not cached - ask github
 	log.Printf("fetching asset info for %s/%s@%s", user, repo, release)
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", user, repo)
 	ghas := ghAssets{}
@@ -83,7 +83,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		if err := h.get(url, &ghr); err != nil {
 			return release, nil, err
 		}
-		release = ghr.TagName //discovered
+		release = ghr.TagName // discovered
 		ghas = ghr.Assets
 	} else {
 		ghrs := []ghRelease{}
@@ -115,8 +115,8 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 	index := map[string]Asset{}
 	for _, ga := range ghas {
 		url := ga.BrowserDownloadURL
-		//only binary containers are supported
-		//TODO deb,rpm etc
+		// only binary containers are supported
+		// TODO deb,rpm etc
 		fext := getFileExt(url)
 		if fext == "" && ga.Size > 1024*1024 {
 			fext = ".bin" // +1MB binary
@@ -128,17 +128,17 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 			log.Printf("fetched asset has unsupported file type: %s (ext '%s')", ga.Name, fext)
 			continue
 		}
-		//match
+		// match
 		os := getOS(ga.Name)
 		arch := getArch(ga.Name)
-		//windows not supported yet
+		// windows not supported yet
 		if os == "windows" {
 			log.Printf("fetched asset is for windows: %s", ga.Name)
-			//TODO: powershell
+			// TODO: powershell
 			// EG: iwr https://deno.land/x/install/install.ps1 -useb | iex
 			continue
 		}
-		//unknown os, cant use
+		// unknown os, cant use
 		if os == "" {
 			log.Printf("fetched asset has unknown os: %s", ga.Name)
 			continue
@@ -156,7 +156,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 			Type:   fext,
 			SHA256: sumIndex[ga.Name],
 		}
-		//there can only be 1 file for each OS/Arch
+		// there can only be 1 file for each OS/Arch
 		key := asset.Key()
 		other, exists := index[key]
 		if exists {
@@ -189,7 +189,7 @@ type ghAssets []ghAsset
 func (as ghAssets) getSumIndex() (map[string]string, error) {
 	url := ""
 	for _, ga := range as {
-		//is checksum file?
+		// is checksum file?
 		if ga.IsChecksumFile() {
 			url = ga.BrowserDownloadURL
 			break
@@ -238,7 +238,7 @@ type ghAsset struct {
 }
 
 func (g ghAsset) IsChecksumFile() bool {
-	return checksumRe.MatchString(strings.ToLower(g.Name)) && g.Size < 64*1024 //maximum file size 64KB
+	return checksumRe.MatchString(strings.ToLower(g.Name)) && g.Size < 64*1024 // maximum file size 64KB
 }
 
 type ghRelease struct {
@@ -248,18 +248,18 @@ type ghRelease struct {
 		ID    int    `json:"id"`
 		Login string `json:"login"`
 	} `json:"author"`
-	Body            string      `json:"body"`
-	CreatedAt       string      `json:"created_at"`
-	Draft           bool        `json:"draft"`
-	HTMLURL         string      `json:"html_url"`
-	ID              int         `json:"id"`
-	Name            interface{} `json:"name"`
-	Prerelease      bool        `json:"prerelease"`
-	PublishedAt     string      `json:"published_at"`
-	TagName         string      `json:"tag_name"`
-	TarballURL      string      `json:"tarball_url"`
-	TargetCommitish string      `json:"target_commitish"`
-	UploadURL       string      `json:"upload_url"`
-	URL             string      `json:"url"`
-	ZipballURL      string      `json:"zipball_url"`
+	Body            string `json:"body"`
+	CreatedAt       string `json:"created_at"`
+	Draft           bool   `json:"draft"`
+	HTMLURL         string `json:"html_url"`
+	ID              int    `json:"id"`
+	Name            any    `json:"name"`
+	Prerelease      bool   `json:"prerelease"`
+	PublishedAt     string `json:"published_at"`
+	TagName         string `json:"tag_name"`
+	TarballURL      string `json:"tarball_url"`
+	TargetCommitish string `json:"target_commitish"`
+	UploadURL       string `json:"upload_url"`
+	URL             string `json:"url"`
+	ZipballURL      string `json:"zipball_url"`
 }

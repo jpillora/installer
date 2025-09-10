@@ -39,20 +39,20 @@ func setupRecorder(t *testing.T) (*recorder.Recorder, *http.Client) {
 
 func checkAsset(t *testing.T, w *httptest.ResponseRecorder, osArch, expectedName string) {
 	t.Helper()
-	
+
 	// Decode JSON response
 	var result handler.QueryResult
 	if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil {
 		t.Fatalf("failed to decode JSON response: %v", err)
 	}
-	
+
 	// Parse OS and arch from osArch parameter
 	parts := strings.Split(osArch, "/")
 	if len(parts) != 2 {
 		t.Fatalf("invalid osArch format %q, expected 'os/arch'", osArch)
 	}
 	expectedOS, expectedArch := parts[0], parts[1]
-	
+
 	// Find the specified asset
 	var targetAsset *handler.Asset
 	for _, asset := range result.Assets {
@@ -61,11 +61,11 @@ func checkAsset(t *testing.T, w *httptest.ResponseRecorder, osArch, expectedName
 			break
 		}
 	}
-	
+
 	if targetAsset == nil {
 		t.Fatalf("%s asset not found in response", osArch)
 	}
-	
+
 	if targetAsset.Name != expectedName {
 		t.Fatalf("expected %s asset name %q, got %q", osArch, expectedName, targetAsset.Name)
 	}
@@ -80,7 +80,7 @@ func TestUV(t *testing.T) {
 	if w.Result().StatusCode != 200 {
 		t.Fatalf("failed to get astral-sh/uv asset status")
 	}
-	
+
 	checkAsset(t, w, "linux/amd64", "uv-x86_64-unknown-linux-musl.tar.gz")
 }
 
@@ -93,7 +93,7 @@ func TestJPilloraServe(t *testing.T) {
 	if w.Result().StatusCode != 200 {
 		t.Fatalf("failed to get jpillora/serve asset status")
 	}
-	
+
 	checkAsset(t, w, "linux/amd64", "serve_1.9.8_linux_amd64.gz")
 }
 
