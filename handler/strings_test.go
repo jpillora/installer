@@ -27,6 +27,7 @@ func TestOSArch(t *testing.T) {
 	}{
 		// m"arm"ite
 		{"marmite-0.2.5-x86_64-unknown-linux-musl.tar.gz", "linux", "amd64"},
+		{"uv-armv7-unknown-linux-musleabihf.tar.gz", "linux", "arm"},
 	} {
 		os := getOS(tc.name)
 		arch := getArch(tc.name)

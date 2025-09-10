@@ -6,10 +6,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 	"sync"
@@ -58,6 +60,7 @@ func (q Query) cacheKey() string {
 // Handler serves install scripts using Github releases
 type Handler struct {
 	Config
+	Client   *http.Client
 	cacheMut sync.Mutex
 	cache    map[string]QueryResult
 }
@@ -234,7 +237,17 @@ func (h *Handler) get(url string, v interface{}) error {
 	if h.Config.Token != "" {
 		req.Header.Set("Authorization", "token "+h.Config.Token)
 	}
-	resp, err := http.Get(url)
+	
+	client := h.Client
+	if client == nil {
+		// Check if we're in testing mode without RECORD=1
+		if flag.Lookup("test.v") != nil && os.Getenv("RECORD") != "1" {
+			return fmt.Errorf("attempted real HTTP request during testing without RECORD=1: %s", url)
+		}
+		client = http.DefaultClient
+	}
+	
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("request failed: %s: %s", url, err)
 	}
