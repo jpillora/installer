@@ -43,9 +43,7 @@ func captureRepoLocation(url string) (user, project string, err error) {
 	if err != nil {
 		return "", "", fmt.Errorf("request failed: %s", err)
 	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
+	resp.Body.Close()
 	// assume redirection
 	if resp.StatusCode/100 != 3 {
 		return "", "", fmt.Errorf("non-redirect response: %d", resp.StatusCode)

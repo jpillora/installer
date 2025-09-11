@@ -68,7 +68,7 @@ type Handler struct {
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/healthz" || r.URL.Path == "/favicon.ico" {
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("OK"))
+		w.Write([]byte("OK"))
 		return
 	}
 	// calculate response type
@@ -142,7 +142,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// no program? treat first part as program, use default user
 	if q.Program == "" {
 		q.Program = q.User
-		q.User = h.User
+		q.User = h.Config.User
 		q.Search = true
 	}
 	if q.Release == "" {
@@ -153,11 +153,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		q.User = "zyedidia"
 	}
 	// force user/repo
-	if h.ForceUser != "" {
-		q.User = h.ForceUser
+	if h.Config.ForceUser != "" {
+		q.User = h.Config.ForceUser
 	}
-	if h.ForceRepo != "" {
-		q.Program = h.ForceRepo
+	if h.Config.ForceRepo != "" {
+		q.Program = h.Config.ForceRepo
 	}
 	// validate query
 	valid := q.Program != ""
@@ -179,7 +179,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// no render script? just output as json
 	if script == "" {
 		b, _ := json.MarshalIndent(result, "", "  ")
-		_, _ = w.Write(b)
+		w.Write(b)
 		return
 	}
 	// load template
@@ -196,7 +196,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("serving script %s/%s@%s (%s)", result.User, result.Program, result.Release, ext)
 	// ready
-	_, _ = w.Write(buff.Bytes())
+	w.Write(buff.Bytes())
 }
 
 type Asset struct {
@@ -234,8 +234,8 @@ func (as Assets) HasM1() bool {
 func (h *Handler) get(url string, v any) error {
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
-	if h.Token != "" {
-		req.Header.Set("Authorization", "token "+h.Token)
+	if h.Config.Token != "" {
+		req.Header.Set("Authorization", "token "+h.Config.Token)
 	}
 
 	client := h.Client
@@ -251,7 +251,7 @@ func (h *Handler) get(url string, v any) error {
 	if err != nil {
 		return fmt.Errorf("request failed: %s: %s", url, err)
 	}
-	defer func() { _ = resp.Body.Close() }()
+	defer resp.Body.Close()
 
 	if resp.StatusCode == 404 {
 		return fmt.Errorf("%w: url %s", errNotFound, url)

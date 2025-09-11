@@ -253,7 +253,7 @@ func (as ghAssets) getSumIndex() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = resp.Body.Close() }()
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("sum file request returned status: %s", resp.Status)
 	}
