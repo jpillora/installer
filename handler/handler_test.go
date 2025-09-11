@@ -2,6 +2,7 @@ package handler_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -71,110 +72,86 @@ func checkAsset(t *testing.T, w *httptest.ResponseRecorder, osArch, expectedName
 	}
 }
 
-func TestUV(t *testing.T) {
+func makeTestRequest(t *testing.T, method, target string) (*httptest.ResponseRecorder, error) {
 	_, client := setupRecorder(t)
 	h := &handler.Handler{Client: client}
-	r := httptest.NewRequest("GET", "/astral-sh/uv?type=json", nil)
+
+	r := httptest.NewRequest(method, target, nil)
 	w := httptest.NewRecorder()
 	h.ServeHTTP(w, r)
 	if w.Result().StatusCode != 200 {
-		t.Fatalf("failed to get astral-sh/uv asset status")
+		return nil, fmt.Errorf("failed to get assets status of %s", target)
+	}
+
+	return w, nil
+}
+
+func TestUV(t *testing.T) {
+	w, err := makeTestRequest(t, "GET", "/astral-sh/uv?type=json")
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	checkAsset(t, w, "linux/amd64", "uv-x86_64-unknown-linux-musl.tar.gz")
 }
 
 func TestJPilloraServe(t *testing.T) {
-	_, client := setupRecorder(t)
-	h := &handler.Handler{Client: client}
-	r := httptest.NewRequest("GET", "/jpillora/serve?type=json", nil)
-	w := httptest.NewRecorder()
-	h.ServeHTTP(w, r)
-	if w.Result().StatusCode != 200 {
-		t.Fatalf("failed to get jpillora/serve asset status")
+	w, err := makeTestRequest(t, "GET", "/jpillora/serve?type=json")
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	checkAsset(t, w, "linux/amd64", "serve_1.9.8_linux_amd64.gz")
 }
 
 func TestMicro(t *testing.T) {
-	_, client := setupRecorder(t)
-	h := &handler.Handler{Client: client}
-	r := httptest.NewRequest("GET", "/micro", nil)
-	w := httptest.NewRecorder()
-	h.ServeHTTP(w, r)
-	t.Log(w.Body.String())
-	if w.Result().StatusCode != 200 {
-		t.Fatalf("failed to get micro asset status")
+	_, err := makeTestRequest(t, "GET", "/micro")
+	if err != nil {
+		t.Fatal(err)
 	}
-}
 
-func TestMicroDoubleBang(t *testing.T) {
-	_, client := setupRecorder(t)
-	h := &handler.Handler{Client: client}
-	r := httptest.NewRequest("GET", "/micro!!", nil)
-	w := httptest.NewRecorder()
-	h.ServeHTTP(w, r)
-	t.Log(w.Body.String())
-	if w.Result().StatusCode != 200 {
-		t.Fatalf("failed to get micro!! asset status")
+	// TestMicroDoubleBang
+	_, err = makeTestRequest(t, "GET", "/micro!!")
+	if err != nil {
+		t.Fatal(err)
 	}
-}
 
-func TestGotty(t *testing.T) {
-	_, client := setupRecorder(t)
-	h := &handler.Handler{Client: client}
-	r := httptest.NewRequest("GET", "/yudai/gotty@v0.0.12", nil)
-	w := httptest.NewRecorder()
-	h.ServeHTTP(w, r)
-	t.Log(w.Body.String())
-	if w.Result().StatusCode != 200 {
-		t.Fatalf("failed to get yudai/gotty status")
-	}
-}
-
-func TestMicroInstall(t *testing.T) {
+	var (
+		w   *httptest.ResponseRecorder
+		out []byte
+	)
 	if os.Getenv("INTEGRATION") != "1" {
 		t.Skip("Skipping integration test - set INTEGRATION=1 to run")
 	}
-	_, client := setupRecorder(t)
-	h := &handler.Handler{Client: client}
-	r := httptest.NewRequest("GET", "/micro?type=script", nil)
-	w := httptest.NewRecorder()
-	h.ServeHTTP(w, r)
-	if w.Result().StatusCode != 200 {
-		t.Fatalf("failed to get micro asset status")
+	// TestMicroInstall
+	if w, err = makeTestRequest(t, "GET", "/micro?type=script"); err != nil {
+		t.Fatal(err)
 	}
-	// pipe into bash
-	bash := exec.Command("bash")
+	bash := exec.Command("bash") // pipe into bash
 	bash.Stdin = w.Body
 	bash.Dir = os.TempDir()
-	out, err := bash.CombinedOutput()
-	if err != nil {
+	if out, err = bash.CombinedOutput(); err != nil {
 		t.Fatalf("failed to install micro: %s %s", err, out)
 	}
 	t.Log(string(out))
-}
 
-func TestMicroInstallAs(t *testing.T) {
-	if os.Getenv("INTEGRATION") != "1" {
-		t.Skip("Skipping integration test - set INTEGRATION=1 to run")
-	}
-	_, client := setupRecorder(t)
-	h := &handler.Handler{Client: client}
-	r := httptest.NewRequest("GET", "/micro?type=script&as=mymicro", nil)
-	w := httptest.NewRecorder()
-	h.ServeHTTP(w, r)
-	if w.Result().StatusCode != 200 {
-		t.Fatalf("failed to get micro asset status")
+	// TestMicroInstallAs
+	if w, err = makeTestRequest(t, "GET", "/micro?type=script&as=mymicro"); err != nil {
+		t.Fatal(err)
 	}
 	// pipe into bash
-	bash := exec.Command("bash")
+	bash = exec.Command("bash")
 	bash.Stdin = w.Body
 	bash.Dir = os.TempDir()
-	out, err := bash.CombinedOutput()
-	if err != nil {
+	if out, err = bash.CombinedOutput(); err != nil {
 		t.Fatalf("failed to install micro as mymicro: %s %s", err, out)
 	}
 	t.Log(string(out))
+}
+
+func TestGotty(t *testing.T) {
+	_, err := makeTestRequest(t, "GET", "/yudai/gotty@v0.0.12")
+	if err != nil {
+		t.Fatal(err)
+	}
 }
