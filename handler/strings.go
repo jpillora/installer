@@ -80,14 +80,14 @@ func getArch(s string) string {
 	case archReMisc.MatchString(s):
 		return archReMisc.FindStringSubmatch(s)[1]
 
-	// fuzz match 'x?32(bit)?'
-	case regexp.MustCompile(`(x?32(bit)?)\b`).
-		MatchString(s):
-		return "386"
 	// fuzz match 'x?64(bit)?'
 	case regexp.MustCompile(`(x?64(bit)?)\b`).
 		MatchString(s):
 		return "amd64"
+	// fuzz match 'x?32(bit)?'
+	case regexp.MustCompile(`(x?32(bit)?|x86)\b`).
+		MatchString(s):
+		return "386"
 	default:
 		return ""
 	}

@@ -59,6 +59,8 @@ func TestOSArch(t *testing.T) {
 		// 32bit
 		{"croc_v10.2.1_Linux-32bit.tar.gz", "linux", "386"},
 		{"croc_v10.2.1_Windows-32bit.zip", "windows", "386"},
+		// x86
+		{"gitui-mac-x86.tar.gz", "darwin", "386"},
 		// Archs besides x86, x64, arm and amd64
 		{"crun-1.20-linux-ppc64le", "linux", "ppc64le"},
 		{"crun-1.20-linux-riscv64", "linux", "riscv64"},

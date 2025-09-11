@@ -122,8 +122,9 @@ func TestUV(t *testing.T) {
 }
 
 // mac
+// x86
 func TestGitui(t *testing.T) {
-	w, err := makeTestRequest(t, "GET", "/gitui-org/gitui?type=json")
+	w, err := makeTestRequest(t, "GET", "/gitui-org/gitui@v0.27.0?type=json")
 	if err != nil {
 		t.Fatal(err)
 	}
