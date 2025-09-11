@@ -72,6 +72,12 @@ func checkAsset(t *testing.T, w *httptest.ResponseRecorder, osArch, expectedName
 	}
 }
 
+func batchCheckAssets(t *testing.T, w *httptest.ResponseRecorder, assets map[string]string) {
+	for osArch, expectedName := range assets {
+		checkAsset(t, w, osArch, expectedName)
+	}
+}
+
 func makeTestRequest(t *testing.T, method, target string) (*httptest.ResponseRecorder, error) {
 	_, client := setupRecorder(t)
 	h := &handler.Handler{Client: client}
@@ -86,13 +92,182 @@ func makeTestRequest(t *testing.T, method, target string) (*httptest.ResponseRec
 	return w, nil
 }
 
+// musl over GNU
+// almost every arches that linux supported
+// i686
+// arch: long names
 func TestUV(t *testing.T) {
-	w, err := makeTestRequest(t, "GET", "/astral-sh/uv?type=json")
+	w, err := makeTestRequest(t, "GET", "/astral-sh/uv@0.8.17?type=json")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	checkAsset(t, w, "linux/amd64", "uv-x86_64-unknown-linux-musl.tar.gz")
+	testCases := map[string]string{
+		"linux/amd64":   "uv-x86_64-unknown-linux-musl.tar.gz",
+		"linux/loong64": "uv-loongarch64-unknown-linux-gnu.tar.gz",
+		"linux/ppc64":   "uv-powerpc64-unknown-linux-gnu.tar.gz",
+		"linux/ppc64le": "uv-powerpc64le-unknown-linux-gnu.tar.gz",
+		"linux/riscv64": "uv-riscv64gc-unknown-linux-gnu.tar.gz",
+		"linux/s390x":   "uv-s390x-unknown-linux-gnu.tar.gz",
+		"linux/arm":     "uv-arm-unknown-linux-musleabihf.tar.gz",
+		"linux/386":     "uv-i686-unknown-linux-musl.tar.gz",
+		"linux/arm64":   "uv-aarch64-unknown-linux-musl.tar.gz",
+		"darwin/amd64":  "uv-x86_64-apple-darwin.tar.gz",
+		"darwin/arm64":  "uv-aarch64-apple-darwin.tar.gz",
+		// "windows/amd64": "uv-x86_64-pc-windows-msvc.zip",
+		// "windows/arm64": "uv-aarch64-pc-windows-msvc.zip",
+		// "windows/386":   "uv-i686-pc-windows-msvc.zip",
+	}
+	batchCheckAssets(t, w, testCases)
+}
+
+// mac
+func TestGitui(t *testing.T) {
+	w, err := makeTestRequest(t, "GET", "/gitui-org/gitui?type=json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testCases := map[string]string{
+		"darwin/386":  "gitui-mac-x86.tar.gz",
+		"linux/amd64": "gitui-linux-x86_64.tar.gz",
+		"linux/arm":   "gitui-linux-arm.tar.gz",
+		"linux/arm64": "gitui-linux-aarch64.tar.gz",
+	}
+	batchCheckAssets(t, w, testCases)
+}
+
+// x32, x64, armv6
+func TestGitleaks(t *testing.T) {
+	w, err := makeTestRequest(t, "GET", "/gitleaks/gitleaks@v8.28.0?type=json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testCases := map[string]string{
+		"darwin/amd64": "gitleaks_8.28.0_darwin_x64.tar.gz",
+		"darwin/arm64": "gitleaks_8.28.0_darwin_arm64.tar.gz",
+		"linux/386":    "gitleaks_8.28.0_linux_x32.tar.gz",
+		"linux/amd64":  "gitleaks_8.28.0_linux_x64.tar.gz",
+		"linux/arm":    "gitleaks_8.28.0_linux_armv6.tar.gz",
+		"linux/arm64":  "gitleaks_8.28.0_linux_arm64.tar.gz",
+	}
+	batchCheckAssets(t, w, testCases)
+}
+
+// macos, dragonflybsd, freebsd, netbsd, openbsd
+// no arch, i386, arm
+func TestPiknik(t *testing.T) {
+	w, err := makeTestRequest(t, "GET", "/jedisct1/piknik@0.10.2?type=json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testCases := map[string]string{
+		// no linux/arm64 asset
+		"darwin/amd64":    "piknik-macos-0.10.2.tar.gz",
+		"dragonfly/amd64": "piknik-dragonflybsd_amd64-0.10.2.tar.gz",
+		"freebsd/386":     "piknik-freebsd_i386-0.10.2.tar.gz",
+		"freebsd/amd64":   "piknik-freebsd_amd64-0.10.2.tar.gz",
+		"linux/386":       "piknik-linux_i386-0.10.2.tar.gz",
+		"linux/amd64":     "piknik-linux_x86_64-0.10.2.tar.gz",
+		"linux/arm":       "piknik-linux_arm-0.10.2.tar.gz",
+		"netbsd/386":      "piknik-netbsd_i386-0.10.2.tar.gz",
+		"netbsd/amd64":    "piknik-netbsd_amd64-0.10.2.tar.gz",
+		"openbsd/386":     "piknik-openbsd_i386-0.10.2.tar.gz",
+		"openbsd/amd64":   "piknik-openbsd_amd64-0.10.2.tar.gz",
+	}
+	batchCheckAssets(t, w, testCases)
+}
+
+// 32-bit
+func TestLazygit(t *testing.T) {
+	w, err := makeTestRequest(t, "GET", "/jesseduffield/lazygit@v0.55.0?type=json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testCases := map[string]string{
+		"darwin/amd64":  "lazygit_0.55.0_darwin_x86_64.tar.gz",
+		"darwin/arm64":  "lazygit_0.55.0_darwin_arm64.tar.gz",
+		"freebsd/386":   "lazygit_0.55.0_freebsd_32-bit.tar.gz",
+		"freebsd/amd64": "lazygit_0.55.0_freebsd_x86_64.tar.gz",
+		"freebsd/arm":   "lazygit_0.55.0_freebsd_armv6.tar.gz",
+		"freebsd/arm64": "lazygit_0.55.0_freebsd_arm64.tar.gz",
+		"linux/386":     "lazygit_0.55.0_linux_32-bit.tar.gz",
+		"linux/amd64":   "lazygit_0.55.0_linux_x86_64.tar.gz",
+		"linux/arm":     "lazygit_0.55.0_linux_armv6.tar.gz",
+		"linux/arm64":   "lazygit_0.55.0_linux_arm64.tar.gz",
+	}
+	batchCheckAssets(t, w, testCases)
+}
+
+// 32bit, 64bit
+func TestCroc(t *testing.T) {
+	w, err := makeTestRequest(t, "GET", "/schollz/croc@v10.2.4?type=json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testCases := map[string]string{
+		"darwin/amd64":    "croc_v10.2.4_macOS-64bit.tar.gz",
+		"darwin/arm64":    "croc_v10.2.4_macOS-ARM64.tar.gz",
+		"dragonfly/amd64": "croc_v10.2.4_DragonFlyBSD-64bit.tar.gz",
+		"freebsd/amd64":   "croc_v10.2.4_FreeBSD-64bit.tar.gz",
+		"freebsd/arm64":   "croc_v10.2.4_FreeBSD-ARM64.tar.gz",
+		"linux/386":       "croc_v10.2.4_Linux-32bit.tar.gz",
+		"linux/amd64":     "croc_v10.2.4_Linux-64bit.tar.gz",
+		"linux/arm":       "croc_v10.2.4_Linux-ARM.tar.gz",
+		"linux/arm64":     "croc_v10.2.4_Linux-ARM64.tar.gz",
+		"netbsd/386":      "croc_v10.2.4_NetBSD-32bit.tar.gz",
+		"netbsd/amd64":    "croc_v10.2.4_NetBSD-64bit.tar.gz",
+		"netbsd/arm64":    "croc_v10.2.4_NetBSD-ARM64.tar.gz",
+		"openbsd/amd64":   "croc_v10.2.4_OpenBSD-64bit.tar.gz",
+		"openbsd/arm64":   "croc_v10.2.4_OpenBSD-ARM64.tar.gz",
+	}
+	batchCheckAssets(t, w, testCases)
+}
+
+// 386
+func TestJid(t *testing.T) {
+	w, err := makeTestRequest(t, "GET", "/simeji/jid@v0.7.6?type=json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testCases := map[string]string{
+		// no darwin/arm64
+		"darwin/386":    "jid_darwin_386.zip",
+		"darwin/amd64":  "jid_darwin_amd64.zip",
+		"freebsd/386":   "jid_freebsd_386.zip",
+		"freebsd/amd64": "jid_freebsd_amd64.zip",
+		"linux/386":     "jid_linux_386.zip",
+		"linux/amd64":   "jid_linux_amd64.zip",
+		"linux/arm64":   "jid_linux_arm64.zip",
+		"netbsd/386":    "jid_netbsd_386.zip",
+		"netbsd/amd64":  "jid_netbsd_amd64.zip",
+		"openbsd/386":   "jid_openbsd_386.zip",
+		"openbsd/amd64": "jid_openbsd_amd64.zip",
+	}
+	batchCheckAssets(t, w, testCases)
+}
+
+// no os, no arch
+// armv7
+func TestYtDlp(t *testing.T) {
+	w, err := makeTestRequest(t, "GET", "/yt-dlp/yt-dlp@2025.09.05?type=json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testCases := map[string]string{
+		// not ideal, but good enough
+		"darwin/amd64": "yt-dlp_macos",
+		"linux/amd64":  "yt-dlp_musllinux.zip",
+		"linux/arm":    "yt-dlp_linux_armv7l.zip",
+		"linux/arm64":  "yt-dlp_linux_aarch64",
+	}
+	batchCheckAssets(t, w, testCases)
 }
 
 func TestJPilloraServe(t *testing.T) {
