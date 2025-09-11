@@ -159,8 +159,11 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 				}
 			}
 		}
-		if arch == "" && os == "linux" {
-			assumedLinuxAsset = true
+		if arch == "" {
+			arch = "amd64"
+			if os == "linux" {
+				assumedLinuxAsset = true
+			}
 		}
 
 		// user selecting a particular asset?
@@ -177,13 +180,19 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 			SHA256: sumIndex[ga.Name],
 		}
 
+		// "linux/", "/amd64" will all be assumed as "linux/amd64"
 		if assumedLinuxAsset {
-			// "linux/", "/amd64", "/" will all be assumed as "linux/amd64"
-			// "linux/" always win,
-			if _, exists := candidates["linux/"]; exists {
+			cAssetKey := asset.Key()
+			// "linux/" always win.
+			if cAssetKey == "linux/" {
+				delete(candidates, "/amd64")
+				foundLinuxAMD64 = true
+
+				// If key "linux/" exist,
+				// assets like "unknown-os-i386" would be ignored (stop guessing OS)
+			} else if _, exists := candidates["linux/"]; exists {
 				continue
 			}
-			// while the other two follow the rule "Last In Wins"
 			candidates[asset.Key()] = asset
 			continue
 		}
@@ -202,12 +211,11 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 	}
 
 	for _, cAsset := range candidates {
-		cArch := cAsset.Arch
-		if cArch == "" {
-			cArch = "amd64"
-		}
 		// "/loong64" will be assumed to be "linux/loong64"
-		indexKey := "linux/" + cArch
+		if cAsset.OS == "" {
+			cAsset.OS = "linux"
+		}
+		indexKey := cAsset.Key()
 		// and will only be selected if the exact match failed
 		if _, exists := index[indexKey]; !exists {
 			index[indexKey] = cAsset
