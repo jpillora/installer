@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -292,7 +291,6 @@ type ghAsset struct {
 }
 
 func (g ghAsset) IsChecksumFile() bool {
-	checksumRe := regexp.MustCompile(`(checksums|sha256sums)`)
 	return checksumRe.MatchString(strings.ToLower(g.Name)) && g.Size < 64*1024 // maximum file size 64KB
 }
 
