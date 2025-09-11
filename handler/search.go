@@ -5,10 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"regexp"
 )
-
-var searchGithubRe = regexp.MustCompile(`https:\/\/github\.com\/(\w+)\/(\w+)`)
 
 func imFeelingLuck(phrase string) (user, project string, err error) {
 	phrase += " site:github.com"
@@ -20,7 +17,7 @@ func imFeelingLuck(phrase string) (user, project string, err error) {
 	}
 	// try google
 	v = url.Values{}
-	v.Set("btnI", "") //I'm feeling lucky
+	v.Set("btnI", "") // I'm feeling lucky
 	v.Set("q", phrase)
 	if user, project, err := captureRepoLocation(("https://www.google.com/search?" + v.Encode())); err == nil {
 		return user, project, nil
@@ -36,19 +33,19 @@ func captureRepoLocation(url string) (user, project string, err error) {
 		panic(err)
 	}
 	req.Header.Set("Accept", "*/*")
-	//I'm a browser... :)
+	// I'm a browser... :)
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36")
-	//roundtripper doesn't follow redirects
+	// roundtripper doesn't follow redirects
 	resp, err := http.DefaultTransport.RoundTrip(req)
 	if err != nil {
 		return "", "", fmt.Errorf("request failed: %s", err)
 	}
 	resp.Body.Close()
-	//assume redirection
+	// assume redirection
 	if resp.StatusCode/100 != 3 {
 		return "", "", fmt.Errorf("non-redirect response: %d", resp.StatusCode)
 	}
-	//extract Location header URL
+	// extract Location header URL
 	loc := resp.Header.Get("Location")
 	m := searchGithubRe.FindStringSubmatch(loc)
 	if len(m) == 0 {
