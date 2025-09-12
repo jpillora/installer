@@ -179,11 +179,11 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 			SHA256: sumIndex[ga.Name],
 		}
 
+		key := asset.Key()
 		// "linux/", "/amd64" will all be assumed as "linux/amd64"
 		if assumedLinuxAsset {
-			cAssetKey := asset.Key()
 			// "linux/" always win.
-			if cAssetKey == "linux/" {
+			if key == "linux/" {
 				delete(candidates, "/amd64")
 				foundLinuxAMD64 = true
 
@@ -192,11 +192,11 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 			} else if _, exists := candidates["linux/"]; exists {
 				continue
 			}
-			candidates[asset.Key()] = asset
+			candidates[key] = asset
 			continue
 		}
+
 		// there can only be 1 file for each OS/Arch
-		key := asset.Key()
 		if other, exists := index[key]; exists {
 			gnu := func(s string) bool { return strings.Contains(s, "gnu") }
 			musl := func(s string) bool { return strings.Contains(s, "musl") }
