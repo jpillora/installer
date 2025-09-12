@@ -10,7 +10,7 @@ import (
 
 	"github.com/jpillora/installer/handler"
 	"github.com/jpillora/opts"
-	"github.com/jpillora/requestlog"
+	"github.com/jpillora/requestlog/v2"
 )
 
 var version = "0.0.0-src"
@@ -38,7 +38,7 @@ func main() {
 	}
 	log.Printf("listening on %s...", addr)
 	h := &handler.Handler{Config: c}
-	lh := requestlog.WrapWith(h, requestlog.Options{
+	lh := requestlog.New(h, requestlog.Options{
 		TrustProxy: true, // assume will be run in paas
 		Filter: func(r *http.Request, code int, duration time.Duration, size int64) bool {
 			return r.URL.Path != "/healthz"
