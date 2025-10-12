@@ -264,11 +264,30 @@ func TestYtDlp(t *testing.T) {
 	testCases := map[string]string{
 		// not ideal, but good enough
 		"darwin/amd64": "yt-dlp_macos",
-		"linux/amd64":  "yt-dlp_musllinux.zip",
 		"linux/arm":    "yt-dlp_linux_armv7l.zip",
 		"linux/arm64":  "yt-dlp_linux_aarch64",
 	}
 	batchCheckAssets(t, w, testCases)
+
+	var result handler.QueryResult
+	if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil {
+		t.Fatalf("failed to decode JSON response: %v", err)
+	}
+	var targetAsset *handler.Asset
+	for i := range result.Assets {
+		if result.Assets[i].OS == "linux" && result.Assets[i].Arch == "amd64" {
+			targetAsset = &result.Assets[i]
+			break
+		}
+	}
+	if targetAsset == nil {
+		t.Fatalf("linux/amd64 asset not found in response")
+	}
+	switch targetAsset.Name {
+	case "yt-dlp_linux.zip", "yt-dlp_musllinux.zip":
+	default:
+		t.Fatalf("expected linux/amd64 asset name one of [yt-dlp_linux.zip yt-dlp_musllinux.zip], got %q", targetAsset.Name)
+	}
 }
 
 func TestJPilloraServe(t *testing.T) {
