@@ -331,3 +331,13 @@ func TestGotty(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// arm32 should be detected as arm (32-bit ARM architecture)
+func TestTmuxArm32(t *testing.T) {
+	w, err := makeTestRequest(t, "GET", "/jpillora/tmux-static-builds@v3.5i?type=json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	checkAsset(t, w, "linux/arm", "tmux.linux-arm32.gz")
+}

@@ -36,7 +36,7 @@ var (
 	archReAmd64   = regexp.MustCompile(`(amd64|x86_64)(?:[^a-zA-Z0-9]|$)`)
 	archRe386     = regexp.MustCompile(`(386|686)(?:[^a-zA-Z0-9]|$)`)
 	archReArm64   = regexp.MustCompile(`(arm64|aarch64)(?:[^a-zA-Z0-9]|$)`)
-	archReArm     = regexp.MustCompile(`(arm(v[567])?[eh]?[fl]?)(?:[^a-zA-Z0-9]|$)`)
+	archReArm     = regexp.MustCompile(`(arm(v[567]|32)?[eh]?[fl]?)(?:[^a-zA-Z0-9]|$)`)
 	archReLoong64 = regexp.MustCompile(`(loong64|loongarch64)(?:[^a-zA-Z0-9]|$)`)
 	archRePPC64   = regexp.MustCompile(`(ppc64|powerpc64)(?:[^a-zA-Z0-9]|$)`)
 	archRePPC64LE = regexp.MustCompile(`(ppc64le|powerpc64le)(?:[^a-zA-Z0-9]|$)`)
