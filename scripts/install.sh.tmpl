@@ -72,7 +72,9 @@ function install {
 	ARCH="{{ .Arch }}"
 	if [ -n "$ARCH" ]; then
 		echo "Override architecture: $ARCH"
-	elif uname -m | grep -E '(arm|arch)64' > /dev/null; then
+	elif uname -m | grep -E 'loong(arch)?64' > /dev/null; then
+		ARCH="loong64"
+	elif uname -m | grep -E '(aarch64|arm64)' > /dev/null; then
 		ARCH="arm64"
 		{{ if not .M1Asset }}
 		# no m1 assets. if on mac arm64, rosetta allows fallback to amd64
