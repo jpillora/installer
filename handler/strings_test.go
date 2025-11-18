@@ -66,6 +66,8 @@ func TestOSArch(t *testing.T) {
 		{"crun-1.20-linux-riscv64", "linux", "riscv64"},
 		{"crun-1.20-linux-s390x", "linux", "s390x"},
 		{"uv-loongarch64-unknown-linux-gnu.tar.gz", "linux", "loong64"},
+		{"just-1.43.1-loongarch64-unknown-linux-musl.tar.gz", "linux", "loong64"},
+		{"program-loong64-linux.tar.gz", "linux", "loong64"},
 		{"uv-powerpc64-unknown-linux-gnu.tar.gz", "linux", "ppc64"},
 		{"uv-powerpc64le-unknown-linux-gnu.tar.gz", "linux", "ppc64le"},
 		{"uv-riscv64gc-unknown-linux-gnu.tar.gz", "linux", "riscv64"},
