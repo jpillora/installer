@@ -41,7 +41,11 @@ func getArch(s string) string {
 	case archRe386.MatchString(s):
 		return "386"
 	case archReMisc.MatchString(s):
-		return archReMisc.FindStringSubmatch(s)[1]
+		arch := archReMisc.FindStringSubmatch(s)[1]
+		if arch == "s390_64" {
+			return "s390x"
+		}
+		return arch
 
 	// fuzz match 'x?64(bit)?'
 	case fuzzArchAmd64.MatchString(s):

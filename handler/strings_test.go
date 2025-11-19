@@ -113,6 +113,13 @@ func TestOSArch(t *testing.T) {
 		{"piknik-linux_i386-0.10.2.tar.gz", "linux", "386"},
 		{"piknik-linux_x86_64-0.10.2.tar.gz", "linux", "amd64"},
 		{"piknik-win64-arm64-0.10.2.zip", "windows", "arm64"},
+		{"buf-Linux-ppc64le", "linux", "ppc64le"},
+		{"buf-Linux-x86_64", "linux", "amd64"},
+		{"protoc-33.1-linux-aarch_64.zip", "linux", "arm64"},
+		{"protoc-33.1-linux-ppcle_64.zip", "linux", "ppc64le"},
+		{"protoc-33.1-linux-s390_64.zip", "linux", "s390x"},
+		{"protoc-33.1-linux-x86_32.zip", "linux", "386"},
+		{"protoc-33.1-linux-x86_64.zip", "linux", "amd64"},
 
 		// no os
 		{"libtree_aarch64", "", "arm64"},
