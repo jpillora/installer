@@ -341,3 +341,40 @@ func TestTmuxArm32(t *testing.T) {
 
 	checkAsset(t, w, "linux/arm", "tmux.linux-arm32.gz")
 }
+
+func TestBuf(t *testing.T) {
+	w, err := makeTestRequest(t, "GET", "/bufbuild/buf@v1.60.0?type=json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testCases := map[string]string{
+		"darwin/amd64":  "buf-Darwin-x86_64",
+		"darwin/arm64":  "buf-Darwin-arm64",
+		"linux/amd64":   "buf-Linux-x86_64",
+		"linux/arm64":   "buf-Linux-aarch64",
+		"linux/arm":     "buf-Linux-armv7",
+		"linux/ppc64le": "buf-Linux-ppc64le",
+		"linux/riscv64": "buf-Linux-riscv64",
+		"linux/s390x":   "buf-Linux-s390x",
+	}
+	batchCheckAssets(t, w, testCases)
+}
+
+func TestProtoc(t *testing.T) {
+	w, err := makeTestRequest(t, "GET", "/protocolbuffers/protobuf@v33.1?type=json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testCases := map[string]string{
+		"darwin/amd64":  "protoc-33.1-osx-universal_binary.zip",
+		"darwin/arm64":  "protoc-33.1-osx-aarch_64.zip",
+		"linux/amd64":   "protoc-33.1-linux-x86_64.zip",
+		"linux/386":     "protoc-33.1-linux-x86_32.zip",
+		"linux/arm64":   "protoc-33.1-linux-aarch_64.zip",
+		"linux/ppc64le": "protoc-33.1-linux-ppcle_64.zip",
+		"linux/s390x":   "protoc-33.1-linux-s390_64.zip",
+	}
+	batchCheckAssets(t, w, testCases)
+}
