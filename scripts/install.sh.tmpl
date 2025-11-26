@@ -72,6 +72,9 @@ function install {
 	ARCH="{{ .Arch }}"
 	if [ -n "$ARCH" ]; then
 		echo "Override architecture: $ARCH"
+	# Special handling for macOS - detect Apple Silicon even when running under Rosetta 2
+	elif [[ $OS = "darwin" ]] && sysctl hw.optional.arm64 2>/dev/null | grep -q ': 1'; then
+		ARCH="arm64"
 	elif uname -m | grep -E 'loong(arch)?64' > /dev/null; then
 		ARCH="loong64"
 	elif uname -m | grep -E '(aarch64|arm64)' > /dev/null; then
