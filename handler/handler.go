@@ -71,6 +71,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 		return
 	}
+	if r.URL.Path == "/clearcache" {
+		h.cacheMut.Lock()
+		h.cache = map[string]QueryResult{}
+		h.cacheMut.Unlock()
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Cache cleared"))
+		return
+	}
 	// calculate response type
 	ext := ""
 	script := ""
