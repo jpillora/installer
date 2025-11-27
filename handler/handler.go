@@ -21,6 +21,10 @@ import (
 	"github.com/jpillora/installer/scripts"
 )
 
+const (
+	cacheTTL = time.Hour
+)
+
 var (
 	isTermRe     = regexp.MustCompile(`(?i)^(curl|wget)\/`)
 	isHomebrewRe = regexp.MustCompile(`(?i)^homebrew`)
