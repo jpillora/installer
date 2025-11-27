@@ -24,8 +24,7 @@ var (
 	// if the regexp is meant to match the whole string.
 
 	osReMisc = regexp.MustCompile(`(?:[^a-zA-Z0-9]|^)` +
-		`(aix|android|illumos|ios|linux|(free|net|open)bsd|plan9|solaris)` +
-		`(?:[^a-zA-Z0-9]|$)`)
+		`(aix|android|illumos|ios|linux|freebsd|netbsd|openbsd|plan9|solaris)`)
 )
 
 // architecture patterns
