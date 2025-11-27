@@ -21,7 +21,7 @@ func (h *Handler) execute(q Query) (QueryResult, error) {
 	cached, ok := h.cache[key]
 	h.cacheMut.Unlock()
 	// cache hit
-	if ok && time.Since(cached.Timestamp) < cacheTTL {
+	if ok && h.Config.CacheTTL > 0 && time.Since(cached.Timestamp) < h.Config.CacheTTL {
 		return cached, nil
 	}
 	// do real operation
@@ -63,9 +63,11 @@ func (h *Handler) execute(q Query) (QueryResult, error) {
 		M1Asset:         assets.HasM1(),
 	}
 	// success store results
-	h.cacheMut.Lock()
-	h.cache[key] = result
-	h.cacheMut.Unlock()
+	if h.Config.CacheTTL > 0 {
+		h.cacheMut.Lock()
+		h.cache[key] = result
+		h.cacheMut.Unlock()
+	}
 	return result, nil
 }
 

@@ -21,10 +21,6 @@ import (
 	"github.com/jpillora/installer/scripts"
 )
 
-const (
-	cacheTTL = time.Hour
-)
-
 var (
 	isTermRe     = regexp.MustCompile(`(?i)^(curl|wget)\/`)
 	isHomebrewRe = regexp.MustCompile(`(?i)^homebrew`)
@@ -69,6 +65,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/healthz" || r.URL.Path == "/favicon.ico" {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
+		return
+	}
+	if r.URL.Path == "/clearcache" {
+		h.cacheMut.Lock()
+		h.cache = map[string]QueryResult{}
+		h.cacheMut.Unlock()
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Cache cleared"))
 		return
 	}
 	// calculate response type
