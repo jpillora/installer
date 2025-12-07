@@ -2,7 +2,7 @@
 if [ "$DEBUG" == "1" ]; then
 	set -x
 fi
-TMP_DIR=$(mktemp -d -t jpillora-installer-XXXXXXXXXX)
+TMP_DIR=$(mktemp -d -t installer-XXXXXXXXXX)
 function cleanup {
 	rm -rf $TMP_DIR > /dev/null
 }
