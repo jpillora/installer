@@ -72,7 +72,6 @@ func TestOSArch(t *testing.T) {
 		{"uv-powerpc64le-unknown-linux-gnu.tar.gz", "linux", "ppc64le"},
 		{"uv-riscv64gc-unknown-linux-gnu.tar.gz", "linux", "riscv64"},
 		{"uv-s390x-unknown-linux-gnu.tar.gz", "linux", "s390x"},
-
 		// OSes besides linux, windows and macos
 		{"croc_v10.2.1_DragonFlyBSD-64bit.tar.gz", "dragonfly", "amd64"},
 		{"croc_v10.2.1_FreeBSD-64bit.tar.gz", "freebsd", "amd64"},
@@ -89,7 +88,6 @@ func TestOSArch(t *testing.T) {
 		{"piknik-netbsd_i386-0.10.2.tar.gz", "netbsd", "386"},
 		{"piknik-openbsd_amd64-0.10.2.tar.gz", "openbsd", "amd64"},
 		{"piknik-openbsd_i386-0.10.2.tar.gz", "openbsd", "386"},
-
 		// misc
 		{"marmite-0.2.5-x86_64-unknown-linux-musl.tar.gz", "linux", "amd64"},
 		{"uv-armv7-unknown-linux-musleabihf.tar.gz", "linux", "arm"},
@@ -120,7 +118,6 @@ func TestOSArch(t *testing.T) {
 		{"protoc-33.1-linux-s390_64.zip", "linux", "s390x"},
 		{"protoc-33.1-linux-x86_32.zip", "linux", "386"},
 		{"protoc-33.1-linux-x86_64.zip", "linux", "amd64"},
-
 		// no os
 		{"libtree_aarch64", "", "arm64"},
 		{"libtree_armv6l", "", "arm"},
@@ -132,12 +129,10 @@ func TestOSArch(t *testing.T) {
 		{"runc.s390x", "", "s390x"},
 		{"runc.armel", "", "arm"},
 		{"runc.armhf", "", "arm"},
-
 		// no arch
 		{"yt-dlp_linux", "linux", ""},
 		// no arch, no os
 		{"codex-npm-0.31.0.tgz", "", ""},
-
 		// architecture indicator not supported
 		// {"piknik-macos-0.10.2.tar.gz", "darwin", "arm64"},
 		// {"piknik-macos-intel-0.10.2.tar.gz", "darwin", "amd64"},
