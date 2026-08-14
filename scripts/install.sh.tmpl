@@ -174,9 +174,8 @@ function install {
 	#move without sudo
 	OUT=$(mv $TMP_BIN $DEST 2>&1)
 	STATUS=$?
-	# failed and string contains "Permission denied"
 	if [ $STATUS -ne 0 ]; then
-		if [[ $OUT =~ "Permission denied" ]]; then
+		if [[ $MOVE = "true" ]]; then
 			echo "mv with sudo..."
 			sudo mv $TMP_BIN $DEST || fail "sudo mv failed" 
 		else
