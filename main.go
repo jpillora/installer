@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -15,7 +16,24 @@ import (
 
 var version = "0.0.0-src"
 
+type command struct {
+	version string
+	stdout  io.Writer
+}
+
+func (c command) handleVersion(args []string) bool {
+	if len(args) != 2 || (args[1] != "--version" && args[1] != "-v") {
+		return false
+	}
+	fmt.Fprintln(c.stdout, c.version)
+	return true
+}
+
 func main() {
+	cmd := command{version: version, stdout: os.Stdout}
+	if cmd.handleVersion(os.Args) {
+		return
+	}
 	c := handler.DefaultConfig
 	opts.New(&c).Repo("github.com/jpillora/installer").Version(version).Parse()
 	log.Printf("default user is '%s'", c.User)
