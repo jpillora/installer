@@ -109,12 +109,11 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 	)
 	for _, ga := range ghas {
 		url := ga.BrowserDownloadURL
+		os := getOS(ga.Name)
+		arch := getArch(ga.Name)
 		// only binary containers are supported
 		// TODO deb,rpm etc
-		fext := getFileExt(url)
-		if fext == "" && ga.Size > 1024*1024 {
-			fext = ".bin" // +1MB binary
-		}
+		fext := ga.FileExt()
 		switch fext {
 		case ".bin", ".zip", ".tar.bz", ".tar.bz2", ".tar.xz", ".txz", ".bz2", ".gz", ".tar.gz", ".tgz":
 			// valid
@@ -122,9 +121,6 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 			log.Printf("fetched asset has unsupported file type: %s (ext '%s')", ga.Name, fext)
 			continue
 		}
-		// match
-		os := getOS(ga.Name)
-		arch := getArch(ga.Name)
 		// windows not supported yet
 		if os == "windows" {
 			log.Printf("fetched asset is for windows: %s", ga.Name)
@@ -287,6 +283,14 @@ type ghAsset struct {
 
 func (g ghAsset) IsChecksumFile() bool {
 	return checksumRe.MatchString(strings.ToLower(g.Name)) && g.Size < 64*1024 // maximum file size 64KB
+}
+
+func (g ghAsset) FileExt() string {
+	fext := getFileExt(g.Name)
+	if g.Size > 1024*1024 && (fext == "" || getOS(fext) != "" || getArch(fext) != "") {
+		return ".bin"
+	}
+	return fext
 }
 
 type ghRelease struct {

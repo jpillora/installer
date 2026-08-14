@@ -450,3 +450,47 @@ func TestAssumedAssetDeterministic(t *testing.T) {
 		checkAsset(t, w, "linux/arm64", "tool_linux_aarch64")
 	}
 }
+
+func TestDottedRawBinaryAssets(t *testing.T) {
+	const target = "v1"
+	mux := http.NewServeMux()
+	mux.HandleFunc("/repos/acme/tool/releases/tags/"+target, func(w http.ResponseWriter, r *http.Request) {
+		json.NewEncoder(w).Encode(map[string]any{
+			"tag_name": target,
+			"assets": []map[string]any{
+				{
+					"name":                 "tool-v1.linux.amd64",
+					"browser_download_url": "https://example.com/tool-v1.linux.amd64",
+					"size":                 5 * 1024 * 1024,
+				},
+				{
+					"name":                 "tool-v1.linux.amd64.asc",
+					"browser_download_url": "https://example.com/tool-v1.linux.amd64.asc",
+					"size":                 5 * 1024 * 1024,
+				},
+			},
+		})
+	})
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	h := &handler.Handler{Client: srv.Client(), GHAPI: srv.URL}
+	r := httptest.NewRequest("GET", "/acme/tool@"+target+"?type=json", nil)
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, r)
+	if w.Result().StatusCode != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Result().StatusCode, w.Body.String())
+	}
+
+	var result handler.QueryResult
+	if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Assets) != 1 {
+		t.Fatalf("expected one raw binary asset, got %d", len(result.Assets))
+	}
+	asset := result.Assets[0]
+	if asset.Name != "tool-v1.linux.amd64" || asset.Type != ".bin" {
+		t.Fatalf("expected dotted raw binary, got %#v", asset)
+	}
+}
