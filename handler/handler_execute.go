@@ -108,7 +108,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		foundLinuxAMD64 = false
 	)
 	for _, ga := range ghas {
-		if q.isBun() && !ga.isBunBinary(q.Select) {
+		if !ga.isBinaryCandidate(q.Select) {
 			continue
 		}
 		url := ga.BrowserDownloadURL
@@ -180,22 +180,16 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 			} else if _, exists := candidates["linux/"]; exists {
 				continue
 			}
+			if other, exists := candidates[key]; exists && !asset.preferredOver(other) {
+				continue
+			}
 			candidates[key] = asset
 			continue
 		}
 
 		// there can only be 1 file for each OS/Arch
-		if other, exists := index[key]; exists {
-			gnu := func(s string) bool { return strings.Contains(s, "gnu") }
-			musl := func(s string) bool { return strings.Contains(s, "musl") }
-			prefer := gnu(other.Name) && !musl(other.Name) && !gnu(asset.Name) && musl(asset.Name)
-			if q.isBun() {
-				prefer = asset.preferredBunAssetOver(other)
-			}
-			// prefer musl over glib for portability, override with select=gnu
-			if !prefer {
-				continue
-			}
+		if other, exists := index[key]; exists && !asset.preferredOver(other) {
+			continue
 		}
 		index[key] = asset
 	}
@@ -290,11 +284,19 @@ type ghAsset struct {
 	URL string `json:"url"`
 }
 
-func (g ghAsset) isBunBinary(selectAsset string) bool {
-	if g.Size <= 1024*1024 || getOS(g.Name) == "" || strings.Contains(g.Name, ".dSYM.") {
+func (g ghAsset) isBinaryCandidate(selectAsset string) bool {
+	if g.Size > 0 && g.Size < 1024 {
 		return false
 	}
-	return !strings.Contains(g.Name, "-profile.") || strings.Contains(selectAsset, "profile")
+	if getOS(g.Name) == "" && getArch(g.Name) == "" && g.Size > 0 && g.Size <= 1024*1024 {
+		return false
+	}
+	name := strings.ToLower(g.Name)
+	if strings.Contains(name, ".dsym.") {
+		return false
+	}
+	profile := strings.Contains(name, "-profile.") || strings.Contains(name, "_profile.")
+	return !profile || strings.Contains(strings.ToLower(selectAsset), "profile")
 }
 
 func (g ghAsset) IsChecksumFile() bool {

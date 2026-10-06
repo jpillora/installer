@@ -130,6 +130,12 @@ func TestOSArch(t *testing.T) {
 		{"bun-freebsd-aarch64.zip", "freebsd", "arm64"},
 		{"bun-windows-aarch64.zip", "windows", "arm64"},
 		{"bun-cli-darwin-x64-0.0.36.tgz", "darwin", "amd64"},
+		{"tool-cli-0.0.32.tgz", "", ""},
+		{"tool-cli-0.0.64.tgz", "", ""},
+		{"tool.x64.zip", "", "amd64"},
+		{"tool.x32.zip", "", "386"},
+		{"tool_x64bit.zip", "", "amd64"},
+		{"tool_x32bit.zip", "", "386"},
 		// no os
 		{"libtree_aarch64", "", "arm64"},
 		{"libtree_armv6l", "", "arm"},

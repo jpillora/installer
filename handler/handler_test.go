@@ -264,7 +264,7 @@ func TestYtDlp(t *testing.T) {
 	testCases := map[string]string{
 		// not ideal, but good enough
 		"darwin/amd64": "yt-dlp_macos",
-		"linux/amd64":  "yt-dlp_musllinux.zip",
+		"linux/amd64":  "yt-dlp_musllinux",
 		"linux/arm":    "yt-dlp_linux_armv7l.zip",
 		"linux/arm64":  "yt-dlp_linux_aarch64",
 	}
