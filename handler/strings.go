@@ -14,8 +14,13 @@ func getOS(s string) string {
 	case osReWindows.MatchString(s):
 		return "windows"
 	case osReMisc.MatchString(s):
-		// return the first capturing group (contains only the alphanumeric characters)
-		return osReMisc.FindStringSubmatch(s)[1]
+		matches := osReMisc.FindAllStringSubmatch(s, -1)
+		for _, match := range matches {
+			if match[1] == "android" {
+				return "android"
+			}
+		}
+		return matches[0][1]
 	default:
 		return ""
 	}

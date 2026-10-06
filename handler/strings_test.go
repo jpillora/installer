@@ -1,6 +1,9 @@
 package handler
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestFilExt(t *testing.T) {
 	tests := []struct {
@@ -118,6 +121,15 @@ func TestOSArch(t *testing.T) {
 		{"protoc-33.1-linux-s390_64.zip", "linux", "s390x"},
 		{"protoc-33.1-linux-x86_32.zip", "linux", "386"},
 		{"protoc-33.1-linux-x86_64.zip", "linux", "amd64"},
+		{"bun-darwin-x64-baseline-profile.zip", "darwin", "amd64"},
+		{"bun-darwin-aarch64.dSYM.tar.gz", "darwin", "arm64"},
+		{"bun-linux-x64-musl-baseline.zip", "linux", "amd64"},
+		{"bun-linux-aarch64-musl-profile.zip", "linux", "arm64"},
+		{"bun-linux-x64-android-baseline.zip", "android", "amd64"},
+		{"bun-linux-aarch64-android-profile.zip", "android", "arm64"},
+		{"bun-freebsd-aarch64.zip", "freebsd", "arm64"},
+		{"bun-windows-aarch64.zip", "windows", "arm64"},
+		{"bun-cli-darwin-x64-0.0.36.tgz", "darwin", "amd64"},
 		// no os
 		{"libtree_aarch64", "", "arm64"},
 		{"libtree_armv6l", "", "arm"},
@@ -142,6 +154,26 @@ func TestOSArch(t *testing.T) {
 		if os != tc.os || arch != tc.arch {
 			t.Fatalf("file '%s' results in %s/%s, expected %s/%s", tc.name, os, arch, tc.os, tc.arch)
 		}
+	}
+}
+
+func TestBunChecksumFiles(t *testing.T) {
+	for _, tc := range []struct {
+		Name     string
+		Size     int
+		Expected bool
+	}{
+		{Name: "SHASUMS256.txt", Size: 4096, Expected: true},
+		{Name: "SHASUMS256.txt.asc", Size: 833},
+		{Name: "SHASUMS256.txt", Size: 64 * 1024},
+		{Name: "bun-linux-x64.zip", Size: 30 * 1024 * 1024},
+	} {
+		t.Run(tc.Name+"/"+fmt.Sprint(tc.Size), func(t *testing.T) {
+			asset := ghAsset{Name: tc.Name, Size: tc.Size}
+			if asset.IsChecksumFile() != tc.Expected {
+				t.Fatalf("expected checksum classification %t for %#v", tc.Expected, asset)
+			}
+		})
 	}
 }
 

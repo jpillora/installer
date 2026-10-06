@@ -97,7 +97,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 	if len(ghas) == 0 {
 		return release, nil, errors.New("no assets found")
 	}
-	sumIndex, _ := ghas.getSumIndex()
+	sumIndex, _ := ghas.getSumIndex(h.Client)
 	if l := len(sumIndex); l > 0 {
 		log.Printf("fetched %d asset shasums", l)
 	}
@@ -108,6 +108,9 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		foundLinuxAMD64 = false
 	)
 	for _, ga := range ghas {
+		if q.isBun() && !ga.isBunBinary(q.Select) {
+			continue
+		}
 		url := ga.BrowserDownloadURL
 		os := getOS(ga.Name)
 		arch := getArch(ga.Name)
@@ -185,9 +188,12 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 		if other, exists := index[key]; exists {
 			gnu := func(s string) bool { return strings.Contains(s, "gnu") }
 			musl := func(s string) bool { return strings.Contains(s, "musl") }
-			g2m := gnu(other.Name) && !musl(other.Name) && !gnu(asset.Name) && musl(asset.Name)
+			prefer := gnu(other.Name) && !musl(other.Name) && !gnu(asset.Name) && musl(asset.Name)
+			if q.isBun() {
+				prefer = asset.preferredBunAssetOver(other)
+			}
 			// prefer musl over glib for portability, override with select=gnu
-			if !g2m {
+			if !prefer {
 				continue
 			}
 		}
@@ -227,7 +233,7 @@ func (h *Handler) getAssetsNoCache(q Query) (string, Assets, error) {
 
 type ghAssets []ghAsset
 
-func (as ghAssets) getSumIndex() (map[string]string, error) {
+func (as ghAssets) getSumIndex(client *http.Client) (map[string]string, error) {
 	url := ""
 	for _, ga := range as {
 		// is checksum file?
@@ -239,7 +245,10 @@ func (as ghAssets) getSumIndex() (map[string]string, error) {
 	if url == "" {
 		return nil, errors.New("no sum file found")
 	}
-	resp, err := http.DefaultClient.Get(url)
+	if client == nil {
+		client = http.DefaultClient
+	}
+	resp, err := client.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -281,8 +290,16 @@ type ghAsset struct {
 	URL string `json:"url"`
 }
 
+func (g ghAsset) isBunBinary(selectAsset string) bool {
+	if g.Size <= 1024*1024 || getOS(g.Name) == "" || strings.Contains(g.Name, ".dSYM.") {
+		return false
+	}
+	return !strings.Contains(g.Name, "-profile.") || strings.Contains(selectAsset, "profile")
+}
+
 func (g ghAsset) IsChecksumFile() bool {
-	return checksumRe.MatchString(strings.ToLower(g.Name)) && g.Size < 64*1024 // maximum file size 64KB
+	name := strings.ToLower(g.Name)
+	return checksumRe.MatchString(name) && !strings.HasSuffix(name, ".asc") && g.Size < 64*1024
 }
 
 func (g ghAsset) FileExt() string {

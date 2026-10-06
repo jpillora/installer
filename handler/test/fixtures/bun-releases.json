@@ -1,0 +1,1851 @@
+{
+  "source": "https://api.github.com/repos/oven-sh/bun/releases?per_page=100",
+  "captured_at": "2026-10-05T23:56:02.856036+00:00",
+  "release_count": 217,
+  "layouts": [
+    {
+      "tags": [
+        "bun-v1.4.2",
+        "bun-v1.4.1",
+        "bun-v1.4.0",
+        "bun-v1.3.14"
+      ],
+      "assets": [
+        {
+          "name": "bun-darwin-aarch64-profile.zip",
+          "size": 126252428
+        },
+        {
+          "name": "bun-darwin-aarch64.zip",
+          "size": 23586433
+        },
+        {
+          "name": "bun-darwin-x64-baseline-profile.zip",
+          "size": 137141180
+        },
+        {
+          "name": "bun-darwin-x64-baseline.zip",
+          "size": 26509145
+        },
+        {
+          "name": "bun-darwin-x64-profile.zip",
+          "size": 137141072
+        },
+        {
+          "name": "bun-darwin-x64.zip",
+          "size": 26509109
+        },
+        {
+          "name": "bun-freebsd-aarch64-profile.zip",
+          "size": 134461520
+        },
+        {
+          "name": "bun-freebsd-aarch64.zip",
+          "size": 35255742
+        },
+        {
+          "name": "bun-freebsd-x64-baseline-profile.zip",
+          "size": 132722697
+        },
+        {
+          "name": "bun-freebsd-x64-baseline.zip",
+          "size": 35829402
+        },
+        {
+          "name": "bun-freebsd-x64-profile.zip",
+          "size": 132722769
+        },
+        {
+          "name": "bun-freebsd-x64.zip",
+          "size": 35829438
+        },
+        {
+          "name": "bun-linux-aarch64-android-profile.zip",
+          "size": 274932074
+        },
+        {
+          "name": "bun-linux-aarch64-android.zip",
+          "size": 34926314
+        },
+        {
+          "name": "bun-linux-aarch64-musl-profile.zip",
+          "size": 142413485
+        },
+        {
+          "name": "bun-linux-aarch64-musl.zip",
+          "size": 33954264
+        },
+        {
+          "name": "bun-linux-aarch64-profile.zip",
+          "size": 162901947
+        },
+        {
+          "name": "bun-linux-aarch64.zip",
+          "size": 35700603
+        },
+        {
+          "name": "bun-linux-x64-android-baseline-profile.zip",
+          "size": 274393066
+        },
+        {
+          "name": "bun-linux-x64-android-baseline.zip",
+          "size": 35807489
+        },
+        {
+          "name": "bun-linux-x64-android-profile.zip",
+          "size": 274393138
+        },
+        {
+          "name": "bun-linux-x64-android.zip",
+          "size": 35807525
+        },
+        {
+          "name": "bun-linux-x64-baseline-profile.zip",
+          "size": 166064108
+        },
+        {
+          "name": "bun-linux-x64-baseline.zip",
+          "size": 35595658
+        },
+        {
+          "name": "bun-linux-x64-musl-baseline-profile.zip",
+          "size": 141128590
+        },
+        {
+          "name": "bun-linux-x64-musl-baseline.zip",
+          "size": 34056109
+        },
+        {
+          "name": "bun-linux-x64-musl-profile.zip",
+          "size": 141128680
+        },
+        {
+          "name": "bun-linux-x64-musl.zip",
+          "size": 34056145
+        },
+        {
+          "name": "bun-linux-x64-profile.zip",
+          "size": 166064216
+        },
+        {
+          "name": "bun-linux-x64.zip",
+          "size": 35969274
+        },
+        {
+          "name": "bun-windows-aarch64-profile.zip",
+          "size": 152529157
+        },
+        {
+          "name": "bun-windows-aarch64.zip",
+          "size": 36330062
+        },
+        {
+          "name": "bun-windows-x64-baseline-profile.zip",
+          "size": 161325590
+        },
+        {
+          "name": "bun-windows-x64-baseline.zip",
+          "size": 38023440
+        },
+        {
+          "name": "bun-windows-x64-profile.zip",
+          "size": 161538064
+        },
+        {
+          "name": "bun-windows-x64.zip",
+          "size": 38366737
+        },
+        {
+          "name": "SHASUMS256.txt",
+          "size": 3431
+        },
+        {
+          "name": "SHASUMS256.txt.asc",
+          "size": 3709
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-darwin-x64-baseline.zip",
+        "darwin/arm64": "bun-darwin-aarch64.zip",
+        "linux/amd64": "bun-linux-x64-musl-baseline.zip",
+        "linux/arm64": "bun-linux-aarch64-musl.zip",
+        "freebsd/amd64": "bun-freebsd-x64-baseline.zip",
+        "freebsd/arm64": "bun-freebsd-aarch64.zip",
+        "android/amd64": "bun-linux-x64-android-baseline.zip",
+        "android/arm64": "bun-linux-aarch64-android.zip"
+      }
+    },
+    {
+      "tags": [
+        "bun-v1.3.13",
+        "bun-v1.3.12",
+        "bun-v1.3.11",
+        "bun-v1.3.10"
+      ],
+      "assets": [
+        {
+          "name": "bun-darwin-aarch64-profile.zip",
+          "size": 427251535
+        },
+        {
+          "name": "bun-darwin-aarch64.zip",
+          "size": 22264502
+        },
+        {
+          "name": "bun-darwin-x64-baseline-profile.zip",
+          "size": 434756068
+        },
+        {
+          "name": "bun-darwin-x64-baseline.zip",
+          "size": 24594401
+        },
+        {
+          "name": "bun-darwin-x64-profile.zip",
+          "size": 434755978
+        },
+        {
+          "name": "bun-darwin-x64.zip",
+          "size": 24594365
+        },
+        {
+          "name": "bun-linux-aarch64-musl-profile.zip",
+          "size": 169810194
+        },
+        {
+          "name": "bun-linux-aarch64-musl.zip",
+          "size": 36127116
+        },
+        {
+          "name": "bun-linux-aarch64-profile.zip",
+          "size": 186990908
+        },
+        {
+          "name": "bun-linux-aarch64.zip",
+          "size": 37957120
+        },
+        {
+          "name": "bun-linux-x64-baseline-profile.zip",
+          "size": 187388919
+        },
+        {
+          "name": "bun-linux-x64-baseline.zip",
+          "size": 37975495
+        },
+        {
+          "name": "bun-linux-x64-musl-baseline-profile.zip",
+          "size": 168638084
+        },
+        {
+          "name": "bun-linux-x64-musl-baseline.zip",
+          "size": 36196137
+        },
+        {
+          "name": "bun-linux-x64-musl-profile.zip",
+          "size": 168767071
+        },
+        {
+          "name": "bun-linux-x64-musl.zip",
+          "size": 36368980
+        },
+        {
+          "name": "bun-linux-x64-profile.zip",
+          "size": 187944968
+        },
+        {
+          "name": "bun-linux-x64.zip",
+          "size": 38253527
+        },
+        {
+          "name": "bun-windows-aarch64-profile.zip",
+          "size": 151955431
+        },
+        {
+          "name": "bun-windows-aarch64.zip",
+          "size": 39050023
+        },
+        {
+          "name": "bun-windows-x64-baseline-profile.zip",
+          "size": 158973535
+        },
+        {
+          "name": "bun-windows-x64-baseline.zip",
+          "size": 40903093
+        },
+        {
+          "name": "bun-windows-x64-profile.zip",
+          "size": 159158145
+        },
+        {
+          "name": "bun-windows-x64.zip",
+          "size": 41064682
+        },
+        {
+          "name": "SHASUMS256.txt",
+          "size": 2263
+        },
+        {
+          "name": "SHASUMS256.txt.asc",
+          "size": 2541
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-darwin-x64-baseline.zip",
+        "darwin/arm64": "bun-darwin-aarch64.zip",
+        "linux/amd64": "bun-linux-x64-musl-baseline.zip",
+        "linux/arm64": "bun-linux-aarch64-musl.zip"
+      }
+    },
+    {
+      "tags": [
+        "bun-v1.3.9",
+        "bun-v1.3.8",
+        "bun-v1.3.7",
+        "bun-v1.3.6",
+        "bun-v1.3.5",
+        "bun-v1.3.4",
+        "bun-v1.3.3",
+        "bun-v1.3.2",
+        "bun-v1.3.1",
+        "bun-v1.3.0",
+        "bun-v1.2.23",
+        "bun-v1.2.22",
+        "bun-v1.2.21",
+        "bun-v1.2.20",
+        "bun-v1.2.19",
+        "bun-v1.2.18",
+        "bun-v1.2.17",
+        "bun-v1.2.16",
+        "bun-v1.2.15",
+        "bun-v1.2.14",
+        "bun-v1.2.13",
+        "bun-v1.2.12",
+        "bun-v1.2.11",
+        "bun-v1.2.10",
+        "bun-v1.2.9",
+        "bun-v1.2.8",
+        "bun-v1.2.7",
+        "bun-v1.2.6",
+        "bun-v1.2.5",
+        "bun-v1.2.4",
+        "bun-v1.2.3",
+        "bun-v1.2.2",
+        "bun-v1.2.1",
+        "bun-v1.2.0",
+        "bun-v1.1.45",
+        "bun-v1.1.44",
+        "bun-v1.1.43",
+        "bun-v1.1.42",
+        "bun-v1.1.41",
+        "bun-v1.1.40",
+        "bun-v1.1.39",
+        "bun-v1.1.38",
+        "bun-v1.1.37",
+        "bun-v1.1.36",
+        "bun-v1.1.35"
+      ],
+      "assets": [
+        {
+          "name": "bun-darwin-aarch64-profile.zip",
+          "size": 187900722
+        },
+        {
+          "name": "bun-darwin-aarch64.zip",
+          "size": 19497123
+        },
+        {
+          "name": "bun-darwin-x64-baseline-profile.zip",
+          "size": 189944054
+        },
+        {
+          "name": "bun-darwin-x64-baseline.zip",
+          "size": 21747149
+        },
+        {
+          "name": "bun-darwin-x64-profile.zip",
+          "size": 189943966
+        },
+        {
+          "name": "bun-darwin-x64.zip",
+          "size": 21747111
+        },
+        {
+          "name": "bun-linux-aarch64-musl-profile.zip",
+          "size": 94615463
+        },
+        {
+          "name": "bun-linux-aarch64-musl.zip",
+          "size": 30382014
+        },
+        {
+          "name": "bun-linux-aarch64-profile.zip",
+          "size": 92778593
+        },
+        {
+          "name": "bun-linux-aarch64.zip",
+          "size": 34844232
+        },
+        {
+          "name": "bun-linux-x64-baseline-profile.zip",
+          "size": 93311105
+        },
+        {
+          "name": "bun-linux-x64-baseline.zip",
+          "size": 36122138
+        },
+        {
+          "name": "bun-linux-x64-musl-baseline-profile.zip",
+          "size": 95856645
+        },
+        {
+          "name": "bun-linux-x64-musl-baseline.zip",
+          "size": 31118890
+        },
+        {
+          "name": "bun-linux-x64-musl-profile.zip",
+          "size": 96066814
+        },
+        {
+          "name": "bun-linux-x64-musl.zip",
+          "size": 31131018
+        },
+        {
+          "name": "bun-linux-x64-profile.zip",
+          "size": 93479403
+        },
+        {
+          "name": "bun-linux-x64.zip",
+          "size": 36240334
+        },
+        {
+          "name": "bun-windows-x64-baseline-profile.zip",
+          "size": 136106251
+        },
+        {
+          "name": "bun-windows-x64-baseline.zip",
+          "size": 37315372
+        },
+        {
+          "name": "bun-windows-x64-profile.zip",
+          "size": 136170770
+        },
+        {
+          "name": "bun-windows-x64.zip",
+          "size": 37423899
+        },
+        {
+          "name": "SHASUMS256.txt",
+          "size": 2075
+        },
+        {
+          "name": "SHASUMS256.txt.asc",
+          "size": 2353
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-darwin-x64-baseline.zip",
+        "darwin/arm64": "bun-darwin-aarch64.zip",
+        "linux/amd64": "bun-linux-x64-musl-baseline.zip",
+        "linux/arm64": "bun-linux-aarch64-musl.zip"
+      }
+    },
+    {
+      "tags": [
+        "bun-v1.1.34",
+        "bun-v1.1.33",
+        "bun-v1.1.32",
+        "bun-v1.1.31",
+        "bun-v1.1.30",
+        "bun-v1.1.29",
+        "bun-v1.1.28",
+        "bun-v1.1.27",
+        "bun-v1.1.26",
+        "bun-v1.1.25",
+        "bun-v1.1.24",
+        "bun-v1.1.21",
+        "bun-v1.1.20",
+        "bun-v1.1.19",
+        "bun-v1.1.18",
+        "bun-v1.1.17",
+        "bun-v1.1.16",
+        "bun-v1.1.15",
+        "bun-v1.1.14",
+        "bun-v1.1.13",
+        "bun-v1.1.12",
+        "bun-v1.1.11",
+        "bun-v1.1.10",
+        "bun-v1.1.9",
+        "bun-v1.1.8",
+        "bun-v1.1.7",
+        "bun-v1.1.4",
+        "bun-v1.1.3",
+        "bun-v1.1.2",
+        "bun-v1.1.1",
+        "bun-v1.1.0"
+      ],
+      "assets": [
+        {
+          "name": "bun-darwin-aarch64-profile.zip",
+          "size": 18916018
+        },
+        {
+          "name": "bun-darwin-aarch64.zip",
+          "size": 17283221
+        },
+        {
+          "name": "bun-darwin-x64-baseline-profile.zip",
+          "size": 21202021
+        },
+        {
+          "name": "bun-darwin-x64-baseline.zip",
+          "size": 18978831
+        },
+        {
+          "name": "bun-darwin-x64-profile.zip",
+          "size": 21225102
+        },
+        {
+          "name": "bun-darwin-x64.zip",
+          "size": 19006333
+        },
+        {
+          "name": "bun-linux-aarch64-profile.zip",
+          "size": 62496151
+        },
+        {
+          "name": "bun-linux-aarch64.zip",
+          "size": 32771625
+        },
+        {
+          "name": "bun-linux-x64-baseline-profile.zip",
+          "size": 62950181
+        },
+        {
+          "name": "bun-linux-x64-baseline.zip",
+          "size": 34101259
+        },
+        {
+          "name": "bun-linux-x64-profile.zip",
+          "size": 62980589
+        },
+        {
+          "name": "bun-linux-x64.zip",
+          "size": 34153617
+        },
+        {
+          "name": "bun-windows-x64-baseline-profile.zip",
+          "size": 96086934
+        },
+        {
+          "name": "bun-windows-x64-baseline.zip",
+          "size": 33402493
+        },
+        {
+          "name": "bun-windows-x64-profile.zip",
+          "size": 96139040
+        },
+        {
+          "name": "bun-windows-x64.zip",
+          "size": 33447288
+        },
+        {
+          "name": "SHASUMS256.txt",
+          "size": 1491
+        },
+        {
+          "name": "SHASUMS256.txt.asc",
+          "size": 1769
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-darwin-x64-baseline.zip",
+        "darwin/arm64": "bun-darwin-aarch64.zip",
+        "linux/amd64": "bun-linux-x64-baseline.zip",
+        "linux/arm64": "bun-linux-aarch64.zip"
+      }
+    },
+    {
+      "tags": [
+        "bun-v1.1.23"
+      ],
+      "assets": [
+        {
+          "name": "bun-darwin-aarch64-profile.zip",
+          "size": 20017827
+        },
+        {
+          "name": "bun-darwin-aarch64.zip",
+          "size": 18397593
+        },
+        {
+          "name": "bun-darwin-x64-profile.zip",
+          "size": 21895836
+        },
+        {
+          "name": "bun-darwin-x64.zip",
+          "size": 20248450
+        },
+        {
+          "name": "bun-linux-aarch64-profile.zip",
+          "size": 62776376
+        },
+        {
+          "name": "bun-linux-aarch64.zip",
+          "size": 33592829
+        },
+        {
+          "name": "bun-linux-x64-baseline-profile.zip",
+          "size": 63117728
+        },
+        {
+          "name": "bun-linux-x64-baseline.zip",
+          "size": 34366708
+        },
+        {
+          "name": "bun-linux-x64-profile.zip",
+          "size": 63202106
+        },
+        {
+          "name": "bun-linux-x64.zip",
+          "size": 34412955
+        },
+        {
+          "name": "bun-windows-x64-baseline-profile.zip",
+          "size": 127424364
+        },
+        {
+          "name": "bun-windows-x64-baseline.zip",
+          "size": 35456451
+        },
+        {
+          "name": "bun-windows-x64-profile.zip",
+          "size": 127526833
+        },
+        {
+          "name": "bun-windows-x64.zip",
+          "size": 35594598
+        },
+        {
+          "name": "SHASUMS256.txt",
+          "size": 1295
+        },
+        {
+          "name": "SHASUMS256.txt.asc",
+          "size": 1573
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-darwin-x64.zip",
+        "darwin/arm64": "bun-darwin-aarch64.zip",
+        "linux/amd64": "bun-linux-x64-baseline.zip",
+        "linux/arm64": "bun-linux-aarch64.zip"
+      }
+    },
+    {
+      "tags": [
+        "bun-v1.1.22",
+        "bun-v1.1.6"
+      ],
+      "assets": [
+        {
+          "name": "bun-darwin-aarch64-profile.zip",
+          "size": 19347879
+        },
+        {
+          "name": "bun-darwin-aarch64.zip",
+          "size": 17706687
+        },
+        {
+          "name": "bun-darwin-x64-baseline.zip",
+          "size": 19692476
+        },
+        {
+          "name": "bun-darwin-x64-profile.zip",
+          "size": 21838423
+        },
+        {
+          "name": "bun-darwin-x64.zip",
+          "size": 19732849
+        },
+        {
+          "name": "bun-linux-aarch64-profile.zip",
+          "size": 63323834
+        },
+        {
+          "name": "bun-linux-aarch64.zip",
+          "size": 32744024
+        },
+        {
+          "name": "bun-linux-x64-baseline-profile.zip",
+          "size": 63518708
+        },
+        {
+          "name": "bun-linux-x64-baseline.zip",
+          "size": 34078750
+        },
+        {
+          "name": "bun-linux-x64-profile.zip",
+          "size": 63596150
+        },
+        {
+          "name": "bun-linux-x64.zip",
+          "size": 34142290
+        },
+        {
+          "name": "bun-windows-x64-baseline-profile.zip",
+          "size": 96020559
+        },
+        {
+          "name": "bun-windows-x64-baseline.zip",
+          "size": 33479960
+        },
+        {
+          "name": "bun-windows-x64-profile.zip",
+          "size": 96065596
+        },
+        {
+          "name": "bun-windows-x64.zip",
+          "size": 33504383
+        },
+        {
+          "name": "SHASUMS256.txt",
+          "size": 1389
+        },
+        {
+          "name": "SHASUMS256.txt.asc",
+          "size": 1667
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-darwin-x64-baseline.zip",
+        "darwin/arm64": "bun-darwin-aarch64.zip",
+        "linux/amd64": "bun-linux-x64-baseline.zip",
+        "linux/arm64": "bun-linux-aarch64.zip"
+      }
+    },
+    {
+      "tags": [
+        "bun-v1.1.5"
+      ],
+      "assets": [
+        {
+          "name": "bun-darwin-aarch64-profile.zip",
+          "size": 19316737
+        },
+        {
+          "name": "bun-darwin-aarch64.zip",
+          "size": 17678599
+        },
+        {
+          "name": "bun-darwin-x64-baseline.zip",
+          "size": 19640376
+        },
+        {
+          "name": "bun-darwin-x64-profile.zip",
+          "size": 22040411
+        },
+        {
+          "name": "bun-darwin-x64.zip",
+          "size": 19679431
+        },
+        {
+          "name": "bun-linux-aarch64-profile.zip",
+          "size": 63892967
+        },
+        {
+          "name": "bun-linux-aarch64.zip",
+          "size": 32712893
+        },
+        {
+          "name": "bun-linux-x64-baseline-profile.zip",
+          "size": 64143661
+        },
+        {
+          "name": "bun-linux-x64-baseline.zip",
+          "size": 34032810
+        },
+        {
+          "name": "bun-linux-x64-profile.zip",
+          "size": 64212237
+        },
+        {
+          "name": "bun-linux-x64.zip",
+          "size": 34089658
+        },
+        {
+          "name": "bun-windows-x64-baseline-profile.zip",
+          "size": 95656089
+        },
+        {
+          "name": "bun-windows-x64-baseline.zip",
+          "size": 33421861
+        },
+        {
+          "name": "bun-windows-x64.zip",
+          "size": 33445441
+        },
+        {
+          "name": "SHASUMS256.txt",
+          "size": 1295
+        },
+        {
+          "name": "SHASUMS256.txt.asc",
+          "size": 1573
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-darwin-x64-baseline.zip",
+        "darwin/arm64": "bun-darwin-aarch64.zip",
+        "linux/amd64": "bun-linux-x64-baseline.zip",
+        "linux/arm64": "bun-linux-aarch64.zip"
+      }
+    },
+    {
+      "tags": [
+        "bun-v1.0.36",
+        "bun-v1.0.35",
+        "bun-v1.0.34",
+        "bun-v1.0.33",
+        "bun-v1.0.32",
+        "bun-v1.0.31",
+        "bun-v1.0.30",
+        "bun-v1.0.29",
+        "bun-v1.0.28",
+        "bun-v1.0.27",
+        "bun-v1.0.26",
+        "bun-v1.0.25",
+        "bun-v1.0.24",
+        "bun-v1.0.23",
+        "bun-v1.0.22",
+        "bun-v1.0.21",
+        "bun-v1.0.20",
+        "bun-v1.0.19",
+        "bun-v1.0.18",
+        "bun-v1.0.17",
+        "bun-v1.0.16",
+        "bun-v1.0.15",
+        "bun-v1.0.14",
+        "bun-v1.0.13",
+        "bun-v1.0.12",
+        "bun-v1.0.11",
+        "bun-v1.0.10",
+        "bun-v1.0.9",
+        "bun-v1.0.8",
+        "bun-v1.0.7",
+        "bun-v1.0.6",
+        "bun-v1.0.5",
+        "bun-v1.0.4",
+        "bun-v1.0.3",
+        "bun-v1.0.2",
+        "bun-v1.0.1",
+        "bun-v1.0.0",
+        "bun-v0.8.1",
+        "bun-v0.8.0",
+        "bun-v0.7.3",
+        "bun-v0.7.2",
+        "bun-v0.7.1",
+        "bun-v0.7.0",
+        "bun-v0.6.14",
+        "bun-v0.6.13",
+        "bun-v0.6.12",
+        "bun-v0.6.11",
+        "bun-v0.6.10",
+        "bun-v0.6.9",
+        "bun-v0.6.8",
+        "bun-v0.6.7",
+        "bun-v0.6.6",
+        "bun-v0.6.5",
+        "bun-v0.6.4",
+        "bun-v0.6.3",
+        "bun-v0.6.2",
+        "bun-v0.6.1",
+        "bun-v0.6.0",
+        "bun-v0.5.9",
+        "bun-v0.5.8",
+        "bun-v0.5.7",
+        "bun-v0.5.6",
+        "bun-v0.5.5",
+        "bun-v0.5.4",
+        "bun-v0.5.3",
+        "bun-v0.5.1"
+      ],
+      "assets": [
+        {
+          "name": "bun-darwin-aarch64-profile.zip",
+          "size": 16796726
+        },
+        {
+          "name": "bun-darwin-aarch64.zip",
+          "size": 15743905
+        },
+        {
+          "name": "bun-darwin-x64-baseline-profile.zip",
+          "size": 19429538
+        },
+        {
+          "name": "bun-darwin-x64-baseline.zip",
+          "size": 18125211
+        },
+        {
+          "name": "bun-darwin-x64-profile.zip",
+          "size": 19619430
+        },
+        {
+          "name": "bun-darwin-x64.zip",
+          "size": 18251023
+        },
+        {
+          "name": "bun-linux-aarch64-profile.zip",
+          "size": 57587612
+        },
+        {
+          "name": "bun-linux-aarch64.zip",
+          "size": 31199328
+        },
+        {
+          "name": "bun-linux-x64-baseline-profile.zip",
+          "size": 58315434
+        },
+        {
+          "name": "bun-linux-x64-baseline.zip",
+          "size": 33604863
+        },
+        {
+          "name": "bun-linux-x64-profile.zip",
+          "size": 58623306
+        },
+        {
+          "name": "bun-linux-x64.zip",
+          "size": 33955395
+        },
+        {
+          "name": "SHASUMS256.txt",
+          "size": 1113
+        },
+        {
+          "name": "SHASUMS256.txt.asc",
+          "size": 1391
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-darwin-x64-baseline.zip",
+        "darwin/arm64": "bun-darwin-aarch64.zip",
+        "linux/amd64": "bun-linux-x64-baseline.zip",
+        "linux/arm64": "bun-linux-aarch64.zip"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.5.2",
+        "bun-v0.5.0",
+        "bun-v0.4.0",
+        "bun-v0.3.0",
+        "bun-v0.2.2",
+        "bun-v0.2.1",
+        "bun-v0.2.0",
+        "bun-v0.1.13",
+        "bun-v0.1.12",
+        "bun-v0.1.11",
+        "bun-v0.1.10",
+        "bun-v0.1.9",
+        "bun-v0.1.8",
+        "bun-v0.1.6"
+      ],
+      "assets": [
+        {
+          "name": "bun-darwin-aarch64-profile.zip",
+          "size": 14795578
+        },
+        {
+          "name": "bun-darwin-aarch64.zip",
+          "size": 13321016
+        },
+        {
+          "name": "bun-darwin-x64-baseline-profile.zip",
+          "size": 16840510
+        },
+        {
+          "name": "bun-darwin-x64-baseline.zip",
+          "size": 16353430
+        },
+        {
+          "name": "bun-darwin-x64-profile.zip",
+          "size": 17242486
+        },
+        {
+          "name": "bun-darwin-x64.zip",
+          "size": 16772034
+        },
+        {
+          "name": "bun-linux-aarch64-profile.zip",
+          "size": 53260106
+        },
+        {
+          "name": "bun-linux-aarch64.zip",
+          "size": 30144116
+        },
+        {
+          "name": "bun-linux-x64-baseline-profile.zip",
+          "size": 53989754
+        },
+        {
+          "name": "bun-linux-x64-baseline.zip",
+          "size": 32262909
+        },
+        {
+          "name": "bun-linux-x64-profile.zip",
+          "size": 54513302
+        },
+        {
+          "name": "bun-linux-x64.zip",
+          "size": 32684433
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-darwin-x64-baseline.zip",
+        "darwin/arm64": "bun-darwin-aarch64.zip",
+        "linux/amd64": "bun-linux-x64-baseline.zip",
+        "linux/arm64": "bun-linux-aarch64.zip"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.1.7"
+      ],
+      "assets": [
+        {
+          "name": "bun-darwin-aarch64-profile.zip",
+          "size": 14868501
+        },
+        {
+          "name": "bun-darwin-aarch64.zip",
+          "size": 13981129
+        },
+        {
+          "name": "bun-darwin-x64-baseline-profile.zip",
+          "size": 17246633
+        },
+        {
+          "name": "bun-darwin-x64-baseline.zip",
+          "size": 16773463
+        },
+        {
+          "name": "bun-darwin-x64-profile.zip",
+          "size": 17312314
+        },
+        {
+          "name": "bun-darwin-x64.dSYM.tar.gz",
+          "size": 18641860
+        },
+        {
+          "name": "bun-darwin-x64.zip",
+          "size": 15609260
+        },
+        {
+          "name": "bun-linux-aarch64-profile.zip",
+          "size": 57394176
+        },
+        {
+          "name": "bun-linux-aarch64.zip",
+          "size": 30763261
+        },
+        {
+          "name": "bun-linux-x64-baseline-profile.zip",
+          "size": 58618511
+        },
+        {
+          "name": "bun-linux-x64-baseline.zip",
+          "size": 32917134
+        },
+        {
+          "name": "bun-linux-x64-profile.zip",
+          "size": 58633572
+        },
+        {
+          "name": "bun-linux-x64.zip",
+          "size": 32941254
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-darwin-x64-baseline.zip",
+        "darwin/arm64": "bun-darwin-aarch64.zip",
+        "linux/amd64": "bun-linux-x64-baseline.zip",
+        "linux/arm64": "bun-linux-aarch64.zip"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.1.5"
+      ],
+      "assets": [
+        {
+          "name": "bun-darwin-aarch64.dSYM.tar.gz",
+          "size": 16244224
+        },
+        {
+          "name": "bun-darwin-aarch64.zip",
+          "size": 13154457
+        },
+        {
+          "name": "bun-darwin-x64.dSYM.tar.gz",
+          "size": 18196039
+        },
+        {
+          "name": "bun-darwin-x64.zip",
+          "size": 15898609
+        },
+        {
+          "name": "bun-linux-aarch64.zip",
+          "size": 55235486
+        },
+        {
+          "name": "bun-linux-x64.zip",
+          "size": 30304883
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-darwin-x64.zip",
+        "darwin/arm64": "bun-darwin-aarch64.zip",
+        "linux/amd64": "bun-linux-x64.zip",
+        "linux/arm64": "bun-linux-aarch64.zip"
+      }
+    },
+    {
+      "tags": [
+        "canary"
+      ],
+      "assets": [
+        {
+          "name": "bun-darwin-aarch64-profile.zip",
+          "size": 130523872
+        },
+        {
+          "name": "bun-darwin-aarch64.zip",
+          "size": 27075770
+        },
+        {
+          "name": "bun-darwin-x64-baseline-profile.zip",
+          "size": 139365688
+        },
+        {
+          "name": "bun-darwin-x64-baseline.zip",
+          "size": 28367120
+        },
+        {
+          "name": "bun-darwin-x64-profile.zip",
+          "size": 139365580
+        },
+        {
+          "name": "bun-darwin-x64.zip",
+          "size": 28367084
+        },
+        {
+          "name": "bun-freebsd-aarch64-profile.zip",
+          "size": 138711661
+        },
+        {
+          "name": "bun-freebsd-aarch64.zip",
+          "size": 35749297
+        },
+        {
+          "name": "bun-freebsd-x64-profile.zip",
+          "size": 137326235
+        },
+        {
+          "name": "bun-freebsd-x64.zip",
+          "size": 35654096
+        },
+        {
+          "name": "bun-linux-aarch64-android-profile.zip",
+          "size": 361998269
+        },
+        {
+          "name": "bun-linux-aarch64-android.zip",
+          "size": 35250889
+        },
+        {
+          "name": "bun-linux-aarch64-musl-profile.zip",
+          "size": 151965603
+        },
+        {
+          "name": "bun-linux-aarch64-musl.zip",
+          "size": 34272555
+        },
+        {
+          "name": "bun-linux-aarch64-profile.zip",
+          "size": 174288799
+        },
+        {
+          "name": "bun-linux-aarch64.zip",
+          "size": 37778282
+        },
+        {
+          "name": "bun-linux-x64-android-profile.zip",
+          "size": 363933203
+        },
+        {
+          "name": "bun-linux-x64-android.zip",
+          "size": 36820566
+        },
+        {
+          "name": "bun-linux-x64-baseline-profile.zip",
+          "size": 177309393
+        },
+        {
+          "name": "bun-linux-x64-baseline.zip",
+          "size": 37948561
+        },
+        {
+          "name": "bun-linux-x64-musl-baseline-profile.zip",
+          "size": 150738158
+        },
+        {
+          "name": "bun-linux-x64-musl-baseline.zip",
+          "size": 34594853
+        },
+        {
+          "name": "bun-linux-x64-musl-profile.zip",
+          "size": 150738068
+        },
+        {
+          "name": "bun-linux-x64-musl.zip",
+          "size": 34594817
+        },
+        {
+          "name": "bun-linux-x64-profile.zip",
+          "size": 177309285
+        },
+        {
+          "name": "bun-linux-x64.zip",
+          "size": 37948525
+        },
+        {
+          "name": "bun-windows-aarch64-profile.zip",
+          "size": 190695755
+        },
+        {
+          "name": "bun-windows-aarch64.zip",
+          "size": 36108670
+        },
+        {
+          "name": "bun-windows-x64-baseline-profile.zip",
+          "size": 227928978
+        },
+        {
+          "name": "bun-windows-x64-baseline.zip",
+          "size": 40364553
+        },
+        {
+          "name": "bun-windows-x64-profile.zip",
+          "size": 227928834
+        },
+        {
+          "name": "bun-windows-x64.zip",
+          "size": 40364517
+        },
+        {
+          "name": "SHASUMS256.txt",
+          "size": 3023
+        },
+        {
+          "name": "SHASUMS256.txt.asc",
+          "size": 3301
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-darwin-x64-baseline.zip",
+        "darwin/arm64": "bun-darwin-aarch64.zip",
+        "linux/amd64": "bun-linux-x64-musl-baseline.zip",
+        "linux/arm64": "bun-linux-aarch64-musl.zip",
+        "freebsd/amd64": "bun-freebsd-x64.zip",
+        "freebsd/arm64": "bun-freebsd-aarch64.zip",
+        "android/amd64": "bun-linux-x64-android.zip",
+        "android/arm64": "bun-linux-aarch64-android.zip"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.1.4",
+        "bun-v0.1.3",
+        "bun-v0.1.2",
+        "bun-v0.1.1",
+        "bun-v0.0.83",
+        "bun-v0.0.81",
+        "bun-v0.0.79",
+        "bun-v0.0.78",
+        "bun-v0.0.76",
+        "bun-v0.0.72",
+        "bun-v0.0.71",
+        "bun-v0.0.69",
+        "bun-v0.0.68"
+      ],
+      "assets": [
+        {
+          "name": "bun-darwin-aarch64.dSYM.tar.gz",
+          "size": 15189761
+        },
+        {
+          "name": "bun-darwin-aarch64.zip",
+          "size": 10312760
+        },
+        {
+          "name": "bun-darwin-x64.dSYM.tar.gz",
+          "size": 16193664
+        },
+        {
+          "name": "bun-darwin-x64.zip",
+          "size": 12039040
+        },
+        {
+          "name": "bun-linux-x64.zip",
+          "size": 24691316
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-darwin-x64.zip",
+        "darwin/arm64": "bun-darwin-aarch64.zip",
+        "linux/amd64": "bun-linux-x64.zip"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.66",
+        "bun-v0.0.56",
+        "bun-v0.0.55",
+        "bun-v0.0.46",
+        "bun-v0.0.45",
+        "bun-v0.0.44",
+        "bun-v0.0.42",
+        "bun-v0.0.41",
+        "bun-v0.0.40"
+      ],
+      "assets": [
+        {
+          "name": "bun-darwin-aarch64.zip",
+          "size": 10443451
+        },
+        {
+          "name": "bun-darwin-x64.zip",
+          "size": 12158915
+        },
+        {
+          "name": "bun-linux-x64.zip",
+          "size": 23573780
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-darwin-x64.zip",
+        "darwin/arm64": "bun-darwin-aarch64.zip",
+        "linux/amd64": "bun-linux-x64.zip"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.36"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-0.0.36.tgz",
+          "size": 3203
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.36.tgz",
+          "size": 10427699
+        },
+        {
+          "name": "bun-cli-darwin-x64-0.0.36.tgz",
+          "size": 11772729
+        },
+        {
+          "name": "bun-cli-linux-x64-0.0.36.tgz",
+          "size": 23351312
+        }
+      ],
+      "expected": {
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.36.tgz",
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.36.tgz",
+        "linux/amd64": "bun-cli-linux-x64-0.0.36.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.34"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-0.0.34.tgz",
+          "size": 3203
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.34.tgz",
+          "size": 9129928
+        },
+        {
+          "name": "bun-cli-darwin-x64-0.0.34.tgz",
+          "size": 10489855
+        },
+        {
+          "name": "bun-cli-linux-x64-0.0.34.tgz",
+          "size": 22786411
+        }
+      ],
+      "expected": {
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.34.tgz",
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.34.tgz",
+        "linux/amd64": "bun-cli-linux-x64-0.0.34.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.32"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-0.0.32.tgz",
+          "size": 3202
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.32.tgz",
+          "size": 9121839
+        },
+        {
+          "name": "bun-cli-darwin-x64-0.0.32.tgz",
+          "size": 10478906
+        },
+        {
+          "name": "bun-cli-linux-x64-0.0.32.tgz",
+          "size": 22775484
+        }
+      ],
+      "expected": {
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.32.tgz",
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.32.tgz",
+        "linux/amd64": "bun-cli-linux-x64-0.0.32.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.29"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-0.0.29.tgz",
+          "size": 3202
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.29.tgz",
+          "size": 9121479
+        },
+        {
+          "name": "bun-cli-darwin-x64-0.0.29.tgz",
+          "size": 10479231
+        },
+        {
+          "name": "bun-cli-linux-x64-0.0.29.tgz",
+          "size": 10338733
+        }
+      ],
+      "expected": {
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.29.tgz",
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.29.tgz",
+        "linux/amd64": "bun-cli-linux-x64-0.0.29.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.28"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-0.0.28.tgz",
+          "size": 3194
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.28.tgz",
+          "size": 9124058
+        },
+        {
+          "name": "bun-cli-darwin-x64-0.0.28.tgz",
+          "size": 10491654
+        },
+        {
+          "name": "bun-cli-linux-x64-0.0.28.tgz",
+          "size": 10349683
+        }
+      ],
+      "expected": {
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.28.tgz",
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.28.tgz",
+        "linux/amd64": "bun-cli-linux-x64-0.0.28.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.27"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-0.0.27.tgz",
+          "size": 3194
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.27.tgz",
+          "size": 9768194
+        },
+        {
+          "name": "bun-cli-darwin-x64-0.0.27.tgz",
+          "size": 11082296
+        }
+      ],
+      "expected": {
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.27.tgz",
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.27.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.26"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-0.0.26.tgz",
+          "size": 3194
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.26.tgz",
+          "size": 9710974
+        },
+        {
+          "name": "bun-cli-darwin-x64-0.0.26.tgz",
+          "size": 11014683
+        }
+      ],
+      "expected": {
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.26.tgz",
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.26.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.24"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.24.tgz",
+          "size": 9568564
+        },
+        {
+          "name": "bun-cli-darwin-x64-0.0.24.tgz",
+          "size": 10834636
+        },
+        {
+          "name": "bun-cli-0.0.24.tgz",
+          "size": 3194
+        }
+      ],
+      "expected": {
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.24.tgz",
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.24.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.23"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-darwin-x64-0.0.23.tgz",
+          "size": 10835530
+        },
+        {
+          "name": "bun-cli-0.0.23.tgz",
+          "size": 3194
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.23.tgz",
+          "size": 9569885
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.23.tgz",
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.23.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.22"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-darwin-x64-0.0.22.tgz",
+          "size": 10836138
+        },
+        {
+          "name": "bun-cli-0.0.22.tgz",
+          "size": 3194
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.22.tgz",
+          "size": 9569881
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.22.tgz",
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.22.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.21"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-darwin-x64-0.0.21.tgz",
+          "size": 10777752
+        },
+        {
+          "name": "bun-cli-0.0.21.tgz",
+          "size": 3194
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.21.tgz",
+          "size": 9529324
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.21.tgz",
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.21.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.19"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-darwin-x64-0.0.19.tgz",
+          "size": 10776441
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.19.tgz",
+          "size": 9528303
+        },
+        {
+          "name": "bun-cli-0.0.19.tgz",
+          "size": 3195
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.19.tgz",
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.19.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.18"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.18.tgz",
+          "size": 9528474
+        },
+        {
+          "name": "bun-cli-darwin-x64-0.0.18.tgz",
+          "size": 10775540
+        },
+        {
+          "name": "bun-cli-0.0.18.tgz",
+          "size": 3195
+        }
+      ],
+      "expected": {
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.18.tgz",
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.18.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.17"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.17.tgz",
+          "size": 9527239
+        },
+        {
+          "name": "bun-cli-darwin-x64-0.0.17.tgz",
+          "size": 10774953
+        },
+        {
+          "name": "bun-cli-0.0.17.tgz",
+          "size": 3195
+        }
+      ],
+      "expected": {
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.17.tgz",
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.17.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.16"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-darwin-x64-0.0.16.tgz",
+          "size": 10696520
+        },
+        {
+          "name": "bun-cli-0.0.16.tgz",
+          "size": 3195
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.16.tgz",
+          "size": 9470182
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.16.tgz",
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.16.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.15"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-darwin-x64-0.0.15.tgz",
+          "size": 10694833
+        },
+        {
+          "name": "bun-cli-0.0.15.tgz",
+          "size": 3195
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.15.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.0-14"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-darwin-x64-0.0.0-14.tgz",
+          "size": 10694879
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.0-14.tgz",
+          "size": 9473376
+        },
+        {
+          "name": "bun-cli-0.0.0-14.tgz",
+          "size": 3196
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.0-14.tgz",
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.0-14.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.0-13"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-darwin-x64-0.0.0-13.tgz",
+          "size": 10699439
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.0-13.tgz",
+          "size": 9481156
+        },
+        {
+          "name": "bun-cli-0.0.0-13.tgz",
+          "size": 3195
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.0-13.tgz",
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.0-13.tgz"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.0-12"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-darwin-x64-0.0.0-12.tgz",
+          "size": 210
+        }
+      ],
+      "expected": {}
+    },
+    {
+      "tags": [
+        "bun-v0.0.0-11"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-darwin-x64-0.0.0-11.tgz",
+          "size": 10699442
+        },
+        {
+          "name": "bun-cli-darwin-aarch64-0.0.0-11.tgz",
+          "size": 9481159
+        },
+        {
+          "name": "bun-cli-0.0.0-11.tgz",
+          "size": 3196
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.0-11.tgz",
+        "darwin/arm64": "bun-cli-darwin-aarch64-0.0.0-11.tgz"
+      }
+    },
+    {
+      "tags": [
+        "not-quite-v0",
+        "bun-build-8"
+      ],
+      "assets": [
+        {
+          "name": "bun-macos-x64.zip",
+          "size": 11062680
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-macos-x64.zip"
+      }
+    },
+    {
+      "tags": [
+        "bun-v0.0.0-9"
+      ],
+      "assets": [],
+      "expected": {}
+    },
+    {
+      "tags": [
+        "bun-v0.0.0-10"
+      ],
+      "assets": [
+        {
+          "name": "bun-cli-0.0.0-10.tgz",
+          "size": 3182
+        },
+        {
+          "name": "bun-cli-darwin-x64-0.0.0-10.tgz",
+          "size": 10699220
+        }
+      ],
+      "expected": {
+        "darwin/amd64": "bun-cli-darwin-x64-0.0.0-10.tgz"
+      }
+    }
+  ]
+}
