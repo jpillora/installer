@@ -117,7 +117,7 @@ func (c *bunReleaseClient) handler() *handler.Handler {
 func (c *bunReleaseClient) check(t *testing.T, w *httptest.ResponseRecorder, expected map[string]string) {
 	t.Helper()
 	if len(expected) == 0 {
-		if w.Code != http.StatusInternalServerError || !strings.Contains(w.Body.String(), "no assets found") && !strings.Contains(w.Body.String(), "no downloads found") {
+		if w.Code != http.StatusBadGateway || !strings.Contains(w.Body.String(), "no assets found") && !strings.Contains(w.Body.String(), "no downloads found") {
 			t.Fatalf("expected release without binaries to fail, got %d: %s", w.Code, w.Body.String())
 		}
 		return

@@ -51,5 +51,5 @@ var (
 var (
 	checksumRe     = regexp.MustCompile(`(checksums|sha256sums|shasums256)`)
 	fileExtRe      = regexp.MustCompile(`(\.tar)?(\.[a-z][a-z0-9]+)$`)
-	searchGithubRe = regexp.MustCompile(`https:\/\/github\.com\/(\w+)\/(\w+)`)
+	searchGithubRe = regexp.MustCompile(`^https://github\.com/([\w.-]+)/([\w.-]+)(?:[/?#]|$)`)
 )

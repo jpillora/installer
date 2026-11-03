@@ -34,17 +34,16 @@ func (h *Handler) execute(q Query) (QueryResult, error) {
 		// use ddg/google to auto-detect user...
 		user, program, gerr := imFeelingLuck(q.Program)
 		if gerr != nil {
-			log.Printf("web search failed: %s", gerr)
-		} else {
-			log.Printf("web search found: %s/%s", user, program)
-			if program != q.Program {
-				log.Printf("program mismatch: got %s: expected %s", q.Program, program)
-			}
-			q.Program = program
-			q.User = user
-			// retry assets...
-			release, assets, err = h.getAssetsNoCache(q)
+			return QueryResult{}, fmt.Errorf("web search for %q failed: %w", q.Program, gerr)
 		}
+		log.Printf("web search found: %s/%s", user, program)
+		if program != q.Program {
+			log.Printf("program mismatch: got %s: expected %s", q.Program, program)
+		}
+		q.Program = program
+		q.User = user
+		// retry assets...
+		release, assets, err = h.getAssetsNoCache(q)
 	}
 	// asset fetch failed, dont cache
 	if err != nil {

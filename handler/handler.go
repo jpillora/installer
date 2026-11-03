@@ -94,7 +94,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if qtype == "script" {
 			cleaned = fmt.Sprintf("echo '%s'", cleaned)
 		}
-		http.Error(w, cleaned, http.StatusInternalServerError)
+		http.Error(w, cleaned, code)
 	}
 	switch qtype {
 	case "json":
